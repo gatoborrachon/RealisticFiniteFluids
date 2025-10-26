@@ -1,0 +1,19 @@
+//Items
+
+item.finite_water_bucket.name=Finite Water Bucket
+item.finite_lava_bucket.name=Finite Lava Bucket
+
+
+//item..name=
+
+
+//Bloques
+tile.finite_water_flowing.name=Finite Water
+tile.finite_water_still.name=Finite Water
+tile.infinite_water_source.name=Ocean Water
+
+tile.finite_lava_flowing.name=Finite Lava
+tile.finite_lava_still.name=Finite Lava
+tile.infinite_lava_source.name=Ocean Lava
+
+//tile..name=

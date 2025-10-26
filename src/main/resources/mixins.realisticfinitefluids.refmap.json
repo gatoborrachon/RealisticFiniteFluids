@@ -1,0 +1,106 @@
+{
+  "mappings": {
+    "net.minecraft.block.BlockIce": { 
+      "harvestBlock": "func_180657_a",
+      "turnIntoWater": "func_185679_b"
+    },
+	"net.minecraft.world.chunk.Chunk": { 
+		"populate": "func_186030_a"
+	},
+	"net.minecraft.world.gen.ChunkGeneratorOverworld": { 
+		"populate": "func_185931_b"
+	},
+	"net.minecraft.world.gen.feature.WorldGenMinable": { 
+		"generate": "func_180709_b"
+	},
+	"net.minecraft.block.BlockLilyPad": { 
+		"canBlockStay": "func_180671_f",
+		"canSustainBush": "func_185514_i"
+	},
+	"net.minecraft.world.gen.structure.StructureOceanMonumentPieces.Piece": { 
+		"WATER": "field_175822_f"
+	},
+	"net.minecraft.world.gen.structure.StructureComponent": {
+		"boundingBox": "field_74887_e",
+		"fillWithBlocks": "func_175804_a",
+		"setBlockState": "func_175811_a",
+		"clearCurrentPositionBlocksUpwards": "func_74871_b",
+		"replaceAirAndLiquidDownwards": "func_175808_b",
+		"addComponentParts": "func_74875_a"
+	},
+	"net.minecraft.world.gen.structure.StructureVillagePieces$Village": {
+		"averageGroundLvl": "field_143015_k",
+		"getBiomeSpecificBlockState": "func_175847_a",
+		"getAverageGroundLevel": "func_74889_b",
+		"addComponentParts": "func_74875_a"
+	},
+	"net.minecraft.world.gen.structure.StructureVillagePieces$Well": {
+		"averageGroundLvl": "field_143015_k",
+		"getBiomeSpecificBlockState": "func_175847_a",
+		"getAverageGroundLevel": "func_74889_b",
+		"addComponentParts": "func_74875_a"
+	},
+	"net.minecraft.world.gen.structure.StructureVillagePieces$Field1": {
+		"averageGroundLvl": "field_143015_k",
+		"getBiomeSpecificBlockState": "func_175847_a",
+		"getAverageGroundLevel": "func_74889_b",
+		"addComponentParts": "func_74875_a",
+		"cropTypeA": "field_82679_b",
+		"cropTypeB": "field_82680_c",
+		"cropTypeC": "field_82678_d",
+		"cropTypeD": "field_82681_h"
+	},
+	"net.minecraft.world.gen.structure.StructureVillagePieces$Field2": {
+		"averageGroundLvl": "field_143015_k",
+		"getBiomeSpecificBlockState": "func_175847_a",
+		"getAverageGroundLevel": "func_74889_b",
+		"addComponentParts": "func_74875_a",
+		"cropTypeA": "field_82675_b",
+		"cropTypeB": "field_82676_c"
+	},
+	"net.minecraft.world.gen.MapGenCaves": {
+		"BLK_LAVA": "field_186126_a"
+	},
+	"net.minecraft.world.gen.MapGenRavine": {
+		"FLOWING_LAVA": "field_186135_a"
+	},
+	"net.minecraft.world.biome.BiomeSwamp": {
+		"genTerrainBlocks": "func_180622_a"
+	},
+	"net.minecraft.client.renderer.EntityRenderer": {
+		"func_78466_h": "updateFogColor"
+	},
+	"net.minecraft.entity.Entity": {
+		"posX": "field_70165_t",
+		"posY": "field_70163_u",
+		"posZ": "field_70161_v",
+		"getEyeHeight": "func_70047_e",
+		"world": "field_70170_p",
+		"inWater": "field_70171_ac",
+		"firstUpdate": "field_70148_d",
+		"fallDistance": "field_70143_R",
+		"doWaterSplashEffect": "func_71061_d_",
+		"extinguish": "func_70066_B",
+		"getEntityBoundingBox": "func_174813_aQ",
+		"getRidingEntity": "func_184187_bx",
+		"isInsideOfMaterial": "func_70055_a",
+		"handleWaterMovement": "func_70072_I"
+	},
+	"net.minecraft.client.renderer.ActiveRenderInfo": {
+		"getBlockStateAtEntityViewpoint": "func_186703_a"
+	},
+	"net.minecraft.world.biome.Biome": {
+		"WATER": "field_185372_h"
+	},
+	"net.minecraft.world.biome.BiomeDecorator": {
+		"genDecorations": "func_150513_a"
+	},
+	"net.minecraft.world.chunk.storage.AnvilChunkLoader": {
+		"readChunkFromNBT": "func_75823_a"
+	},
+	"jaredbgreat.climaticbiome.biomes.decorators.VolcanoDecorator": {
+		"genDecorations": "func_150513_a",
+		"immediateBlockTick": "func_189507_a"
+	}
+  }
+}

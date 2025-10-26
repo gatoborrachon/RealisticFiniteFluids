@@ -1,0 +1,22 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.gatoborrachon.realisticfinitefluids.mixin.earlymixins",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "mixins.realisticfinitefluids.refmap.json",
+  "mixins": [
+	"MixinBlockLilyPad",
+	"MixinFluid",
+	"MixinFluidUtil",
+	"MixinForgeHooks",
+	"MixinChunkGeneratorOverworld",
+	"MixinBlockIce",
+	"MixinOceanMonumentPiece",
+	"MixinBiomeSwamp",
+	"MixinStructureComponent",
+	"MixinEntity",
+	"MixinBiomeDecorator"
+	],
+  "client": [],
+  "server": []
+}

@@ -1,0 +1,19 @@
+//Items
+
+item.finite_water_bucket.name=Cubeta de Agua Finita
+item.finite_lava_bucket.name=Cubeta de Lava Finita
+
+
+//item..name=
+
+
+//Bloques
+tile.finite_water_flowing.name=Agua Finita
+tile.finite_water_still.name=Agua Finita
+tile.infinite_water_source.name=Agua Oceanica
+
+tile.finite_lava_flowing.name=Lava Finita
+tile.finite_lava_still.name=Lava Finita
+tile.infinite_lava_source.name=Lava Oceanica
+
+//tile..name=

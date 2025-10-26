@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "normal": { "model": "realisticfinitefluids:finite_lava_flowing" }
+  }
+}

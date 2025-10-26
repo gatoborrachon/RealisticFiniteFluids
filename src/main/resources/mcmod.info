@@ -1,0 +1,16 @@
+[
+{
+  "modid": "realisticfinitefluids",
+  "name": "Realistic Finite Fluids",
+  "description": "A mod about finite water and lava",
+  "version": "1.6.2",
+  "mcversion": "1.12.2",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["gatoborrachon"],
+  "credits": "The Forge and FML guys, for making this example",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]

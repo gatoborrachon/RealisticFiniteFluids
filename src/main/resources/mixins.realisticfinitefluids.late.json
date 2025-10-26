@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.gatoborrachon.realisticfinitefluids.mixin.latemixins",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "mixins.realisticfinitefluids.refmap.json",
+  "mixins": [
+  	"MixinVillage",
+  	"MixinField1",
+	"MixinField2",
+	"MixinWell"
+  ],
+  "client": [],
+  "server": []
+}
