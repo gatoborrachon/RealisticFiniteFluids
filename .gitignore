@@ -1,0 +1,30 @@
+# eclipse
+bin
+*.launch
+.settings
+.metadata
+.classpath
+.project
+
+# idea
+out
+*.ipr
+*.iws
+*.iml
+.idea
+
+
+# other
+eclipse
+/run
+/libs
+eula.txt
+CREDITS.txt
+LICENSE-Paulscode IBXM Library.txt
+LICENSE-Paulscode SoundSystem CodecIBXM.txt
+/.gradle
+/build
+/LISTA
+/mappings
+NOTAS POR SI ESTAS SACADO DE PEDO.txt
+

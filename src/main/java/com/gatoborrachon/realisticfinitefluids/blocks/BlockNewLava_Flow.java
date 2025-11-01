@@ -27,7 +27,7 @@ public class BlockNewLava_Flow extends BlockNewWater_Flow {
             null, // player: null para que lo escuchen todos cerca
             pos.getX() + 0.5, 
             pos.getY() + 0.5, 
-            pos.getZ() + 0.5,
+            pos.getZ() + 0.5, 
             SoundEvents.BLOCK_FIRE_EXTINGUISH,
             SoundCategory.BLOCKS,
             0.5F,

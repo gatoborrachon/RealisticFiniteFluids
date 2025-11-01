@@ -1,3 +1,7 @@
+v1.6.3
+-Fixed: Superficial layer of water from rivers and ocean becomes ice on a cold biome when chunk is first generated.
+-Refactor: Names of some classes (BlockNewWater and BlockNewLava)
+
 v1.6.2
 -Added: Config options to let you modify the behavior of the flow of water on creative players and to control whether fluids should tick randomly.
 -Fixed: Texture size and orientation of flowing fluids.

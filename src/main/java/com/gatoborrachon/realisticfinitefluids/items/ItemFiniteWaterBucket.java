@@ -6,7 +6,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import com.gatoborrachon.realisticfinitefluids.blocks.BlockFiniteFluid;
-import com.gatoborrachon.realisticfinitefluids.blocks.BlockNewWater;
+import com.gatoborrachon.realisticfinitefluids.blocks.BlockNewWater_Flow;
 import com.gatoborrachon.realisticfinitefluids.init.ModBlocks;
 import com.gatoborrachon.realisticfinitefluids.init.ModItems;
 import com.gatoborrachon.realisticfinitefluids.logic.FiniteFluidLogic;
@@ -148,7 +148,7 @@ public class ItemFiniteWaterBucket extends ItemBucket  {
                 }
                 else
                 {
-                    if (worldIn.provider.doesWaterVaporize() && this.containedBlock instanceof BlockNewWater)
+                    if (worldIn.provider.doesWaterVaporize() && this.containedBlock instanceof BlockNewWater_Flow)
                     {
                         int l = posIn.getX();
                         int i = posIn.getY();

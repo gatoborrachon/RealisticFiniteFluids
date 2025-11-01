@@ -123,13 +123,17 @@ public class ModConfig {
                 // TODO --> Eliminar el bloque oceanico, y de ahi descomentar estas 3 lineas de codigo que siguen, y comentar la de net.minecraft
                 
                 //PARA EVITAR CRASHES ESPERABLES
-                //"net.minecraft.block.blockLiquid", //No creo que pase nada malo pero igual no es que me importe modificar esta clase
+                //PARA EVITAR CRASHES ESPERABLES
+                //"net.minecraft.block", //.blockLiquid", //No creo que pase nada malo pero igual no es que me importe modificar esta clase
                 //"net.minecraft.client.renderer", //Creo que hay varias cosillas que no quisiera tocar aca jeje
-                //"net.minecraft.init.Blocks", //Si excluyo esto, se ha de morir todo xd
-                
+                //"net.minecraft.init", //.Blocks", //Si excluyo esto, se ha de morir todo xd
+                //"net.minecraft.world.gen.ChunkGeneratorFlat", //TODO --> Mis mixins ya modifican gran parte de este cuete, falta verificar isOceanBlock de MapGenRavines y MapGenCaves, no tengo ni idea de que hagan esas cosas jaja
+                //"net.minecraft.world.gen.ChunkGeneratorOverworld", 
+                //"net.minecraft.world.gen.MapGenCaves", 
+                //"net.minecraft.world.gen.MapGenRavine", 
+
                 //"net.minecraft.stats", //No se si sea util/bueno no excluir esto
-                ////"net.minecraftforge.event.ForgeEventFactory", //Igual y estos 2 nunca fueron evitados, asi que los quito de la lista de esclusiones jeje
-                ////"net.minecraftforge.fluids.FluidRegistry",
+                //"net.minecraftforge",
 
                 "net.minecraft",
                 "com.gatoborrachon",

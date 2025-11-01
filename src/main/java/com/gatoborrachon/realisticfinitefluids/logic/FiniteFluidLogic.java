@@ -14,7 +14,7 @@ import javax.annotation.Nullable;
 
 import com.gatoborrachon.realisticfinitefluids.blocks.BlockFiniteFluid;
 import com.gatoborrachon.realisticfinitefluids.blocks.BlockNewInfiniteSource;
-import com.gatoborrachon.realisticfinitefluids.blocks.BlockNewWater;
+import com.gatoborrachon.realisticfinitefluids.blocks.BlockNewWater_Flow;
 import com.gatoborrachon.realisticfinitefluids.init.ModBlocks;
 import com.gatoborrachon.realisticfinitefluids.init.ModConfig;
 
@@ -744,7 +744,7 @@ public class FiniteFluidLogic {
             IBlockState state = world.getBlockState(pos);
         	if (state.getBlock() instanceof BlockFiniteFluid) {
             if (fluidIndex > -1) {
-                int level = state.getValue(BlockNewWater.LEVEL) * 2;
+                int level = state.getValue(BlockFiniteFluid.LEVEL) * 2;
 
                 if (level > 14) level = 14;
 
@@ -2277,11 +2277,11 @@ y la funcion getWaterType (dentro dde isAnyWater) corroborra primero que:
                     return true;
                 }
 
-                if (block instanceof BlockNewWater && ((BlockNewWater) block).interactWithLiquid(world, pos, below)) {
+                if (block instanceof BlockNewWater_Flow && ((BlockNewWater_Flow) block).interactWithLiquid(world, pos, below)) {
                     return true;
                 }
 
-                if (blockBelow instanceof BlockNewWater && ((BlockNewWater) blockBelow).interactWithLiquid(world, below, pos)) {
+                if (blockBelow instanceof BlockNewWater_Flow && ((BlockNewWater_Flow) blockBelow).interactWithLiquid(world, below, pos)) {
                     return true;
                 }
                 
@@ -2313,11 +2313,11 @@ y la funcion getWaterType (dentro dde isAnyWater) corroborra primero que:
                             return true;
                         }
 
-                        if (block instanceof BlockNewWater && ((BlockNewWater) block).interactWithLiquid(world, pos, neighborPos)) {
+                        if (block instanceof BlockNewWater_Flow && ((BlockNewWater_Flow) block).interactWithLiquid(world, pos, neighborPos)) {
                             return true;
                         }
 
-                        if (neighborBlock instanceof BlockNewWater && ((BlockNewWater) neighborBlock).interactWithLiquid(world, neighborPos, pos)) {
+                        if (neighborBlock instanceof BlockNewWater_Flow && ((BlockNewWater_Flow) neighborBlock).interactWithLiquid(world, neighborPos, pos)) {
                             return true;
                         }
                     }
@@ -2330,11 +2330,11 @@ y la funcion getWaterType (dentro dde isAnyWater) corroborra primero que:
 
                     int typeNeighbor = getFluidIndex(neighborBlock);
                     if (typeNeighbor > -1) {
-                        if (block instanceof BlockNewWater && ((BlockNewWater) block).interactWithLiquid(world, pos, neighborPos)) {
+                        if (block instanceof BlockNewWater_Flow && ((BlockNewWater_Flow) block).interactWithLiquid(world, pos, neighborPos)) {
                             return true;
                         }
 
-                        if (neighborBlock instanceof BlockNewWater && ((BlockNewWater) neighborBlock).interactWithLiquid(world, neighborPos, pos)) {
+                        if (neighborBlock instanceof BlockNewWater_Flow && ((BlockNewWater_Flow) neighborBlock).interactWithLiquid(world, neighborPos, pos)) {
                             return true;
                         }
                     }

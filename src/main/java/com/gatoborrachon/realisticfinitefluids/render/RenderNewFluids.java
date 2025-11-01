@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.gatoborrachon.realisticfinitefluids.blocks.BlockNewWater;
+import com.gatoborrachon.realisticfinitefluids.blocks.BlockNewWater_Flow;
 import com.gatoborrachon.realisticfinitefluids.logic.FiniteFluidLogic;
 
 import net.minecraft.block.Block;
@@ -70,7 +70,7 @@ public class RenderNewFluids {
     		
     		float angle = 0;
             boolean hasFlow = false;
-	    	if (state.getBlock() instanceof BlockNewWater) {
+	    	if (state.getBlock() instanceof BlockNewWater_Flow) {
 	                // flow viene en Vec3d (x,z). si ambas componentes son ~0 => sin flujo efectivo.
 	                float fx = (float) flow.x;
 	                float fz = (float) flow.z;
@@ -119,7 +119,7 @@ public class RenderNewFluids {
     	    	//System.out.println("Angulo: "+angle);
 
                 // si NO hay flujo significativo, usa las UVs simples del sprite (still)
-                if (!(state.getBlock() instanceof BlockNewWater)) {
+                if (!(state.getBlock() instanceof BlockNewWater_Flow)) {
                     // top quad con UVs sin rotación ni offsets
                     UnpackedBakedQuad.Builder topUp = new UnpackedBakedQuad.Builder(DefaultVertexFormats.BLOCK);
                     topUp.setQuadOrientation(EnumFacing.UP);
@@ -225,7 +225,7 @@ public class RenderNewFluids {
     	     //Si no debemos renderizar, vamos con la siguiente cara.
     	        if (!shouldRender) continue;
     	        
-    	    	if (state.getBlock() instanceof BlockNewWater) {
+    	    	if (state.getBlock() instanceof BlockNewWater_Flow) {
 		    		u1 = midU + (u1 - midU) * 0.5f;
 		    		v1 = midV + (v1 - midV) * 0.5f;
 		    		u0 = midU - (midU - u0) * 0.5f;
