@@ -52,10 +52,12 @@ public class RealisticFiniteFluidsMixinCoremod implements IFMLLoadingPlugin, IEa
         //LOGGER.info("MODO SELECCIONADO AL FINAL: {}", universalCompatEnabled);
         if ("true".equalsIgnoreCase(universalCompatEnabled)) {
             return new String[] { "com.gatoborrachon.realisticfinitefluids.coremod.ChunkHellTransformer",
-					  			  "com.gatoborrachon.realisticfinitefluids.coremod.BlocksGlobalTransformer" };
+					  			  "com.gatoborrachon.realisticfinitefluids.coremod.BlocksGlobalTransformer",
+					  			  "com.gatoborrachon.realisticfinitefluids.coremod.BiomeTransformer" };
         };
         
-        return new String[] { "com.gatoborrachon.realisticfinitefluids.coremod.ChunkHellTransformer" };
+        return new String[] { "com.gatoborrachon.realisticfinitefluids.coremod.ChunkHellTransformer",
+        					  "com.gatoborrachon.realisticfinitefluids.coremod.BiomeTransformer" };
         
     }
     

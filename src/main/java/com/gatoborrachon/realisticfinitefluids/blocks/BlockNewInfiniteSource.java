@@ -30,10 +30,8 @@ public class BlockNewInfiniteSource extends BlockFiniteFluid //Former OceanBlock
         //setResistance(6000F);
 
         //ESTO NO ESTABA ACA, NO SE QUE PUEDA PROVOCAR
-        if (FiniteFluidLogic.shouldTickRandomly)
-        {
-            this.setTickRandomly(true);
-        }
+        this.setTickRandomly(FiniteFluidLogic.shouldTickRandomly);
+
 
 
     }

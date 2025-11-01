@@ -31,10 +31,7 @@ public class BlockNewWater_Flow extends BlockFiniteFluid
 		ModItems.ITEMS.add(new ItemBlock(this).setRegistryName(this.getRegistryName()));
         this.setDefaultState(this.blockState.getBaseState().withProperty(LEVEL, Integer.valueOf(15)));
 
-        if (FiniteFluidLogic.shouldTickRandomly)
-        {
-            this.setTickRandomly(true);
-        }
+        this.setTickRandomly(FiniteFluidLogic.shouldTickRandomly);
     }
 
 

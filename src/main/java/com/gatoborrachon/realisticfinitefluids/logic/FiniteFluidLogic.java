@@ -581,7 +581,7 @@ public class FiniteFluidLogic {
                 int viewDistance = server.getPlayerList().getViewDistance();
 	            if (scalableRainMethod) rainAmount = (int) Math.ceil((48*(1.0/rainNewMethodAmount))/viewDistance); // 48 es mi constante que resuelve 2-->24, 4-->12
 
-	            System.out.println(rainAmount);
+	            //System.out.println(rainAmount);
 	            
 	            if (rand.nextInt(rainAmount) == 0) {
 	                int playerIndex = rand.nextInt(world.playerEntities.size());

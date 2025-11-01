@@ -33,26 +33,15 @@ public class MixinChunkGeneratorOverworld {
             target = "net/minecraft/world/gen/feature/WorldGenLakes"
         ), remap = true
     )
-    /*private WorldGenLakes redirectLakeGen(Block blockIn) {
-        if (blockIn == ForgeRegistries.BLOCKS.getValue(new ResourceLocation("minecraft:water"))) {
-            return new WorldGenLakes(ModBlocks.INFINITE_WATER_SOURCE);
-        }
-
-        if (blockIn == ForgeRegistries.BLOCKS.getValue(new ResourceLocation("minecraft:lava"))) {
-            return new WorldGenLakes(ModBlocks.INFINITE_LAVA_SOURCE);
-        }
-
-        return new WorldGenLakes(blockIn);
-    }*/
     private WorldGenLakes redirectLakeGen(Block blockIn) {
-        // Si es agua vanilla, la cambiamos por tu agua finita
+        // Si es agua vanilla, la cambiamos por agua finita
         if (blockIn == Blocks.WATER) {
             return new WorldGenLakes(ModBlocks.INFINITE_WATER_SOURCE.setLightOpacity(ModConfig.waterLightOpacity));
         }
 
-        // También podrías interceptar LAVA aquí si quieres cambiarla por lava finita
+        // También interceptamos LAVA aquí para cambiarla por lava finita
         if (blockIn == Blocks.LAVA) {
-            return new WorldGenLakes(ModBlocks.INFINITE_LAVA_SOURCE); // puedes reemplazar con otro ModBlocks si lo deseas
+            return new WorldGenLakes(ModBlocks.INFINITE_LAVA_SOURCE);
         }
 
         // En cualquier otro caso, regresamos el bloque original
@@ -73,5 +62,5 @@ public class MixinChunkGeneratorOverworld {
                 e.printStackTrace();
             }
         }
-    
+        
 }

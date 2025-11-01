@@ -15,7 +15,8 @@
 	"MixinBiomeSwamp",
 	"MixinStructureComponent",
 	"MixinEntity",
-	"MixinBiomeDecorator"
+	"MixinBiomeDecorator",
+	"MixinWorld"
 	],
   "client": [],
   "server": []
