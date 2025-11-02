@@ -18,7 +18,10 @@ import com.gatoborrachon.realisticfinitefluids.blocks.BlockNewWater_Flow;
 import com.gatoborrachon.realisticfinitefluids.init.ModBlocks;
 import com.gatoborrachon.realisticfinitefluids.init.ModConfig;
 
+import git.jbredwards.fluidlogged_api.api.util.FluidState;
+import git.jbredwards.fluidlogged_api.api.util.FluidloggedUtils;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockAir;
 import net.minecraft.block.BlockCrops;
 import net.minecraft.block.BlockFarmland;
 import net.minecraft.block.BlockFlower;
@@ -237,7 +240,7 @@ public class FiniteFluidLogic {
                     pos.down(), pos.up(),
                     pos.north(), pos.south()
             }) {
-                int type = FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(world.getBlockState(offset).getBlock());
+                int type = FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(world.getBlockState(offset).getBlock(), world, offset);
                 if (detectedType == -1 && type != -1) {
                     detectedType = type;
                 }
@@ -627,7 +630,7 @@ public class FiniteFluidLogic {
 
 	        for (; y > 0; --y) {
 	            IBlockState state = chunk.getBlockState(x, y, z);
-	            if (state.getBlock() == Blocks.ICE || getFluidIndex(state.getBlock()) != -1) {
+	            if (state.getBlock() == Blocks.ICE || getFluidIndex(state.getBlock(), world, new BlockPos(x,y,z)) != -1) {
 	                return y + 1;
 	            }
 	            if (!state.getBlock().isAir(state, world, new BlockPos(x, y, z)) &&
@@ -698,7 +701,7 @@ public class FiniteFluidLogic {
 
     	
     	public static void setCurrentFluidIndex(Block block) {
-            onFiniteFluidIndex = getFluidIndex(block);
+            onFiniteFluidIndex = getFluidIndex(block, null, null);
             if (onFiniteFluidIndex < 0) onFiniteFluidIndex = 0;
             return;
             
@@ -715,8 +718,22 @@ public class FiniteFluidLogic {
          * @param block the Block to check on the finite fluid list
          * @return the index on the FiniteFluid list of this Block
          */      
-        public static int getFluidIndex(Block block) {
+        public static int getFluidIndex(Block block, @Nullable IBlockAccess access, @Nullable BlockPos pos) {
+        	if (block instanceof BlockFiniteFluid) {
             return blockToFluidIndex.getOrDefault(block, -1);
+        } else if (access != null || pos != null) {
+        	FluidState fluidState = FluidloggedUtils.getFluidState(access, pos);
+        	IBlockState state = fluidState.getState();
+        	//System.out.println("Bloque Original:"+block);
+        	//System.out.println("Bloque Obtenido:"+state.getBlock());
+        	if (access.getBlockState(pos).getBlock() instanceof IFluidBlock) {
+            	//System.out.println("FluidBlock?:"+fluidState.getFluidBlock());        		
+        	}
+        	System.out.println(" ");
+            return blockToFluidIndex.getOrDefault(state.getBlock(), -1);
+        	} else {
+        		return -1;
+        	}
         }
         
         /**
@@ -730,14 +747,30 @@ public class FiniteFluidLogic {
         }
 
 
-        public static int getFluidGravity()
+        /*public static int getFluidGravity()
         {
             return onFiniteFluidIndex < 0 ? getFluidGravity(0) : getFluidGravity(onFiniteFluidIndex);
         }
 
         public static int getFluidGravity(int fluidIndex)
         {
-            return fluidIndex < 0 /*undefined index*/ ? ((NewFluidType)liquids.get(0)).gravity /*Water gravity*/ : ((NewFluidType)liquids.get(fluidIndex)).gravity;
+            return fluidIndex < 0 /*undefined index*/ /*? ((NewFluidType)liquids.get(0)).gravity /*Water gravity*/ /*: ((NewFluidType)liquids.get(fluidIndex)).gravity;
+        }*/
+        
+        public static int getFluidGravity() {
+        	if (onFiniteFluidIndex < 0) {
+        		return getFluidGravity(0);
+        	} else {
+        		return getFluidGravity(onFiniteFluidIndex);
+        	}
+        }
+
+        public static int getFluidGravity(int fluidIndex) {
+        	if (fluidIndex < 0) {
+        		return ((NewFluidType)liquids.get(0)).gravity; //Water gravity default
+        	} else {
+        		return ((NewFluidType)liquids.get(fluidIndex)).gravity;
+        	}        
         }
 
         public static int getFluidLevelRender(IBlockAccess world, BlockPos pos, int fluidIndex) {
@@ -761,13 +794,13 @@ public class FiniteFluidLogic {
         }
         
         public static float getHeight(IBlockAccess access, BlockPos pos, int dx, int dz) {
-            int fluidIndex = getFluidIndex(access.getBlockState(pos).getBlock());
+            int fluidIndex = getFluidIndex(access.getBlockState(pos).getBlock(), access, pos);
             if (fluidIndex == -1) return 0f;
             float total = getFluidLevelRender(access, pos, fluidIndex) + 1.0f;
             int samples = 1;
 
             BlockPos above = pos.up(getFluidGravity(fluidIndex));
-            if (isAnyRealisticFluid(access.getBlockState(above).getBlock(), fluidIndex)) return 1.0f;
+            if (isAnyRealisticFluid(access.getBlockState(above).getBlock(), fluidIndex, access, above)) return 1.0f;
             if (access.getBlockState(pos).getBlock() == liquids.get(fluidIndex).oceanBlock) return 1.0f;
 
             boolean hasNeighbors = !(access.isAirBlock(pos.east()) &&
@@ -823,8 +856,8 @@ public class FiniteFluidLogic {
             Block block1 = state1.getBlock();
             Block block2 = state2.getBlock();
 
-            int type1 = FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(block1);
-            int type2 = FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(block2);
+            int type1 = FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(block1, world, pos1);
+            int type2 = FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(block2, world, pos2);
 
             if (type1 != -1 && type2 != -1) {
                 Block newBlock1 = ((NewFluidType)liquids.get(type2)).flowingBlock;
@@ -867,7 +900,7 @@ public class FiniteFluidLogic {
 
         public static boolean isAnyRealisticFluid(IBlockAccess world, BlockPos pos, int indexToCompare)
         {
-            return isAnyRealisticFluid(world.getBlockState(pos).getBlock(), indexToCompare);
+            return isAnyRealisticFluid(world.getBlockState(pos).getBlock(), indexToCompare, world, pos);
         }
         
         /**
@@ -884,14 +917,14 @@ y la funcion getWaterType (dentro dde isAnyWater) corroborra primero que:
          * @return
          */
 
-        public static boolean isAnyRealisticFluid(Block compare1, int indexToCompare)
+        public static boolean isAnyRealisticFluid(Block compare1, int indexToCompare, @Nullable IBlockAccess access, @Nullable BlockPos pos)
         {
-            return getFluidIndex(compare1) == indexToCompare;
+            return getFluidIndex(compare1, access, pos) == indexToCompare;
         }
         
-        public static boolean isOtherRealisticFluid(Block compare1, int indexToCompare)
+        public static boolean isOtherRealisticFluid(Block compare1, int indexToCompare, IBlockAccess access, BlockPos pos)
         {
-        	int indexToCompare1 = getFluidIndex(compare1);
+        	int indexToCompare1 = getFluidIndex(compare1, access, pos);
             return indexToCompare1 != -1 && indexToCompare1 != indexToCompare;
         }
 
@@ -1212,11 +1245,11 @@ y la funcion getWaterType (dentro dde isAnyWater) corroborra primero que:
             if (block instanceof BlockFluidClassic) return false;
             
             //Check para evitar romper otros bloques de fluido realistico
-        	if (isOtherRealisticFluid(block, getFluidIndex(world.getBlockState(fromPos).getBlock()))) {
+        	if (isOtherRealisticFluid(block, getFluidIndex(world.getBlockState(fromPos).getBlock(), world, fromPos), world, toPos)) {
         		return false;
         	}
         	
-        	//checks para bloques vanilla que no deberian ser rotos, por ser Replaceable
+        	//checks para bloques vanilla que no deberian ser rotos, por no se bloques completos
             if (block instanceof BlockPistonBase || block instanceof BlockPistonExtension || block instanceof BlockFarmland || block instanceof BlockGrassPath || block instanceof BlockIce) {
                 return false;
             }
@@ -1230,10 +1263,11 @@ y la funcion getWaterType (dentro dde isAnyWater) corroborra primero que:
             }
 
             // Si el nivel de agua es mayor a 7 y el bloque no es completo (ej: flores, placas, etc.)
-            if (currentLevel > 7 && !state.isFullBlock() && !state.getBlock().hasTileEntity()) {
+            //REMOVIDO PARA COMPATIBILIDAD CON COSAS FLUIDLOGGEABLES
+            /*if (currentLevel > 7 && !state.isFullBlock() && !state.getBlock().hasTileEntity()) {
                 world.destroyBlock(toPos, true);
                 return true;
-            }
+            }*/
             
 
             return false;
@@ -1244,11 +1278,23 @@ y la funcion getWaterType (dentro dde isAnyWater) corroborra primero que:
             
             IBlockState fromState = world.getBlockState(from);
             Block fromBlock = fromState.getBlock();
+            //FluidLogged API Compat
+            if (!(fromBlock instanceof BlockFiniteFluid)) {
+            	fromState = FluidloggedUtils.getFluidState(world, from).getState();
+            	fromBlock = FluidloggedUtils.getFluidState(world, from).getBlock();
+            }
+            //////
             if (!(fromBlock instanceof BlockFiniteFluid)) return false; //CHECAR QUE ESTO NO ROMPA EL FUNCIONAMIENTO DEL AGUA
             int sourceLevel = fromState.getValue(BlockFiniteFluid.LEVEL);
 
             IBlockState toState = world.getBlockState(to);
             Block toBlock = toState.getBlock();
+            //FluidLogged API Compat
+            if (!(toBlock instanceof BlockFiniteFluid)) {
+            	toState = FluidloggedUtils.getFluidState(world, to).getState();
+            	toBlock = FluidloggedUtils.getFluidState(world, to).getBlock();
+            }
+            //////
             //if (!(toBlock instanceof BlockFiniteFluid)) return false;
             int destLevel = toBlock instanceof BlockFiniteFluid ? toState.getValue(BlockFiniteFluid.LEVEL) : -1;
 
@@ -1762,7 +1808,10 @@ y la funcion getWaterType (dentro dde isAnyWater) corroborra primero que:
         }
         
         public static int getFluidLevel(IBlockAccess world, BlockPos pos) { 
-        	return world.getBlockState(pos).getValue(BlockFiniteFluid.LEVEL); 
+        	//return world.getBlockState(pos).getValue(BlockFiniteFluid.LEVEL); 
+        	IBlockState state = world.getBlockState(pos);
+        	if(state.getBlock() instanceof BlockFiniteFluid) return state.getValue(BlockFiniteFluid.LEVEL);
+        	else { return FluidloggedUtils.getFluidState(world, pos).getLevel();}
         }
         
         
@@ -2205,7 +2254,7 @@ y la funcion getWaterType (dentro dde isAnyWater) corroborra primero que:
         
         
         public static boolean canPlaceEntityOnSide(World world, BlockPos pos, EnumFacing side, Entity entity, ItemStack stack) {
-            int fluidIndex = getFluidIndex(world.getBlockState(pos).getBlock());
+            int fluidIndex = getFluidIndex(world.getBlockState(pos).getBlock(), world, pos);
             return fluidIndex != -1 || world.mayPlace(world.getBlockState(pos).getBlock(), pos, false, side, entity);
         }
         
@@ -2219,7 +2268,7 @@ y la funcion getWaterType (dentro dde isAnyWater) corroborra primero que:
         public static boolean checkForNeighborLiquid(World world, BlockPos pos) {
             IBlockState blockState = world.getBlockState(pos);
             Block block = blockState.getBlock();
-            int type = getFluidIndex(block);
+            int type = getFluidIndex(block, world, pos);
             
             
             BlockPos above = pos.up();
@@ -2227,7 +2276,7 @@ y la funcion getWaterType (dentro dde isAnyWater) corroborra primero que:
 
             BlockPos below = pos.down();
             Block blockBelow = world.getBlockState(below).getBlock();
-            int typeBelow = getFluidIndex(blockBelow);
+            int typeBelow = getFluidIndex(blockBelow, world, below);
 
         	//System.out.println("block"+block+world.getBlockState(pos).getMaterial().toString());
 
@@ -2301,7 +2350,7 @@ y la funcion getWaterType (dentro dde isAnyWater) corroborra primero que:
 
                     BlockPos neighborPos = new BlockPos(dx, dy, dz);
                     Block neighborBlock = world.getBlockState(neighborPos).getBlock();
-                    int typeNeighbor = getFluidIndex(neighborBlock);
+                    int typeNeighbor = getFluidIndex(neighborBlock, world, neighborPos);
 
                     if (typeNeighbor > -1) {
                         if (
@@ -2328,7 +2377,7 @@ y la funcion getWaterType (dentro dde isAnyWater) corroborra primero que:
                     BlockPos neighborPos = pos.offset(EnumFacing.getHorizontal(i));
                     Block neighborBlock = world.getBlockState(neighborPos).getBlock();
 
-                    int typeNeighbor = getFluidIndex(neighborBlock);
+                    int typeNeighbor = getFluidIndex(neighborBlock, world, neighborPos);
                     if (typeNeighbor > -1) {
                         if (block instanceof BlockNewWater_Flow && ((BlockNewWater_Flow) block).interactWithLiquid(world, pos, neighborPos)) {
                             return true;
@@ -2758,10 +2807,10 @@ y la funcion getWaterType (dentro dde isAnyWater) corroborra primero que:
                     if (remaining <= 0) break; //original: <=0, ahora es <0, para aceptar al 0 entre los valores
 
                     IBlockState s = world.getBlockState(p);
-                    if (!(s.getBlock() instanceof BlockFiniteFluid) || FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(s.getBlock()) != fluidType) continue; //Para que no crashee la IC2 FluidCell en el CASO 1) xd
+                    if (!(s.getBlock() instanceof BlockFiniteFluid) || FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(s.getBlock(), world, p) != fluidType) continue; //Para que no crashee la IC2 FluidCell en el CASO 1) xd
                     int level = s.getValue(BlockFiniteFluid.LEVEL);
                     if (level < 15) {
-                    	int temporalFluidType = FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(s.getBlock()); 
+                    	int temporalFluidType = FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(s.getBlock(), world, p); 
                     	Block newBlock1 = ((NewFluidType)liquids.get(temporalFluidType)).flowingBlock;
                     	
                         world.setBlockState(p, newBlock1.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, level + 1)); //s.withProperty(RFFBlock.LEVEL, level + 1));

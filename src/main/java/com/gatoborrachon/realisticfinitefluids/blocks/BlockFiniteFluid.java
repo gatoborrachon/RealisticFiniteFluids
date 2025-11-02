@@ -11,6 +11,8 @@ import com.gatoborrachon.realisticfinitefluids.blocks.properties.UnlistedPropert
 import com.gatoborrachon.realisticfinitefluids.init.ModConfig;
 import com.gatoborrachon.realisticfinitefluids.logic.FiniteFluidLogic;
 
+import git.jbredwards.fluidlogged_api.api.util.FluidState;
+import git.jbredwards.fluidlogged_api.api.util.FluidloggedUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockSnow;
 import net.minecraft.block.material.Material;
@@ -37,13 +39,15 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.property.ExtendedBlockState;
 import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
+import net.minecraftforge.common.property.PropertyFloat;
+import net.minecraftforge.fluids.BlockFluidFinite;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.IFluidBlock;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class BlockFiniteFluid extends Block implements IFluidBlock {
+public class BlockFiniteFluid extends BlockFluidFinite /*Block implements IFluidBlock*/ {
 
 	private Fluid fluid;
 	private Material fluidMaterial;
@@ -53,13 +57,14 @@ public class BlockFiniteFluid extends Block implements IFluidBlock {
      * The main class for Finite Fluids blocks, has all the base elements that will be required, other classes only add the tick functions and some interactions
      */
 	public BlockFiniteFluid(String name, Fluid fluid, Material material) {
-		super(material);
+		super(fluid, material);
         this.fluid = fluid;
     	this.fluidMaterial = material;
     	
 		setUnlocalizedName(name);
 		setRegistryName(name);
         this.setDefaultState(this.blockState.getBaseState().withProperty(LEVEL, Integer.valueOf(0)));
+        setQuantaPerBlock(16);
 	}
 	
     // =========================
@@ -67,10 +72,17 @@ public class BlockFiniteFluid extends Block implements IFluidBlock {
     // ========================= 
     public static final PropertyInteger LEVEL = PropertyInteger.create("level", 0, 15); //MEJOR NO TOCAMOS ESTO, SE VA ALV EL REGISTRO DE BLOQUES
     public static final IUnlistedProperty<Map<EnumFacing, IBlockState>> NEIGHBOR_STATES = new UnlistedPropertyNeighborStates();
-    public static final IUnlistedProperty<Float> HEIGHT_NW = new UnlistedPropertyHeights("height_nw");  // h00
-    public static final IUnlistedProperty<Float> HEIGHT_NE = new UnlistedPropertyHeights("height_ne");  // h10
-    public static final IUnlistedProperty<Float> HEIGHT_SW = new UnlistedPropertyHeights("height_sw");  // h01
-    public static final IUnlistedProperty<Float> HEIGHT_SE = new UnlistedPropertyHeights("height_se");	// h11
+    /*public static final IUnlistedProperty<Float>[] LEVEL_CORNERS = new IUnlistedProperty[] {
+    	    new PropertyFloat("level_nw"),  // h00
+    	    new PropertyFloat("level_ne"),  // h10
+    	    new PropertyFloat("level_sw"),  // h01
+    	    new PropertyFloat("level_se")   // h11
+    	};*/
+    
+    //public static final IUnlistedProperty<Float> HEIGHT_NW = new UnlistedPropertyHeights("height_nw");  // h00
+    //public static final IUnlistedProperty<Float> HEIGHT_NE = new UnlistedPropertyHeights("height_ne");  // h10
+    //public static final IUnlistedProperty<Float> HEIGHT_SW = new UnlistedPropertyHeights("height_sw");  // h01
+    //public static final IUnlistedProperty<Float> HEIGHT_SE = new UnlistedPropertyHeights("height_se");	// h11
     public static final IUnlistedProperty<Integer> FLUID_COLOR = new UnlistedPropertyColor("fluid_color");
     public static final IUnlistedProperty<Vec3d> FLOW_DIRECTION = new UnlistedPropertyFlowDirection("flow_direction");
 
@@ -81,10 +93,14 @@ public class BlockFiniteFluid extends Block implements IFluidBlock {
         	new IProperty[] { LEVEL }, //Listed Properties
             new IUnlistedProperty<?>[] { //Unlisted Properties
         		NEIGHBOR_STATES,
-                HEIGHT_NW,
-                HEIGHT_NE,
-                HEIGHT_SW,
-                HEIGHT_SE,
+                LEVEL_CORNERS[0],
+                LEVEL_CORNERS[1],
+                LEVEL_CORNERS[2],
+                LEVEL_CORNERS[3],
+                //HEIGHT_NW,
+                //HEIGHT_NE,
+                //HEIGHT_SW,
+                //HEIGHT_SE,
                 FLUID_COLOR,
                 FLOW_DIRECTION
             }
@@ -110,14 +126,20 @@ public class BlockFiniteFluid extends Block implements IFluidBlock {
             
             int color = Minecraft.getMinecraft().getBlockColors().colorMultiplier(state, world, pos, 0);
             
-            Vec3d flowDirection = (state.getBlock() instanceof BlockNewWater_Flow) ? calculateFlowVector(world, pos) : null;
+            //Vec3d flowDirection = (state.getBlock() instanceof BlockNewWater_Flow) ? calculateFlowVector(world, pos) : null;
+            //Vec3d flowDirection = (state.getBlock() instanceof BlockNewWater_Flow) ? getFlowVector(world, pos) : null;
+            Vec3d flowDirection = new Vec3d(0,0,0);
             
             extendedState = extendedState
                	.withProperty(NEIGHBOR_STATES, neighborStates)
-                .withProperty(HEIGHT_NW, h00)
-                .withProperty(HEIGHT_NE, h10)
-                .withProperty(HEIGHT_SW, h01)
-                .withProperty(HEIGHT_SE, h11)
+                .withProperty(LEVEL_CORNERS[0], h00)
+                .withProperty(LEVEL_CORNERS[1], h10)
+                .withProperty(LEVEL_CORNERS[2], h01)
+                .withProperty(LEVEL_CORNERS[3], h11)
+                //.withProperty(HEIGHT_NW, h00)
+                //.withProperty(HEIGHT_NE, h10)
+                //.withProperty(HEIGHT_SW, h01)
+                //.withProperty(HEIGHT_SE, h11)
                 .withProperty(FLUID_COLOR, color)
                 .withProperty(FLOW_DIRECTION, flowDirection);
             return extendedState; 
@@ -427,8 +449,20 @@ public class BlockFiniteFluid extends Block implements IFluidBlock {
 
     public boolean calcAvg(World world, BlockPos posFrom, BlockPos posTo) //shouldEqualize queda mejor
     {
-        int levelFrom = world.getBlockState(posFrom).getValue(LEVEL);
-        int levelTo = world.getBlockState(posTo).getValue(LEVEL);
+    	//FluidLogged API Compat
+    	IBlockState fromState = world.getBlockState(posFrom);
+    	IBlockState toState = world.getBlockState(posTo);
+    	if (!(world.getBlockState(posFrom).getBlock() instanceof BlockFiniteFluid)) {
+    		fromState = FluidloggedUtils.getFluidState(world, posFrom).getState();
+    	} 
+    	if (!(world.getBlockState(posTo).getBlock() instanceof BlockFiniteFluid)) {
+    		toState = FluidloggedUtils.getFluidState(world, posTo).getState();    		
+    	}
+    	////
+    	
+    		
+        int levelFrom = fromState.getValue(LEVEL);
+        int levelTo = toState.getValue(LEVEL);
 
         if (levelFrom - 1 > levelTo)
         {
@@ -452,8 +486,16 @@ public class BlockFiniteFluid extends Block implements IFluidBlock {
     	Vec3d flow = new Vec3d(0,0,0);
         for(EnumFacing dir : EnumFacing.Plane.HORIZONTAL) {
             BlockPos neighbor = pos.offset(dir);
-            if (!(world.getBlockState(neighbor).getBlock() instanceof BlockFiniteFluid)) continue;
+            Block blockToCheck = world.getBlockState(neighbor).getBlock();
             
+        	if (!(blockToCheck instanceof BlockFiniteFluid)) 
+        	{
+            	FluidState fluidState = FluidloggedUtils.getFluidState(world, pos);
+            	blockToCheck = fluidState.getState().getBlock();
+            }
+        	
+        	if (!(blockToCheck instanceof BlockFiniteFluid)) continue;
+                        
             int levelNeighbor = FiniteFluidLogic.GeneralPurposeLogic.getFluidLevel(world, neighbor);
             int levelCurrent = FiniteFluidLogic.GeneralPurposeLogic.getFluidLevel(world, pos);
             int diff = levelNeighbor - levelCurrent;
@@ -725,11 +767,11 @@ public class BlockFiniteFluid extends Block implements IFluidBlock {
     /**
      * Used to prevent updates on chunk generation
      */
-    @Override
+    /*@Override //No longer required since i extend BlockFluidFinite
     public boolean requiresUpdates()
     {
         return false;
-    }
+    }*/
 
 
 	

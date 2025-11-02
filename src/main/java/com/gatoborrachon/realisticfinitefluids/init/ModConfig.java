@@ -137,7 +137,7 @@ public class ModConfig {
 
                 "net.minecraft",
                 "com.gatoborrachon",
-                
+                "git.jbredwards",
                 
                 //PARA NO HACER LOG DE MAS
                 "com.llamalad7",

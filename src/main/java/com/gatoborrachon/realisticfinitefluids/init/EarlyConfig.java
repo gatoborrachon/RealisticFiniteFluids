@@ -132,6 +132,7 @@ public class EarlyConfig {
 
                 "net.minecraft",
                 "com.gatoborrachon",
+                "git.jbredwards",
 
                 
                 

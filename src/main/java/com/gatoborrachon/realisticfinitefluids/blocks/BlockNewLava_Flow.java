@@ -54,8 +54,8 @@ public class BlockNewLava_Flow extends BlockNewWater_Flow {
         int lavaMeta = lavaBlock.getMetaFromState(world.getBlockState(lavaPos));
         int targetMeta = targetBlock.getMetaFromState(world.getBlockState(targetPos));
 
-        int lavaType = FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(lavaBlock);     
-        int targetType = FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(targetBlock); 
+        int lavaType = FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(lavaBlock, world, lavaPos);     
+        int targetType = FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(targetBlock, world, targetPos); 
         
         //a ver si evita un crash aal poner un bloque encima de lava
         if (lavaType < 0 || targetType < 0) return false;

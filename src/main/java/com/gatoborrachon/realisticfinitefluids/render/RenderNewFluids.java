@@ -96,7 +96,7 @@ public class RenderNewFluids {
     	    IBlockState upState = neighborStates.get(EnumFacing.UP); //Obtener IBlockState vecino superior.
     	    Block upBlock = upState != null ? upState.getBlock() : Blocks.AIR; //Obtener Block vecino superior, si es null entonces usamos Blocks.AIR.
     	    boolean renderTop = true; //Asumimos que renderizamos la parte superior.
-	        int topFluidIndex = FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(upBlock);
+	        int topFluidIndex = FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(upBlock, null, null);
 	        if (fluidIndex == topFluidIndex) renderTop = false;
     	    
     	    //TESTS PREVIOS PARA DETERMINAR CUANDO SE RENDERIZABA EL BLOQUE SUPERIOR
@@ -213,7 +213,7 @@ public class RenderNewFluids {
     	     if (neighborBlock == Blocks.AIR) {
     	         shouldRender = true;
     	     } else {
-    	         int neighborFluidIndex = FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(neighborBlock);
+    	         int neighborFluidIndex = FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(neighborBlock, null, null);
 
     	    	 if (neighborFluidIndex == fluidIndex) {
     	    	     shouldRender = false; // mismo tipo de fluido --> no renderizar (porque la cara top de uno y otro bloque se fusionan)

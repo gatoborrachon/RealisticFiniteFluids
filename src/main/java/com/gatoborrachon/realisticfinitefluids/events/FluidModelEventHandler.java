@@ -7,6 +7,8 @@ import com.gatoborrachon.realisticfinitefluids.logic.FiniteFluidLogic;
 import com.gatoborrachon.realisticfinitefluids.render.BakedModelFiniteFluid;
 import com.gatoborrachon.realisticfinitefluids.render.RenderNewFluids;
 
+import git.jbredwards.fluidlogged_api.api.util.FluidState;
+import git.jbredwards.fluidlogged_api.api.util.FluidloggedUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -99,19 +101,19 @@ public class FluidModelEventHandler {
         //Flowing
         ModelResourceLocation modelLocFlowing = new ModelResourceLocation("realisticfinitefluids:finite_water_flowing", "normal");
         TextureAtlasSprite spriteFlowing = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("minecraft:blocks/water_flow");
-        BakedModelFiniteFluid modelFlowing = new BakedModelFiniteFluid(renderer, spriteFlowing, FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(ModBlocks.FINITE_WATER_FLOWING));
+        BakedModelFiniteFluid modelFlowing = new BakedModelFiniteFluid(renderer, spriteFlowing, FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(ModBlocks.FINITE_WATER_FLOWING, null, null));
         event.getModelRegistry().putObject(modelLocFlowing, modelFlowing);
       
 
         //Still
         ModelResourceLocation modelLocStill = new ModelResourceLocation("realisticfinitefluids:finite_water_still", "normal");
         TextureAtlasSprite spriteStill = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("minecraft:blocks/water_still");
-        BakedModelFiniteFluid modelStill = new BakedModelFiniteFluid(renderer, spriteStill, FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(ModBlocks.FINITE_WATER_STILL));
+        BakedModelFiniteFluid modelStill = new BakedModelFiniteFluid(renderer, spriteStill, FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(ModBlocks.FINITE_WATER_STILL, null, null));
         event.getModelRegistry().putObject(modelLocStill, modelStill);   
         
         //Ocean
         ModelResourceLocation modelLocOcean = new ModelResourceLocation("realisticfinitefluids:infinite_water_source", "normal");
-        BakedModelFiniteFluid modelOcean = new BakedModelFiniteFluid(renderer, spriteStill, FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(ModBlocks.INFINITE_WATER_SOURCE));
+        BakedModelFiniteFluid modelOcean = new BakedModelFiniteFluid(renderer, spriteStill, FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(ModBlocks.INFINITE_WATER_SOURCE, null, null));
         event.getModelRegistry().putObject(modelLocOcean, modelOcean);   
     
         
@@ -122,18 +124,18 @@ public class FluidModelEventHandler {
         //Flowing
         ModelResourceLocation modelLocLavaFlowing = new ModelResourceLocation("realisticfinitefluids:finite_lava_flowing", "normal");
         TextureAtlasSprite spriteLavaFlowing = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("minecraft:blocks/lava_flow");
-        BakedModelFiniteFluid modelLavaFlowing = new BakedModelFiniteFluid(renderer, spriteLavaFlowing, FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(ModBlocks.FINITE_LAVA_FLOWING));
+        BakedModelFiniteFluid modelLavaFlowing = new BakedModelFiniteFluid(renderer, spriteLavaFlowing, FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(ModBlocks.FINITE_LAVA_FLOWING, null, null));
         event.getModelRegistry().putObject(modelLocLavaFlowing, modelLavaFlowing);
         
         //Still
         ModelResourceLocation modelLocLavaStill = new ModelResourceLocation("realisticfinitefluids:finite_lava_still", "normal");
         TextureAtlasSprite spriteLavaStill = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite("minecraft:blocks/lava_still");
-        BakedModelFiniteFluid modelLavaStill = new BakedModelFiniteFluid(renderer, spriteLavaStill, FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(ModBlocks.FINITE_LAVA_FLOWING));
+        BakedModelFiniteFluid modelLavaStill = new BakedModelFiniteFluid(renderer, spriteLavaStill, FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(ModBlocks.FINITE_LAVA_FLOWING, null, null));
         event.getModelRegistry().putObject(modelLocLavaStill, modelLavaStill);
 
         //Ocean
         ModelResourceLocation modelLocLavaOcean = new ModelResourceLocation("realisticfinitefluids:infinite_lava_source", "normal");
-        BakedModelFiniteFluid modelLavaOcean = new BakedModelFiniteFluid(renderer, spriteLavaStill, FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(ModBlocks.INFINITE_LAVA_SOURCE));
+        BakedModelFiniteFluid modelLavaOcean = new BakedModelFiniteFluid(renderer, spriteLavaStill, FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(ModBlocks.INFINITE_LAVA_SOURCE, null, null));
         event.getModelRegistry().putObject(modelLocLavaOcean, modelLavaOcean);   
         
     }
@@ -194,9 +196,15 @@ public class FluidModelEventHandler {
             for (BlockPos pos : BlockPos.getAllInBox(player.getPosition().add(-8, -4, -8),
                                                      player.getPosition().add(8, 4, 8))) {
                 IBlockState state = world.getBlockState(pos);
-                if (state.getBlock() instanceof BlockFiniteFluid) {
-                    int level = state.getValue(BlockFiniteFluid.LEVEL);
-
+                FluidState fluidState = FluidloggedUtils.getFluidState(world, pos);
+                if (state.getBlock() instanceof BlockFiniteFluid || fluidState.getBlock() instanceof BlockFiniteFluid) {
+                	int level = 0;
+                	if (state.getBlock() instanceof BlockFiniteFluid) {
+                		level = state.getValue(BlockFiniteFluid.LEVEL);
+                	} else if (fluidState.getBlock() instanceof BlockFiniteFluid) {
+                		level = fluidState.getState().getValue(BlockFiniteFluid.LEVEL);
+                	}
+                	
                     double x = pos.getX() + 0.5;
                     double y = pos.getY() + 1.2;
                     double z = pos.getZ() + 0.5;
