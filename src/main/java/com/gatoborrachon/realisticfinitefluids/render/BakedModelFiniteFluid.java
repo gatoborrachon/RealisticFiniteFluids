@@ -41,10 +41,10 @@ public class BakedModelFiniteFluid implements IBakedModel {
 
         IExtendedBlockState ext = (IExtendedBlockState) state;
 
-        Float h00 = ext.getValue(BlockFiniteFluid.HEIGHT_NW);
-        Float h10 = ext.getValue(BlockFiniteFluid.HEIGHT_NE);
-        Float h01 = ext.getValue(BlockFiniteFluid.HEIGHT_SW);
-        Float h11 = ext.getValue(BlockFiniteFluid.HEIGHT_SE);
+        Float h00 = ext.getValue(BlockFiniteFluid.LEVEL_CORNERS[0]);
+        Float h10 = ext.getValue(BlockFiniteFluid.LEVEL_CORNERS[1]);
+        Float h01 = ext.getValue(BlockFiniteFluid.LEVEL_CORNERS[2]);
+        Float h11 = ext.getValue(BlockFiniteFluid.LEVEL_CORNERS[3]);
         
         Map<EnumFacing, IBlockState> neighborStates = ext.getValue(BlockFiniteFluid.NEIGHBOR_STATES);
         
@@ -55,10 +55,7 @@ public class BakedModelFiniteFluid implements IBakedModel {
         }
         
         
-        Vec3d flow = new Vec3d(0,0,0);
-        //if (state.getBlock() instanceof BlockNewWater_Flow) {
-        flow = ext.getValue(BlockFiniteFluid.FLOW_DIRECTION);
-        //}
+        Vec3d flow = ext.getValue(BlockFiniteFluid.FLOW_DIRECTION);
         
 
         if (h00 == null || h10 == null || h01 == null || h11 == null || neighborStates == null) {

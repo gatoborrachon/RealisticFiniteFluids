@@ -86,7 +86,7 @@ public class BlockNewWater_Still extends BlockFiniteFluid
         	
     		//En mi mente enferma penso en que, este bloque deberia quedarse asi si ya no tiene a donde moverse o si tiene 0 de agua
     		//Si un bloque intenta meterle agua (tryGrab) pues revive y se convierte en flow y vuelve a ejecutar sus tareas dde flow (ecualizacion hirozntal)
-            int newLevel = world.getBlockState(pos).getValue(LEVEL);
+            int newLevel = BlockFiniteFluid.getVolume(world.getBlockState(pos)); //world.getBlockState(pos).getValue(LEVEL);
             FiniteFluidLogic.GeneralPurposeLogic.setCurrentFluidIndex(this);
 
             if (FiniteFluidLogic.GeneralPurposeLogic.canMove(world, pos, newLevel))
@@ -95,8 +95,9 @@ public class BlockNewWater_Still extends BlockFiniteFluid
             	//int currentFluidIndex = FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(this);
             	Block flowingBlock = ((NewFluidType) FiniteFluidLogic.liquids.get(FiniteFluidLogic.onFiniteFluidIndex)).flowingBlock;
 
-            	IBlockState newState = flowingBlock.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, newLevel);
-            	world.setBlockState(pos, newState, 3);
+            	BlockFiniteFluid.setBlockState(world, pos, BlockFiniteFluid.setVolume(flowingBlock.getDefaultState(), newLevel));
+            	//IBlockState newState = flowingBlock.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, newLevel);
+            	//world.setBlockState(pos, newState, 3);
             	
             	//world.setBlock(var2, var3, var4, ((NewFluidType)FiniteFluidLogic.liquids.get(FiniteFluidLogic.onWaterType)).flow, var6, 3);
             }
@@ -123,7 +124,7 @@ public class BlockNewWater_Still extends BlockFiniteFluid
                 if (FiniteFluidLogic.GeneralPurposeLogic.checkForNeighborLiquid(world, pos)){
                     return;
                     //Aca yo controlo lo de interaccion de still con water xd
-                }  else if (stateBelow.getBlock() == ModBlocks.INFINITE_WATER_SOURCE && world.getBlockState(pos).getValue(LEVEL) < 2) {
+                }  else if (stateBelow.getBlock() == ModBlocks.INFINITE_WATER_SOURCE && BlockFiniteFluid.getVolume(world.getBlockState(pos)) < 2) {
                     // Este bloque es "absorbido" por el océano
                     world.setBlockToAir(pos);  // O reemplaza por aire
                 }

@@ -32,29 +32,6 @@ public class RegistryHandler
 		event.getRegistry().registerAll(ModBlocks.BLOCKS.toArray(new Block[0]));
 	}
 	
-    /*public static void registerBlocks() {
-        for (Block block : ModBlocks.BLOCKS) {
-            // Aquí registras manualmente
-            block.setRegistryName(block.getUnlocalizedName().substring(5));
-            ForgeRegistries.BLOCKS.register(block);
-        }
-    }
-    
-    public static void registerItems() {
-        for (Item item : ModItems.ITEMS) {
-            item.setRegistryName(item.getUnlocalizedName().substring(5));
-            ForgeRegistries.ITEMS.register(item);
-        }
-
-        // Registrar ítems de bloques
-        for (Block block : ModBlocks.BLOCKS) {
-            ItemBlock ib = new ItemBlock(block);
-            ib.setRegistryName(block.getRegistryName());
-            ForgeRegistries.ITEMS.register(ib);
-        }
-    }*/
-	
-	
 	@SubscribeEvent
 	public static void onModelRegister(ModelRegistryEvent event)
 	{

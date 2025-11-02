@@ -50,9 +50,10 @@ public class BlockNewWater_Flow extends BlockFiniteFluid
             
             //Aca yo controlo lo de interaccion de flowing con ocean xd
             //Avoid too much block updates over oceanic liquid
-            if (downBlock == FiniteFluidLogic.liquids.get(FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(currentBlock)).oceanBlock && currentaState.getValue(BlockFiniteFluid.LEVEL) < 4) { //8
-            	int newValue = world.getBlockState(pos).getValue(BlockFiniteFluid.LEVEL)/2; //3
-            	world.setBlockState(pos, currentaState.withProperty(BlockFiniteFluid.LEVEL, newValue));
+            if (downBlock == FiniteFluidLogic.liquids.get(FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(currentBlock)).oceanBlock && BlockFiniteFluid.getVolume(currentaState) < 4) { //8
+            	int newValue = BlockFiniteFluid.getVolume(world.getBlockState(pos))/2; //3
+            	//world.setBlockState(pos, currentaState.withProperty(BlockFiniteFluid.LEVEL, newValue));
+            	BlockFiniteFluid.setBlockState(world, pos, BlockFiniteFluid.setVolume(currentaState, newValue));
             }
             
             FiniteFluidLogic.InfiniteWaterSource.wakeOcean(world, pos);
@@ -68,7 +69,7 @@ public class BlockNewWater_Flow extends BlockFiniteFluid
 
                 if (belowBlock1 != Blocks.AIR & !FiniteFluidLogic.GeneralPurposeLogic.hasSideBorder(world, pos, Blocks.AIR))
                 {
-                    if ((float)FiniteFluidLogic.GeneralPurposeLogic.getCalc() > (float)FiniteFluidLogic.GeneralPurposeLogic.getMaxCalc() * 0.65F && world.getBlockState(pos).getValue(LEVEL) < 4 & (!FiniteFluidLogic.GeneralPurposeLogic.isRealisticFluid(belowBlock1) || world.getBlockState(new BlockPos(pos.getX(), pos.getY() - 1 * FiniteFluidLogic.GeneralPurposeLogic.getFluidGravity(), pos.getZ())).getValue(LEVEL) < 15))
+                    if ((float)FiniteFluidLogic.GeneralPurposeLogic.getCalc() > (float)FiniteFluidLogic.GeneralPurposeLogic.getMaxCalc() * 0.65F && BlockFiniteFluid.getVolume(world, pos) < 4 & (!FiniteFluidLogic.GeneralPurposeLogic.isRealisticFluid(belowBlock1) || BlockFiniteFluid.getVolume(world, new BlockPos(pos.getX(), pos.getY() - 1 * FiniteFluidLogic.GeneralPurposeLogic.getFluidGravity(), pos.getZ())) < 15))
                     {
                     	world.scheduleUpdate(pos, this, this.tickRate(world));
                         return;
@@ -92,18 +93,20 @@ public class BlockNewWater_Flow extends BlockFiniteFluid
                 if (world.getBlockState(new BlockPos(pos.getX(), pos.getY() - 1 * FiniteFluidLogic.GeneralPurposeLogic.getFluidGravity(), pos.getZ())).getBlock() == Blocks.DIAMOND_BLOCK)
                 {
                     IBlockState currentState = world.getBlockState(pos);
-                    IBlockState newState = currentState.withProperty(BlockFiniteFluid.LEVEL, 15);
-                    if (currentState.getValue(BlockFiniteFluid.LEVEL) < 15) {
-                    world.setBlockState(pos, newState, 3);
+                    IBlockState newState = BlockFiniteFluid.setVolume(currentState, BlockFiniteFluid.MAXIMUM_LEVEL); //currentState.withProperty(BlockFiniteFluid.LEVEL, 15);
+                    if (BlockFiniteFluid.getVolume(currentState) < 15) {
+                    	BlockFiniteFluid.setBlockState(world, pos, newState);
+                    //world.setBlockState(pos, newState, 3);
                     }
-                    world.setBlockState(pos.up(), newState, 3);
+                	BlockFiniteFluid.setBlockState(world, pos.up(), newState);
+                    //world.setBlockState(pos.up(), newState, 3);
                     
                 	FiniteFluidLogic.GeneralPurposeLogic.tryMove(world, pos.up());
                     world.scheduleUpdate(pos, this, this.tickRate(world));
                 }
                 else if (!FiniteFluidLogic.GeneralPurposeLogic.checkForNeighborLiquid(world, pos))
                 {
-                    int newLevel = world.getBlockState(pos).getValue(LEVEL);
+                    int newLevel = BlockFiniteFluid.getVolume(world.getBlockState(pos));
                     if (FiniteFluidLogic.GeneralPurposeLogic.tryMove(world, pos))
                     {
                     	world.scheduleUpdate(pos, this, this.tickRate(world));
@@ -114,8 +117,9 @@ public class BlockNewWater_Flow extends BlockFiniteFluid
                     	//int currentFluidIndex = FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(this);
 
                     	Block stillBlock = ((NewFluidType) FiniteFluidLogic.liquids.get(FiniteFluidLogic.onFiniteFluidIndex)).stillBlock;
-                    	IBlockState newState = stillBlock.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, newLevel);
-                    	world.setBlockState(pos, newState, 3);
+                    	//IBlockState newState = stillBlock.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, newLevel);
+                    	//world.setBlockState(pos, newState, 3);
+                    	BlockFiniteFluid.setBlockState(world, pos, BlockFiniteFluid.setVolume(stillBlock.getDefaultState(), newLevel));
                     	
                     	BlockPos belowBlock = new BlockPos(pos.getX(), pos.getY() - 1 * FiniteFluidLogic.GeneralPurposeLogic.getFluidGravity(), pos.getZ());
                     	if (world.getBlockState(pos).getMaterial() == world.getBlockState(belowBlock).getMaterial()) {

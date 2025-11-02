@@ -170,7 +170,8 @@ public class ItemFiniteLavaBucket extends ItemBucket  {
                         SoundEvent soundevent = /*this.containedBlock == Blocks.FLOWING_LAVA ?*/ SoundEvents.ITEM_BUCKET_EMPTY_LAVA /*: SoundEvents.ITEM_BUCKET_EMPTY*/;
                         worldIn.playSound(player, posIn, soundevent, SoundCategory.BLOCKS, 1.0F, 1.0F);
                         //System.out.println("VERGA-2");
-                        worldIn.setBlockState(posIn, ModBlocks.FINITE_LAVA_FLOWING.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, 15));                        	
+                        //worldIn.setBlockState(posIn, ModBlocks.FINITE_LAVA_FLOWING.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, 15));                        	
+                    	BlockFiniteFluid.setBlockState(worldIn, posIn, BlockFiniteFluid.setVolume(ModBlocks.FINITE_LAVA_FLOWING.getDefaultState(), BlockFiniteFluid.MAXIMUM_LEVEL));
 
                         //distributeFluidEqually(worldIn, posIn, 15);
                         /*IBlockState blockWhereToPutWater = worldIn.getBlockState(posIn);
@@ -239,7 +240,7 @@ public class ItemFiniteLavaBucket extends ItemBucket  {
                     if (!worldIn.isRemote) {
                     	if (targetBlock instanceof BlockFiniteFluid && worldIn.getBlockState(targetPos).getMaterial() == Material.LAVA) {
                     		//System.out.println("VERGA LAVA BUCKET");
-                    		if (targetBlockState.getValue(BlockFiniteFluid.LEVEL)+1 == 16) worldIn.setBlockState(targetPos.up(), ModBlocks.FINITE_LAVA_FLOWING.getDefaultState());
+                    		if (BlockFiniteFluid.getConceptualVolume(targetBlockState) == 16) worldIn.setBlockState(targetPos.up(), ModBlocks.FINITE_LAVA_FLOWING.getDefaultState());
                     		else
                             // Lógica de distribución equitativa
                             distributeFluidEqually(worldIn, targetPos, 16); // 15 como nivel completo                    		
@@ -248,7 +249,8 @@ public class ItemFiniteLavaBucket extends ItemBucket  {
                             worldIn.setBlockState(targetPos, ModBlocks.FINITE_LAVA_FLOWING.getDefaultState());
                     	} else {
                             //distributeFluidEqually(worldIn, targetPos, 15); // 15 como nivel completo                    		
-                            worldIn.setBlockState(targetPos, ModBlocks.FINITE_LAVA_FLOWING.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, 15));                        	
+                            //worldIn.setBlockState(targetPos, ModBlocks.FINITE_LAVA_FLOWING.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, 15));                        	
+                        	BlockFiniteFluid.setBlockState(worldIn, targetPos, BlockFiniteFluid.setVolume(ModBlocks.FINITE_LAVA_FLOWING.getDefaultState(), BlockFiniteFluid.MAXIMUM_LEVEL));
 
                     	}
                         worldIn.playSound(player, pos, SoundEvents.ITEM_BUCKET_EMPTY_LAVA, SoundCategory.BLOCKS, 1.0F, 1.0F);
@@ -281,15 +283,17 @@ public class ItemFiniteLavaBucket extends ItemBucket  {
             IBlockState centerState = world.getBlockState(pos);
 
             if (centerState.getBlock() instanceof BlockFiniteFluid && centerState.getMaterial() == Material.LAVA) {
-                int currentLevel = centerState.getValue(BlockFiniteFluid.LEVEL)+1;
+                int currentLevel = BlockFiniteFluid.getConceptualVolume(centerState); //centerState.getValue(BlockFiniteFluid.LEVEL)+1;
                 int toAdd = Math.min(16 - currentLevel, remaining); //remaining es el maximo, 16 LEVELs conceptuales
                 if (toAdd > 0) {
-                    world.setBlockState(pos, centerState.withProperty(BlockFiniteFluid.LEVEL, currentLevel + toAdd-1));
-                    remaining -= toAdd;
+                    //world.setBlockState(pos, centerState.withProperty(BlockFiniteFluid.LEVEL, currentLevel + toAdd-1));
+                	BlockFiniteFluid.setBlockState(world, pos, BlockFiniteFluid.setVolume(centerState, currentLevel + toAdd-1));
+                	remaining -= toAdd;
                 }
 
             } else {
-            	world.setBlockState(pos, ModBlocks.FINITE_LAVA_FLOWING.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, remaining-1)); //COMO LA ENTRADA SON 16, PUES REGRESAMOS A LITERALES
+            	//world.setBlockState(pos, ModBlocks.FINITE_LAVA_FLOWING.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, remaining-1)); //COMO LA ENTRADA SON 16, PUES REGRESAMOS A LITERALES
+            	BlockFiniteFluid.setBlockState(world, pos, BlockFiniteFluid.setConceptualVolume(ModBlocks.FINITE_LAVA_FLOWING.getDefaultState(), remaining));
             }
 
             // Coordenadas para laterales y diagonales
@@ -304,7 +308,7 @@ public class ItemFiniteLavaBucket extends ItemBucket  {
             // 2. Recolecta objetivos laterales válidos
             for (BlockPos p : laterals) {
                 IBlockState s = world.getBlockState(p);
-                if (s.getBlock() instanceof BlockFiniteFluid && s.getMaterial() == Material.LAVA && s.getValue(BlockFiniteFluid.LEVEL)+1 < 16) {
+                if (s.getBlock() instanceof BlockFiniteFluid && s.getMaterial() == Material.LAVA && BlockFiniteFluid.getConceptualVolume(s) < 16) {
                     lateralTargets.add(p);
                 }
             }
@@ -312,7 +316,7 @@ public class ItemFiniteLavaBucket extends ItemBucket  {
             // 3. Recolecta objetivos diagonales válidos
             for (BlockPos p : diagonals) {
                 IBlockState s = world.getBlockState(p);
-                if (s.getBlock() instanceof BlockFiniteFluid && s.getMaterial() == Material.LAVA && s.getValue(BlockFiniteFluid.LEVEL)+1 < 16) {
+                if (s.getBlock() instanceof BlockFiniteFluid && s.getMaterial() == Material.LAVA && BlockFiniteFluid.getConceptualVolume(s) < 16) {
                     diagonalTargets.add(p);
                 }
             }
@@ -329,7 +333,8 @@ public class ItemFiniteLavaBucket extends ItemBucket  {
             if (remaining > 0 && remaining <=16) { //ChatGPT dijo que <16 --> <=16
                 BlockPos above = pos.up();
                 if (world.isAirBlock(above)) {
-                    world.setBlockState(above, ModBlocks.FINITE_LAVA_FLOWING.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, remaining-1)); //COMO LA ENTRADA SON 16, PUES REGRESAMOS A LITERALES
+                    //world.setBlockState(above, ModBlocks.FINITE_LAVA_FLOWING.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, remaining-1)); //COMO LA ENTRADA SON 16, PUES REGRESAMOS A LITERALES
+                	BlockFiniteFluid.setBlockState(world, above, BlockFiniteFluid.setConceptualVolume(ModBlocks.FINITE_LAVA_FLOWING.getDefaultState(), remaining));
                     remaining = 0;
                 }
             }

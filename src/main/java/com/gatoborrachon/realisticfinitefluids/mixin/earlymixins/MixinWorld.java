@@ -46,7 +46,7 @@ public class MixinWorld {
         //boolean isVanillaWater = block == Blocks.WATER || block == Blocks.FLOWING_WATER;
 
         if ((isFiniteWater/* || isVanillaWater*/)
-                && state.getValue(BlockFiniteFluid.LEVEL) >= 12) { //deberia ser >=15 para que solo los bloques completos se congelen, pero bueno, vamos a darle un mayor margen
+                && BlockFiniteFluid.getVolume(state) >= 12) { //deberia ser >=15 para que solo los bloques completos se congelen, pero bueno, vamos a darle un mayor margen
 
             if (!noWaterAdj) {
                 cir.setReturnValue(true);
