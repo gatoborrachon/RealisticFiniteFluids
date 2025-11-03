@@ -205,6 +205,7 @@ public class FluidModelEventHandler {
                 		level = fluidState.getState().getValue(BlockFiniteFluid.LEVEL);
                 	}
                 	
+
                     double x = pos.getX() + 0.5;
                     double y = pos.getY() + 1.2;
                     double z = pos.getZ() + 0.5;

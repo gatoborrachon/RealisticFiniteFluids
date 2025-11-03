@@ -162,7 +162,7 @@ public abstract class MixinEntity implements IEntityExtended {
                     // Lógica custom para agua finita
                     double fluidSurface = pos.getY() + 1.0D;
                     if (block instanceof BlockFiniteFluid) {
-                        int level = state.getValue(BlockFiniteFluid.LEVEL) + 1;
+                        int level = BlockFiniteFluid.getConceptualVolume(state);//state.getValue(BlockFiniteFluid.LEVEL) + 1;
                         fluidSurface = pos.getY() + (level / 16.0D);
                     } else {
                         continue;

@@ -1,7 +1,7 @@
 package com.gatoborrachon.realisticfinitefluids.render;
 
 import com.gatoborrachon.realisticfinitefluids.blocks.BlockFiniteFluid;
-//import com.gatoborrachon.realisticfinitefluids.blocks.LEVEL_CORNERS;
+import com.gatoborrachon.realisticfinitefluids.blocks.BlockNewWater_Flow;
 import com.gatoborrachon.realisticfinitefluids.render.RenderNewFluids;
 import net.minecraft.block.state.IBlockState;
 
@@ -56,13 +56,11 @@ public class BakedModelFiniteFluid implements IBakedModel {
         
         
         Vec3d flow = ext.getValue(BlockFiniteFluid.FLOW_DIRECTION);
-        //if (state.getBlock() instanceof BlockNewWater_Flow && flow == null) 
-        //	flow = new Vec3d(0,0,0);
         
 
-        if (h00 == null || h10 == null || h01 == null || h11 == null || neighborStates == null)
+        if (h00 == null || h10 == null || h01 == null || h11 == null || neighborStates == null) {
             return Collections.emptyList();
-        
+        }
 
 
         return renderer.renderBlockNewFluid(state, h00, h10, h01, h11, neighborStates, color, fluidIndex, sprite, side, flow);

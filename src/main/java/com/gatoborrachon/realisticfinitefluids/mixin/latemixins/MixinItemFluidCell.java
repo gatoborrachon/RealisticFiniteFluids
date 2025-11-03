@@ -37,7 +37,7 @@ public abstract class MixinItemFluidCell {
 
     private static final String NBT_KEY_LEVELS = "FiniteLevels"; // niveles conceptuales 1..16
     //private static final String NBT_KEY_FLUID = "FiniteFluid";   // registry name, e.g. "water"
-    private static final int MAX_LEVELS = 16;
+    private static final int MAX_LEVELS = BlockFiniteFluid.MAXIMUM_LEVEL+1;
 
     @Inject(method = "onItemUse", at = @At("HEAD"), cancellable = true)
     private void onItemUseCustom(EntityPlayer player, World world, BlockPos pos, EnumHand hand,
@@ -172,7 +172,7 @@ CASOS QUE REQUIEREN CONFIRMAR EL BLOQUE A COLOCAR --> Caso 2, 6, 1.2, 5
             	////System.out.println("DEBUG CASO 1.1");
 
                 // RECoger suavemente
-                int blockLevelConceptual = state.getValue(BlockFiniteFluid.LEVEL) + 1;
+                int blockLevelConceptual = BlockFiniteFluid.getConceptualVolume(state); //state.getValue(BlockFiniteFluid.LEVEL) + 1;
                 // usa la nueva función que devuelve cuantos niveles conceptuales EXTRA se obtuvieron
                 int delta = FiniteFluidLogic.FluidWorldInteraction.bucketRemoveFluidEvenLowCollect(world, pos, blockLevelConceptual, MAX_LEVELS - currentLevels, ((IFluidBlock)state.getBlock()).getFluid());
             	////System.out.println("DEBUG CASO 1.1:delta "+delta);
@@ -220,7 +220,7 @@ CASOS QUE REQUIEREN CONFIRMAR EL BLOQUE A COLOCAR --> Caso 2, 6, 1.2, 5
             		
             	////System.out.println("DEBUG CASO 3");
                 // intentar recoger desde el bloque al que apuntamos (equivalente a llenar una celda vacía)
-                int blockLevelConceptual = state.getValue(BlockFiniteFluid.LEVEL) + 1;
+                int blockLevelConceptual = BlockFiniteFluid.getConceptualVolume(state); //state.getValue(BlockFiniteFluid.LEVEL) + 1;
             	////System.out.println("DEBUG CASO 3:blockLevelConceptual"+blockLevelConceptual);
                 int delta = FiniteFluidLogic.FluidWorldInteraction.bucketRemoveFluidEvenLowCollect(world, pos, blockLevelConceptual, MAX_LEVELS - currentLevels, ((IFluidBlock)state.getBlock()).getFluid());
             	////System.out.println("DEBUG CASO 3:delta"+delta);
@@ -288,7 +288,7 @@ CASOS QUE REQUIEREN CONFIRMAR EL BLOQUE A COLOCAR --> Caso 2, 6, 1.2, 5
             if (world.isAirBlock(placePos) || world.mayPlace(ModBlocks.FINITE_WATER_FLOWING, placePos, false, side, null)) {
             	Block blockFluidType = ((NewFluidType)FiniteFluidLogic.liquids.get(fluidType)).flowingBlock;
             	////System.out.println("DEBUG CASO 2:blockFluidType: "+blockFluidType);
-            	IBlockState blockstateToPlace = blockFluidType.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, MAX_LEVELS - 1);
+            	IBlockState blockstateToPlace = BlockFiniteFluid.setVolume(blockFluidType.getDefaultState(), BlockFiniteFluid.MAXIMUM_LEVEL); //blockFluidType.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, MAX_LEVELS - 1);
             	
             	////System.out.println("DEBUG CASO 2:blockstateToPlace: "+blockstateToPlace);
                 world.setBlockState(placePos, blockstateToPlace); //ModBlocks.FINITE_WATER_FLOWING.getDefaultState().withProperty(RFFBlock.LEVEL, MAX_LEVELS - 1));

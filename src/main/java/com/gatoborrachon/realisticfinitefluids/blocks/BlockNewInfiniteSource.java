@@ -76,7 +76,7 @@ public class BlockNewInfiniteSource extends BlockFiniteFluid //Former OceanBlock
             }
 
             FiniteFluidLogic.GeneralPurposeLogic.addCalc();
-            FiniteFluidLogic.GeneralPurposeLogic.setCurrentFluidIndex(this);
+            FiniteFluidLogic.GeneralPurposeLogic.setCurrentFluidIndex(this, world, pos);
 
             if (FiniteFluidLogic.InfiniteWaterSource.tryOceanMove(world, pos))
             {
