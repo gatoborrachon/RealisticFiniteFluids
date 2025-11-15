@@ -241,10 +241,10 @@ public class ItemFiniteWaterBucket extends ItemBucket  {
 
                     	if (targetBlock instanceof BlockFiniteFluid && worldIn.getBlockState(targetPos).getMaterial() == Material.WATER) {
                     		//System.out.println("VERGA WATER BUCKET");
-                    		if (BlockFiniteFluid.getConceptualVolume(worldIn, targetPos, targetBlockState) == 16) worldIn.setBlockState(targetPos.up(), ModBlocks.FINITE_WATER_FLOWING.getDefaultState());
+                    		if (BlockFiniteFluid.getConceptualVolume(worldIn, targetPos, targetBlockState) == BlockFiniteFluid.MAXIMUM_CONCEPTUAL_LEVEL) worldIn.setBlockState(targetPos.up(), ModBlocks.FINITE_WATER_FLOWING.getDefaultState());
                     		else
                             // Lógica de distribución equitativa
-                            distributeFluidEqually(worldIn, targetPos, 16); // 15 como nivel completo                    		
+                            distributeFluidEqually(worldIn, targetPos, BlockFiniteFluid.MAXIMUM_CONCEPTUAL_LEVEL); // 15 como nivel completo                    		
                     	} else if (targetBlock instanceof BlockFiniteFluid && worldIn.getBlockState(targetPos).getMaterial() == Material.LAVA) {
                             worldIn.playSound(player, pos, SoundEvents.BLOCK_FIRE_EXTINGUISH, SoundCategory.BLOCKS, 0.5F, 2.6F + (worldIn.rand.nextFloat() - worldIn.rand.nextFloat()) * 0.8F);
                             worldIn.setBlockState(targetPos, ModBlocks.FINITE_WATER_FLOWING.getDefaultState());
@@ -285,8 +285,8 @@ public class ItemFiniteWaterBucket extends ItemBucket  {
 
             if (centerState.getBlock() instanceof BlockFiniteFluid && centerState.getMaterial() == Material.WATER) {
                 int currentLevel = BlockFiniteFluid.getConceptualVolume(world, pos, centerState); //centerState.getValue(BlockFiniteFluid.LEVEL)+1;
-                int toAdd = Math.min(16 - currentLevel, remaining);
-                if (toAdd > 0) {
+                int toAdd = Math.min(BlockFiniteFluid.MAXIMUM_CONCEPTUAL_LEVEL - currentLevel, remaining);
+                if (toAdd > BlockFiniteFluid.MINIMUM_LEVEL) {
                     //world.setBlockState(pos, centerState.withProperty(BlockFiniteFluid.LEVEL, currentLevel + toAdd-1));
                 	BlockFiniteFluid.setBlockState(world, pos, BlockFiniteFluid.setVolume(world, pos, centerState, currentLevel + toAdd-1));
                 	remaining -= toAdd;
@@ -309,7 +309,7 @@ public class ItemFiniteWaterBucket extends ItemBucket  {
             // 2. Recolecta objetivos laterales válidos
             for (BlockPos p : laterals) {
                 IBlockState s = world.getBlockState(p);
-                if (s.getBlock() instanceof BlockFiniteFluid && s.getMaterial() == Material.WATER && BlockFiniteFluid.getConceptualVolume(world, p, s) < 16) {
+                if (s.getBlock() instanceof BlockFiniteFluid && s.getMaterial() == Material.WATER && BlockFiniteFluid.getConceptualVolume(world, p, s) < BlockFiniteFluid.MAXIMUM_CONCEPTUAL_LEVEL) {
                     lateralTargets.add(p);
                 }
             }
@@ -317,7 +317,7 @@ public class ItemFiniteWaterBucket extends ItemBucket  {
             // 3. Recolecta objetivos diagonales válidos
             for (BlockPos p : diagonals) {
                 IBlockState s = world.getBlockState(p);
-                if (s.getBlock() instanceof BlockFiniteFluid && s.getMaterial() == Material.WATER && BlockFiniteFluid.getConceptualVolume(world, p, s) < 16) {
+                if (s.getBlock() instanceof BlockFiniteFluid && s.getMaterial() == Material.WATER && BlockFiniteFluid.getConceptualVolume(world, p, s) < BlockFiniteFluid.MAXIMUM_CONCEPTUAL_LEVEL) {
                     diagonalTargets.add(p);
                 }
             }
@@ -331,12 +331,12 @@ public class ItemFiniteWaterBucket extends ItemBucket  {
             //System.out.println(remaining);
             //System.out.println("VERGA-1");
             // 6. Si todavía sobra, intenta poner un nuevo bloque arriba
-            if (remaining > 0 && remaining <=16) { //ChatGPT dijo que <16 --> <=16
+            if (remaining > BlockFiniteFluid.MINIMUM_LEVEL && remaining <= BlockFiniteFluid.MAXIMUM_CONCEPTUAL_LEVEL) { //ChatGPT dijo que <16 --> <=16
                 BlockPos above = pos.up();
                 if (world.isAirBlock(above)) {
                     //world.setBlockState(above, ModBlocks.FINITE_WATER_FLOWING.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, remaining -1));
                 	BlockFiniteFluid.setBlockState(world, above, BlockFiniteFluid.setConceptualVolume(null, null, ModBlocks.FINITE_WATER_FLOWING.getDefaultState(), remaining));
-                	remaining = 0;
+                	remaining = BlockFiniteFluid.MINIMUM_LEVEL;
                 }
             }
             

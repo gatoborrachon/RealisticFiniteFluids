@@ -65,6 +65,6 @@ public class RealisticFiniteFluidsMixinCoremod implements IFMLLoadingPlugin, IEa
 
     @Override
     public void injectData(Map<String, Object> data) {
-        // Aquí puedes modificar cosas del classloader si lo necesitas
+    	
     }
 }

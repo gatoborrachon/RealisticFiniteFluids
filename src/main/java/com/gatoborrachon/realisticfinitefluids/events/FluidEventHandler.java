@@ -230,12 +230,12 @@ public class FluidEventHandler {
         
         // Si es agua vanilla
         if ((state.getBlock() == Blocks.WATER || state.getBlock() == Blocks.FLOWING_WATER) &&
-                state.getValue(BlockLiquid.LEVEL) == 0) {
+                state.getValue(BlockLiquid.LEVEL) == BlockFiniteFluid.MINIMUM_LEVEL) {
                 event.setFilledBucket(new ItemStack(Items.WATER_BUCKET));
                 world.setBlockToAir(pos);
                 event.setResult(net.minecraftforge.fml.common.eventhandler.Event.Result.ALLOW);
             } else if ((state.getBlock() == Blocks.LAVA || state.getBlock() == Blocks.FLOWING_LAVA) &&
-                       state.getValue(BlockLiquid.LEVEL) == 0) {
+                       state.getValue(BlockLiquid.LEVEL) == BlockFiniteFluid.MINIMUM_LEVEL) {
                 event.setFilledBucket(new ItemStack(Items.LAVA_BUCKET));
                 world.setBlockToAir(pos);
                 event.setResult(net.minecraftforge.fml.common.eventhandler.Event.Result.ALLOW);
@@ -263,7 +263,7 @@ public class FluidEventHandler {
         //
         //"Evitar obtener agua vanilla de mi agua finita con LEVEL de 0"
         Block blockToCheck = world.getBlockState(pos.down()).getBlock();
-        if (level == 0 && !(blockToCheck instanceof BlockFiniteFluid)) {
+        if (level == BlockFiniteFluid.MINIMUM_LEVEL && !(blockToCheck instanceof BlockFiniteFluid)) {
             //world.setBlockToAir(pos);
             event.setCanceled(true);
 
@@ -370,36 +370,4 @@ public class FluidEventHandler {
         sealedChunks.add(chunk.getPos());
     }
     
-
-
-    
-    
-    //INTENTO PARA REEMPLAZAR AGUA EN EL MUNDO POR MIS BLOQUES, VER CODIGO DE ARRIBA QUE SI REEMPLAZA BIEN BLOQUES
-    private static final Set<ChunkPos> convertedChunks = new HashSet<>();
-
-    @SubscribeEvent
-    public void onChunkLoadReplace(ChunkDataEvent.Load event) {
-        NBTTagCompound data = event.getData();
-        if (data.getBoolean("convertedLiquids")) {
-            convertedChunks.add(event.getChunk().getPos());
-        }
-    }
-
-    @SubscribeEvent
-    public void onChunkSaveReplace(ChunkDataEvent.Save event) {
-        ChunkPos pos = event.getChunk().getPos();
-        if (convertedChunks.contains(pos)) {
-            event.getData().setBoolean("convertedLiquids", true);
-        }
-    }
-    
-    public static boolean isReplaced(Chunk chunk) {
-        return convertedChunks.contains(chunk.getPos());
-    }
-
-    public static void markReplaced(Chunk chunk) {
-    	convertedChunks.add(chunk.getPos());
-    }
-
-
 }

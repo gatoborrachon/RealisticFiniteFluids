@@ -26,7 +26,7 @@ public class BlockNewInfiniteSource extends BlockFiniteFluid //Former OceanBlock
 		setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
 		ModBlocks.BLOCKS.add(this);
 		ModItems.ITEMS.add(new ItemBlock(this).setRegistryName(this.getRegistryName()));
-        this.setDefaultState(this.blockState.getBaseState().withProperty(LEVEL, Integer.valueOf(15)));
+        this.setDefaultState(this.blockState.getBaseState().withProperty(LEVEL, Integer.valueOf(MAXIMUM_LEVEL)));
         //setResistance(6000F);
 
         //ESTO NO ESTABA ACA, NO SE QUE PUEDA PROVOCAR

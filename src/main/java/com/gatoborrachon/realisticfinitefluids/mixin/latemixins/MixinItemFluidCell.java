@@ -37,7 +37,7 @@ public abstract class MixinItemFluidCell {
 
     private static final String NBT_KEY_LEVELS = "FiniteLevels"; // niveles conceptuales 1..16
     //private static final String NBT_KEY_FLUID = "FiniteFluid";   // registry name, e.g. "water"
-    private static final int MAX_LEVELS = BlockFiniteFluid.MAXIMUM_LEVEL+1;
+    private static final int MAX_LEVELS = (int)BlockFiniteFluid.MAXIMUM_CONCEPTUAL_LEVEL;
 
     @Inject(method = "onItemUse", at = @At("HEAD"), cancellable = true)
     private void onItemUseCustom(EntityPlayer player, World world, BlockPos pos, EnumHand hand,

@@ -36,21 +36,3 @@ public class ModBlocks {
 
     }
 }
-
-/*public class ModBlocks 
-{
-	public static final List<Block> BLOCKS = new ArrayList<Block>();
-	
-	//public static final Block NIOBIUM_ORE = new OreBlock("niobium_ore", Material.ROCK); 
-    //public static final Block finiteWaterStill = new BlockFiniteWater(Material.WATER, "finite_water_still");
-    public static final Block FINITE_WATER_FLOWING = new BlockNewWater("finite_water_flowing", FluidRegistry.WATER, Material.WATER);
-    public static final Block FINITE_WATER_STILL = new BlockNewWater_Still("finite_water_still", FluidRegistry.WATER, Material.WATER);
-    public static final Block INFINITE_WATER_SOURCE = new BlockNewInfiniteSource("infinite_water_source", FluidRegistry.WATER, Material.WATER);
-
-    public static final Block FINITE_LAVA_FLOWING = new BlockNewLava("finite_lava_flowing", FluidRegistry.LAVA, Material.LAVA);
-    public static final Block FINITE_LAVA_STILL = new BlockNewLava_Still("finite_lava_still", FluidRegistry.LAVA, Material.LAVA);
-    public static final Block INFINITE_LAVA_SOURCE = new BlockNewInfiniteLavaSource("infinite_lava_source", FluidRegistry.LAVA, Material.LAVA);
-
-    
-}*/
-

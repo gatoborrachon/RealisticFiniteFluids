@@ -186,7 +186,7 @@ public class FiniteFluidLogic {
             // Si el destino no es agua y cierta probabilidad +
             if (!FiniteFluidLogic.GeneralPurposeLogic.isRealisticFluid(destBlock) && !(new Random().nextInt(10) == 0)) {
                 //se puede reemplazar -->
-            	if (FiniteFluidLogic.GeneralPurposeLogic.canMoveInto(world, to, from, 15, fluid)) {
+            	if (FiniteFluidLogic.GeneralPurposeLogic.canMoveInto(world, to, from, BlockFiniteFluid.MAXIMUM_LEVEL, fluid)) {
             		//Remplaza por agua still
                     if (doMove) {
                     	FiniteFluidLogic.GeneralPurposeLogic.setCurrentFluidIndex(sourceBlock);
@@ -264,7 +264,7 @@ public class FiniteFluidLogic {
                             if (world.getBlockState(pos).getBlock() == type.oceanBlock) {
                                 //world.setBlockState(pos, type.flowingBlock.getDefaultState()
                                 //        .withProperty(BlockFiniteFluid.LEVEL, 15), 3);
-                            	BlockFiniteFluid.setBlockState(world, pos, BlockFiniteFluid.setVolume(null, null, type.flowingBlock.getDefaultState(), 15));
+                            	BlockFiniteFluid.setBlockState(world, pos, BlockFiniteFluid.setVolume(null, null, type.flowingBlock.getDefaultState(), BlockFiniteFluid.MAXIMUM_LEVEL));
 
                             }
 
@@ -330,7 +330,7 @@ public class FiniteFluidLogic {
         
         
         /**
-         * A function to "wake" adyacent ocean blocks. Doesn't calculate whether they should become stll-->flowing blocks.
+         * A function to "wake" adyacent ocean blocks. Doesn't calculate whether they should become Ocean-->flowing blocks.
          * @param world
          * @param pos
          */
@@ -460,15 +460,15 @@ public class FiniteFluidLogic {
                     }
                 }
 
-                Block block = (i < 15)
+                Block block = (i < BlockFiniteFluid.MAXIMUM_LEVEL)
                     ? ((NewFluidType) liquids.get(onFiniteFluidIndex)).flowingBlock
                     : ((NewFluidType) liquids.get(onFiniteFluidIndex)).stillBlock;
 
-                int level = 15;
+                int level = BlockFiniteFluid.MAXIMUM_LEVEL;
                 BlockPos above = pos.up(FiniteFluidLogic.GeneralPurposeLogic.getFluidGravity());
 
                 if (!world.isAirBlock(above)) {
-                    level = 15;
+                    level = BlockFiniteFluid.MAXIMUM_LEVEL;
                 }
 
                 //world.setBlockState(pos, block.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, level), 3);
@@ -755,7 +755,7 @@ public class FiniteFluidLogic {
             if (fluidIndex > -1) {
                 int level = BlockFiniteFluid.getVolume(world, pos, state) * 2;
 
-                if (level > 14) level = 14;
+                if (level >= BlockFiniteFluid.MAXIMUM_LEVEL) level = BlockFiniteFluid.MAXIMUM_LEVEL-1;
 
                 Block block = state.getBlock();
                 if (block == liquids.get(fluidIndex).oceanBlock) {
@@ -766,7 +766,7 @@ public class FiniteFluidLogic {
             //IBlockState state = world.getBlockState(pos);
             return BlockFiniteFluid.getVolume(world, pos, state);
         	}
-			return 15;
+			return BlockFiniteFluid.MAXIMUM_LEVEL;
         }
         
         public static float getHeight(IBlockAccess access, BlockPos pos, int dx, int dz) {
@@ -784,7 +784,7 @@ public class FiniteFluidLogic {
             		access.isAirBlock(pos.north()) &&
             		access.isAirBlock(pos.south()));
 
-            if (!hasNeighbors) return total / 16.0f;
+            if (!hasNeighbors) return total / (float) BlockFiniteFluid.MAXIMUM_CONCEPTUAL_LEVEL;
 
             BlockPos p1 = pos.add(dx, 0, 0);
             BlockPos p2 = pos.add(0, 0, dz);
@@ -818,7 +818,7 @@ public class FiniteFluidLogic {
             if (isFullWaterRender(access, p2.up(getFluidGravity(fluidIndex)), fluidIndex)) return 1.0f;
             if (isLDWater(access, p2, fluidIndex)) return 0.0f;
 
-            return total / 16.0f / samples;
+            return total / (float)BlockFiniteFluid.MAXIMUM_CONCEPTUAL_LEVEL / samples;
         }
         
         
@@ -960,7 +960,7 @@ y la funcion getWaterType (dentro dde isAnyWater) corroborra primero que:
                     Block block = state.getBlock();
                     if (fluid.isFluid(block)) {
                         int level = BlockFiniteFluid.getVolume(world, checkPos, state);
-                        if (level > 0 || block == fluid.oceanBlock) {
+                        if (level > BlockFiniteFluid.MINIMUM_LEVEL || block == fluid.oceanBlock) {
                             found = true;
                         	//System.out.println("VERGA TRYTOSAVE_1");
 
@@ -1003,7 +1003,7 @@ y la funcion getWaterType (dentro dde isAnyWater) corroborra primero que:
                         Block block = state.getBlock();
                         if (fluid.isFluid(block)) {
                             int level = BlockFiniteFluid.getVolume(world, checkPos, state);;
-                            if (level > 0 || block == fluid.oceanBlock) {
+                            if (level > BlockFiniteFluid.MINIMUM_LEVEL || block == fluid.oceanBlock) {
                                 found = true;
                             	//System.out.println("VERGA TRYTOSAVE_2");
                                 if (block != fluid.oceanBlock) {
@@ -1337,13 +1337,13 @@ y la funcion getWaterType (dentro dde isAnyWater) corroborra primero que:
                 
                 //Si el destino tiene agua y tiene espacio para niveles de agua
                 //Ecualizacion Vertical
-                if (isRealisticFluid(toBlock) && destLevel < 15) {
+                if (isRealisticFluid(toBlock) && destLevel < BlockFiniteFluid.MAXIMUM_LEVEL) {
                 	//System.out.println("destLevel menor a 15");
                     if (doMove) {
                     	//ECUALIZACION
                     		int realSource = sourceLevel + 1;
                         	int realDest   = destLevel + 1;
-                        	int transfer = Math.min(15 - destLevel, realSource);
+                        	int transfer = Math.min(BlockFiniteFluid.MAXIMUM_LEVEL - destLevel, realSource);
 
                         	realSource -= transfer;
                         	realDest   += transfer;
@@ -1351,7 +1351,7 @@ y la funcion getWaterType (dentro dde isAnyWater) corroborra primero que:
                         	sourceLevel = realSource - 1;
                         	destLevel   = realDest   - 1;
 
-                        if (sourceLevel > -1) //SI COMPARAS CONTRA 0, LOS BLOQUES CON VALOR 0 SE VAN AL CARAJO, DEBE SER CONTRA -1
+                        if (sourceLevel >= BlockFiniteFluid.MINIMUM_LEVEL) //SI COMPARAS CONTRA 0, LOS BLOQUES CON VALOR 0 SE VAN AL CARAJO, DEBE SER CONTRA -1
                             //world.setBlockState(from, fluid.flowingBlock.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, sourceLevel), 3);
                         	BlockFiniteFluid.setBlockState(world, from, BlockFiniteFluid.setVolume(null, null, fluid.flowingBlock.getDefaultState(), sourceLevel));
                         else
@@ -1361,7 +1361,7 @@ y la funcion getWaterType (dentro dde isAnyWater) corroborra primero que:
                         BlockFiniteFluid.setBlockState(world, to, BlockFiniteFluid.setVolume(null, null, fluid.flowingBlock.getDefaultState(), destLevel));
 
                         
-                        if (doPressure && destLevel == 15)
+                        if (doPressure && destLevel == BlockFiniteFluid.MAXIMUM_LEVEL)
                         	FiniteFluidLogic.GeneralPurposeLogic.addToPressure(world, to, false); // 0 = false
                     }
                     return true;
@@ -1379,7 +1379,7 @@ y la funcion getWaterType (dentro dde isAnyWater) corroborra primero que:
                         destLevel = total - sourceLevel - 1;
                         --sourceLevel;
                         
-                        if (sourceLevel > -1)
+                        if (sourceLevel >= BlockFiniteFluid.MINIMUM_LEVEL)
                         	//world.setBlockState(from, fluid.flowingBlock.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, sourceLevel), 3);
                         	BlockFiniteFluid.setBlockState(world, from, BlockFiniteFluid.setVolume(null, null, fluid.flowingBlock.getDefaultState(), sourceLevel));
                          else 
@@ -1483,7 +1483,7 @@ y la funcion getWaterType (dentro dde isAnyWater) corroborra primero que:
                 
                 //Si el destino tiene agua y tiene espacio para niveles de agua
                 //Ecualizacion Vertical
-                if (isRealisticFluid(toBlock) && destLevel < 15) {
+                if (isRealisticFluid(toBlock) && destLevel < BlockFiniteFluid.MAXIMUM_LEVEL) {
                 	//System.out.println("destLevel menor a 15");
                     if (doMove) {
                         
@@ -1528,7 +1528,7 @@ y la funcion getWaterType (dentro dde isAnyWater) corroborra primero que:
                     		 */
                     		int realSource = sourceLevel + 1;
                         	int realDest   = destLevel + 1;
-                        	int transfer = Math.min(15 - destLevel, realSource);
+                        	int transfer = Math.min(BlockFiniteFluid.MAXIMUM_LEVEL - destLevel, realSource);
 
                         	realSource -= transfer;
                         	realDest   += transfer;
@@ -1625,7 +1625,7 @@ y la funcion getWaterType (dentro dde isAnyWater) corroborra primero que:
                             }
                     	}*/
                         
-                        if (doPressure && destLevel == 15)
+                        if (doPressure && destLevel == BlockFiniteFluid.MAXIMUM_LEVEL)
                         	FiniteFluidLogic.GeneralPurposeLogic.addToPressure(world, to, false); // 0 = false
                     }
                     return true;
@@ -1646,7 +1646,7 @@ y la funcion getWaterType (dentro dde isAnyWater) corroborra primero que:
             	//}
             	
                 // Ecualización normal si son del mismo material
-                if (calcAvg(world, from, to) && destLevel < 15 && sourceLevel > 0) {
+                if (calcAvg(world, from, to) && destLevel < BlockFiniteFluid.MAXIMUM_LEVEL && sourceLevel > 0) {
                     if (doMove) {
                         int total = sourceLevel + destLevel + 2;
                         sourceLevel = total / 2;
@@ -1659,7 +1659,7 @@ y la funcion getWaterType (dentro dde isAnyWater) corroborra primero que:
                         	FiniteFluidLogic.GeneralPurposeLogic.tryGrab(world, from, to, 0, fluid);
                         	world.setBlockState(to, fluid.flowingBlock.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, destLevel), 3);
 
-                        if (doPressure && destLevel == 15)
+                        if (doPressure && destLevel == BlockFiniteFluid.MAXIMUM_LEVEL)
                             addToPressure(world, to, false); // 0 = false
                     }
                     return true;
@@ -1728,7 +1728,7 @@ y la funcion getWaterType (dentro dde isAnyWater) corroborra primero que:
                 if (lMove(world, pos, target, false, 0)) return true;
                 
                 //No recuerdo porque añadi esto :'v
-                if (level > 1) {
+                if (level > BlockFiniteFluid.MINIMUM_CONCEPTUAL_LEVEL) {
                 	lMove(world, pos, target, true, 0);
                 }
                 
@@ -1797,7 +1797,7 @@ y la funcion getWaterType (dentro dde isAnyWater) corroborra primero que:
             }
             IBlockState s = world.getBlockState(pos);
             int level = BlockFiniteFluid.getVolume(world, pos, s);
-            boolean result = level >= 13 && isAWater(world, pos.down(getFluidGravity()));
+            boolean result = level > BlockFiniteFluid.Q3_HIGH && isAWater(world, pos.down(getFluidGravity()));
             //System.out.println("[DEBUG] shouldPressure pos=" + pos + " level=" + level + " grav=" + grav() + " -> " + result);
             return result;
         }
@@ -1881,18 +1881,18 @@ y la funcion getWaterType (dentro dde isAnyWater) corroborra primero que:
             removeFromPressure(current.north());
             removeFromPressure(current.south());
 
-            int metaCurrent = 0;
+            int metaCurrent = BlockFiniteFluid.MINIMUM_LEVEL;
             IBlockState curState = world.getBlockState(current);
             if (curState.getBlock() instanceof BlockFiniteFluid) {
                 metaCurrent = BlockFiniteFluid.getVolume(world, current, curState);
             }
 
-            if (metaCurrent < 9) {
-                byte defaultMeta = 8;
+            if (metaCurrent <= BlockFiniteFluid.Q2_HIGH) {
+                byte defaultMeta = BlockFiniteFluid.Q2_HIGH;
                 boolean isAir = world.isAirBlock(current);
-                if (isAir) defaultMeta = 7;
+                if (isAir) defaultMeta = BlockFiniteFluid.Q2_LOW;
 
-                int newMetaAtCurrent = metaCurrent + 7;
+                int newMetaAtCurrent = metaCurrent + BlockFiniteFluid.Q2_LOW;
 
                 // setCurrentWater(block) -> usamos el bloque en source
                 setCurrentFluidIndex(blockAtSource);
@@ -2008,8 +2008,8 @@ y la funcion getWaterType (dentro dde isAnyWater) corroborra primero que:
                               ? BlockFiniteFluid.getVolume(world, current, curState) : -1;
 
             // if (var12 > 7 & var5 >= var2 & var7 > 0)
-            if (metaCurrent > 7 & current.getY() >= source.getY() & depth > 0 && (blockAtSource instanceof BlockFiniteFluid)) {
-                int newMetaAtCurrent = metaCurrent - 8;
+            if (metaCurrent > BlockFiniteFluid.Q2_LOW & current.getY() >= source.getY() & depth > 0 && (blockAtSource instanceof BlockFiniteFluid)) {
+                int newMetaAtCurrent = metaCurrent - BlockFiniteFluid.Q2_HIGH;
 
                 // setCurrentWater(block) usando el bloque del source
                 ////System.out.println("LMOVE Position: "+ source);
@@ -2437,7 +2437,7 @@ y la funcion getWaterType (dentro dde isAnyWater) corroborra primero que:
 		@Deprecated
 		public static boolean bucketRemoveFluidEvenLowOLD(World world, BlockPos pos, int level) {
 	        int totalLevel = level;
-		if (level <= 14) {
+		if (level < BlockFiniteFluid.MAXIMUM_LEVEL) {
 
             BlockPos[] laterals = { pos.north(), pos.south(), pos.east(), pos.west() };
             BlockPos[] diagonals = {
@@ -2449,39 +2449,39 @@ y la funcion getWaterType (dentro dde isAnyWater) corroborra primero que:
             for (BlockPos p : laterals) {
                 if (world.getBlockState(p).getBlock() instanceof BlockFiniteFluid) {
                     int neighborLevel = world.getBlockState(p).getValue(BlockFiniteFluid.LEVEL);
-                    int toTake = 15 - level;
+                    int toTake = BlockFiniteFluid.MAXIMUM_LEVEL - level;
                     int newNeighborLevel = neighborLevel - toTake;
-                    if (newNeighborLevel < 0) world.setBlockToAir(p);
+                    if (newNeighborLevel < BlockFiniteFluid.MINIMUM_LEVEL) world.setBlockToAir(p);
                     else world.setBlockState(p, world.getBlockState(p).getBlock().getDefaultState().withProperty(BlockFiniteFluid.LEVEL, newNeighborLevel));
 
                     world.setBlockToAir(pos);
                     totalLevel += neighborLevel;
-                    if (totalLevel >= 14) { return true; }
+                    if (totalLevel >= BlockFiniteFluid.MAXIMUM_LEVEL-1) { return true; }
                 }
             }
 
 
             // 2. Diagonales
-            if (totalLevel < 15) {
+            if (totalLevel < BlockFiniteFluid.MAXIMUM_LEVEL) {
                 for (BlockPos p : diagonals) {
                     if (world.getBlockState(p).getBlock() instanceof BlockFiniteFluid) {
                         int neighborLevel = world.getBlockState(p).getValue(BlockFiniteFluid.LEVEL);
-                        int toTake = 15 - level;
+                        int toTake = BlockFiniteFluid.MAXIMUM_LEVEL - level;
                         int newNeighborLevel = neighborLevel - toTake;
-                        if (newNeighborLevel < 0) world.setBlockToAir(p);
+                        if (newNeighborLevel < BlockFiniteFluid.MINIMUM_LEVEL) world.setBlockToAir(p);
                         else world.setBlockState(p, world.getBlockState(p).getBlock().getDefaultState().withProperty(BlockFiniteFluid.LEVEL, newNeighborLevel));
 
                         world.setBlockToAir(pos);
                         totalLevel += neighborLevel;
                         //>= 14 en vez ded >= 15 para evitar perder un liquiddo solo por un Level
                     	////System.out.println("LEVEL" + (totalLevel));
-                        if (totalLevel >= 13) { return true; }
+                        if (totalLevel >= BlockFiniteFluid.MAXIMUM_LEVEL-2) { return true; }
                     }
                 }
             }
 
             // 3. Abajo
-            if (totalLevel < 15) {
+            if (totalLevel < BlockFiniteFluid.MAXIMUM_LEVEL) {
                 BlockPos below = pos.down();
                 IBlockState belowState = world.getBlockState(below);
                 if (belowState.getBlock() instanceof BlockFiniteFluid) {
@@ -2534,35 +2534,35 @@ y la funcion getWaterType (dentro dde isAnyWater) corroborra primero que:
 	        }
 
 	        // Ahora sí, remover líquido para simular la recogida
-	        int needed = 15;
+	        int needed = BlockFiniteFluid.MAXIMUM_LEVEL;
 	        //shouldContinue = true;
 	        int remaining = needed - level;
 	        world.setBlockToAir(pos);
 
 	        // Consumir laterales
 	        for (BlockPos p : laterals) {
-	            if (remaining <= 0) break;
+	            if (remaining <= BlockFiniteFluid.MINIMUM_LEVEL) break;
 	            IBlockState s = world.getBlockState(p);
 	            if (s.getBlock() instanceof BlockFiniteFluid) {
 	                int neighborLevel = BlockFiniteFluid.getVolume(world, p, s); //s.getValue(BlockFiniteFluid.LEVEL);
 	                int take = Math.min(neighborLevel, remaining);
 	                int newLevel = neighborLevel - take;
-	                if (newLevel <= 0) world.setBlockToAir(p);
+	                if (newLevel <= BlockFiniteFluid.MINIMUM_LEVEL) world.setBlockToAir(p);
 	                else world.setBlockState(p, s.getBlock().getDefaultState().withProperty(BlockFiniteFluid.LEVEL, newLevel));
 	                remaining -= take;
 	            }
 	        }
 
 	        // Consumir diagonales
-	        if (remaining > 0) {
+	        if (remaining > BlockFiniteFluid.MINIMUM_LEVEL) {
 	            for (BlockPos p : diagonals) {
-	                if (remaining <= 0) break;
+	                if (remaining <= BlockFiniteFluid.MINIMUM_LEVEL) break;
 	                IBlockState s = world.getBlockState(p);
 	                if (s.getBlock() instanceof BlockFiniteFluid) {
 	                    int neighborLevel = BlockFiniteFluid.getVolume(world, p, s); //s.getValue(BlockFiniteFluid.LEVEL);
 	                    int take = Math.min(neighborLevel, remaining);
 	                    int newLevel = neighborLevel - take;
-	                    if (newLevel <= 0) world.setBlockToAir(p);
+	                    if (newLevel <= BlockFiniteFluid.MINIMUM_LEVEL) world.setBlockToAir(p);
 	                    else world.setBlockState(p, s.getBlock().getDefaultState().withProperty(BlockFiniteFluid.LEVEL, newLevel));
 	                    remaining -= take;
 	                }
@@ -2570,11 +2570,11 @@ y la funcion getWaterType (dentro dde isAnyWater) corroborra primero que:
 	        }
 
 	        // Consumir abajo (si queda algo)
-	        if (remaining > 0 && belowState.getBlock() instanceof BlockFiniteFluid) {
+	        if (remaining > BlockFiniteFluid.MINIMUM_LEVEL && belowState.getBlock() instanceof BlockFiniteFluid) {
 	            int neighborLevel = BlockFiniteFluid.getVolume(world, below, belowState); //belowState.getValue(BlockFiniteFluid.LEVEL);
 	            int take = Math.min(neighborLevel, remaining);
 	            int newLevel = neighborLevel - take;
-	            if (newLevel <= 0) world.setBlockToAir(below);
+	            if (newLevel <= BlockFiniteFluid.MINIMUM_LEVEL) world.setBlockToAir(below);
 	            else world.setBlockState(below, belowState.getBlock().getDefaultState().withProperty(BlockFiniteFluid.LEVEL, newLevel));
 	        }
 	        return true;
@@ -2597,7 +2597,7 @@ y la funcion getWaterType (dentro dde isAnyWater) corroborra primero que:
 		    int collected = level; // Nivel inicial del bloque central
 		    world.setBlockToAir(pos); // Removemos el bloque principal
 
-		    if (collected >= 16) return true; // Ya lleno, terminamos
+		    if (collected >= BlockFiniteFluid.MAXIMUM_CONCEPTUAL_LEVEL) return true; // Ya lleno, terminamos
 
 		    // Posiciones laterales y diagonales
 		    BlockPos[] laterals = { pos.north(), pos.south(), pos.east(), pos.west() };
@@ -2607,22 +2607,22 @@ y la funcion getWaterType (dentro dde isAnyWater) corroborra primero que:
 		    };
 
 		    // Recolectar suavemente
-		    collected = collectEqually(world, laterals, collected, 16, targetFluid);
-		    if (collected < 16) collected = collectEqually(world, diagonals, collected, 16, targetFluid);
+		    collected = collectEqually(world, laterals, collected, BlockFiniteFluid.MAXIMUM_CONCEPTUAL_LEVEL, targetFluid);
+		    if (collected < BlockFiniteFluid.MAXIMUM_CONCEPTUAL_LEVEL) collected = collectEqually(world, diagonals, collected, BlockFiniteFluid.MAXIMUM_CONCEPTUAL_LEVEL, targetFluid);
 
 		    // Última oportunidad: abajo
-		    if (collected < 16) {
+		    if (collected < BlockFiniteFluid.MAXIMUM_CONCEPTUAL_LEVEL) {
 		        BlockPos below = pos.down();
 		        IBlockState belowState = world.getBlockState(below);
 		        if (belowState.getBlock() instanceof IFluidBlock) {
 		            IFluidBlock fluidBlock = (IFluidBlock) belowState.getBlock();
 		            if (fluidBlock.getFluid() == targetFluid) {
 		                int neighborLevel = BlockFiniteFluid.getConceptualVolume(world, below, belowState);
-		                int take = Math.min(neighborLevel, 16 - collected);
+		                int take = Math.min(neighborLevel, BlockFiniteFluid.MAXIMUM_CONCEPTUAL_LEVEL - collected);
 		                int newLevel = neighborLevel - take;
 
-		                if (newLevel <= 0) {
-		                    if (newLevel == 0) {
+		                if (newLevel <= BlockFiniteFluid.MINIMUM_LEVEL) {
+		                    if (newLevel == BlockFiniteFluid.MINIMUM_LEVEL) {
 		                        //world.setBlockState(below, belowState.withProperty(BlockFiniteFluid.LEVEL, 0)); // nivel mínimo
 		                    	BlockFiniteFluid.setBlockState(world, below, BlockFiniteFluid.setVolume(world, below, belowState, BlockFiniteFluid.MINIMUM_LEVEL));
 		                    } else {
@@ -2636,7 +2636,7 @@ y la funcion getWaterType (dentro dde isAnyWater) corroborra primero que:
 		        }
 		    }
 
-		    return collected >= 16; // True si alcanzó 16 niveles conceptuales, false si no
+		    return collected >= BlockFiniteFluid.MAXIMUM_CONCEPTUAL_LEVEL; // True si alcanzó 16 niveles conceptuales, false si no
 		}
 
 		
@@ -2688,20 +2688,20 @@ y la funcion getWaterType (dentro dde isAnyWater) corroborra primero que:
 		        }
 		    }
 
-		    if (totalAvailable < 16) return false;
+		    if (totalAvailable < BlockFiniteFluid.MAXIMUM_CONCEPTUAL_LEVEL) return false;
 
 		    // --- Recolectar ---
 		    world.setBlockToAir(pos);
 
-		    collected = collectEqually(world, laterals, collected, 16, targetFluid);
-		    if (collected < 16) collected = collectEqually(world, diagonals, collected, 16, targetFluid);
-		    if (collected < 16 && belowState.getBlock() instanceof IFluidBlock) {
+		    collected = collectEqually(world, laterals, collected, BlockFiniteFluid.MAXIMUM_CONCEPTUAL_LEVEL, targetFluid);
+		    if (collected < BlockFiniteFluid.MAXIMUM_CONCEPTUAL_LEVEL) collected = collectEqually(world, diagonals, collected, BlockFiniteFluid.MAXIMUM_CONCEPTUAL_LEVEL, targetFluid);
+		    if (collected < BlockFiniteFluid.MAXIMUM_CONCEPTUAL_LEVEL && belowState.getBlock() instanceof IFluidBlock) {
 		        IFluidBlock fluidBlock = (IFluidBlock) belowState.getBlock();
 		        if (fluidBlock.getFluid() == targetFluid) {
 		            int neighborLevel = BlockFiniteFluid.getConceptualVolume(world, below, belowState);
-		            int take = Math.min(neighborLevel, 16 - collected);
+		            int take = Math.min(neighborLevel, BlockFiniteFluid.MAXIMUM_CONCEPTUAL_LEVEL - collected);
 		            int newLevel = neighborLevel - take;
-		            if (newLevel <= 0) world.setBlockToAir(below);
+		            if (newLevel <= BlockFiniteFluid.MINIMUM_LEVEL) world.setBlockToAir(below);
 		            else world.setBlockState(below, BlockFiniteFluid.setConceptualVolume(world, below, belowState, newLevel));
 		            collected += take;
 		        }
@@ -2739,7 +2739,7 @@ y la funcion getWaterType (dentro dde isAnyWater) corroborra primero que:
 		            int neighborLevel = BlockFiniteFluid.getConceptualVolume(world, pos, state); //state.getValue(BlockFiniteFluid.LEVEL) + 1;
 		            int take = Math.min(neighborLevel, spaceLeft - collected);
 		            int newLevel = neighborLevel - take;
-		            if (newLevel <= 0) world.setBlockToAir(pos);
+		            if (newLevel <= BlockFiniteFluid.MINIMUM_LEVEL) world.setBlockToAir(pos);
 		            else BlockFiniteFluid.setBlockState(world, pos, BlockFiniteFluid.setConceptualVolume(world, pos, state, newLevel)); //world.setBlockState(pos, state.withProperty(BlockFiniteFluid.LEVEL, newLevel - 1));
 		            collected += take;
 		            activateOcean(world, pos);
@@ -2775,20 +2775,20 @@ y la funcion getWaterType (dentro dde isAnyWater) corroborra primero que:
 		
 		
 		public static int distributeEqually(World world, List<BlockPos> targets, int remaining, int fluidType) {
-            if (targets.isEmpty() || remaining <= 0) return remaining; //original: <=0, ahora es <0, para aceptar al 0 entre los valores
+            if (targets.isEmpty() || remaining <= BlockFiniteFluid.MINIMUM_LEVEL) return remaining; //original: <=0, ahora es <0, para aceptar al 0 entre los valores
 
             boolean didSomething = true;
 
             // Repite mientras queden niveles que distribuir
-            while (remaining > 0 && didSomething) {
+            while (remaining > BlockFiniteFluid.MINIMUM_LEVEL && didSomething) {
                 didSomething = false;
                 for (BlockPos p : targets) {
-                    if (remaining <= 0) break; //original: <=0, ahora es <0, para aceptar al 0 entre los valores
+                    if (remaining <= BlockFiniteFluid.MINIMUM_LEVEL) break; //original: <=0, ahora es <0, para aceptar al 0 entre los valores
 
                     IBlockState s = world.getBlockState(p);
                     if (!(s.getBlock() instanceof BlockFiniteFluid) || FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(s.getBlock()) != fluidType) continue; //Para que no crashee la IC2 FluidCell en el CASO 1) xd
                     int level = BlockFiniteFluid.getVolume(world, p, s);
-                    if (level < 15) {
+                    if (level < BlockFiniteFluid.MAXIMUM_LEVEL) {
                     	int temporalFluidType = FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(s.getBlock()); 
                     	Block newBlock1 = ((NewFluidType)liquids.get(temporalFluidType)).flowingBlock;
                     	
@@ -2805,22 +2805,22 @@ y la funcion getWaterType (dentro dde isAnyWater) corroborra primero que:
         }
 		
 		public static int distributeEquallyNoAdyFluid(World world, List<BlockPos> targets, int remaining, Block finiteFluidBlock) {
-            if (targets.isEmpty() || remaining <= 0) return remaining; //original: <=0, ahora es <0, para aceptar al 0 entre los valores
+            if (targets.isEmpty() || remaining <= BlockFiniteFluid.MINIMUM_LEVEL) return remaining; //original: <=0, ahora es <0, para aceptar al 0 entre los valores
 
             boolean didSomething = true;
 
             // Repite mientras queden niveles que distribuir
-            while (remaining > 0 && didSomething) {
+            while (remaining > BlockFiniteFluid.MINIMUM_LEVEL && didSomething) {
                 didSomething = false;
                 for (BlockPos p : targets) {
-                    if (remaining <= 0) break; //original: <=0, ahora es <0, para aceptar al 0 entre los valores
+                    if (remaining <= BlockFiniteFluid.MINIMUM_LEVEL) break; //original: <=0, ahora es <0, para aceptar al 0 entre los valores
 
                     IBlockState s = world.getBlockState(p);
                     if (world.isAirBlock(p) && !(s.getBlock() instanceof BlockFiniteFluid)) { //Para que no crashee la IC2 FluidCell en el CASO 1) xd
                         //if (!(remaining > 16)) { //16 porque estamos en LEVELs conceptuales
                         	//world.setBlockState(p, finiteFluidBlock.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, remaining-1)); //ModBlocks.FINITE_WATER_FLOWING.getDefaultState().withProperty(RFFBlock.LEVEL, remaining-1));
                         BlockFiniteFluid.setBlockState(world, p, BlockFiniteFluid.setConceptualVolume(null, null, finiteFluidBlock.getDefaultState(), remaining));	
-                    	return 0;	
+                    	return BlockFiniteFluid.MINIMUM_LEVEL;	
                         /*} else {
                         	world.setBlockState(p, finiteFluidBlock.getDefaultState().withProperty(RFFBlock.LEVEL, 15)); //15 porque esta en LEVELs directos
                         	return remaining -= 16; //-16 porque esta en LEVELs conceptuales
@@ -2828,7 +2828,7 @@ y la funcion getWaterType (dentro dde isAnyWater) corroborra primero que:
                     } 
                     
                     int level = BlockFiniteFluid.getVolume(world, p, s);
-                    if (level < 15) {
+                    if (level < BlockFiniteFluid.MAXIMUM_LEVEL) {
                         //world.setBlockState(p, s.withProperty(BlockFiniteFluid.LEVEL, level + 1));
                         BlockFiniteFluid.setBlockState(world, p, BlockFiniteFluid.setVolume(world, p, s, level + 1));	
                         remaining--;
@@ -2866,10 +2866,10 @@ y la funcion getWaterType (dentro dde isAnyWater) corroborra primero que:
 
 		    // cuánto puedo realmente tomar del bloque central
 		    int takeFromCenter = Math.min(original, spaceLeft);
-		    if (takeFromCenter > 0) {
+		    if (takeFromCenter > BlockFiniteFluid.MINIMUM_LEVEL) {
 		        collected += takeFromCenter;
 		        int newLevelCenter = original - takeFromCenter;
-		        if (newLevelCenter <= 0) {
+		        if (newLevelCenter <= BlockFiniteFluid.MINIMUM_LEVEL) {
 		            world.setBlockToAir(pos);
 		            activateOcean(world, pos);
 		        } else {
@@ -2907,7 +2907,7 @@ y la funcion getWaterType (dentro dde isAnyWater) corroborra primero que:
 		                int neighborLevel = BlockFiniteFluid.getConceptualVolume(world, below, belowState); //belowState.getValue(BlockFiniteFluid.LEVEL) + 1; // conceptual
 		                int take = Math.min(neighborLevel, spaceLeft - collected);
 		                int newLevel = neighborLevel - take;
-		                if (newLevel <= 0) {world.setBlockToAir(below);  activateOcean(world, below);}
+		                if (newLevel <= BlockFiniteFluid.MINIMUM_LEVEL) {world.setBlockToAir(below);  activateOcean(world, below);}
 		                else BlockFiniteFluid.setBlockState(world, below, BlockFiniteFluid.setConceptualVolume(world, below, belowState, newLevel)); //world.setBlockState(below, belowState.withProperty(BlockFiniteFluid.LEVEL, newLevel - 1));
 		                collected += take;
 		            }
@@ -2942,25 +2942,25 @@ y la funcion getWaterType (dentro dde isAnyWater) corroborra primero que:
 		    if (belowState.getBlock() instanceof BlockFiniteFluid) total += BlockFiniteFluid.getConceptualVolume(world, below, belowState); //belowState.getValue(BlockFiniteFluid.LEVEL) + 1;
 
 		    // si no hay suficientes niveles (conceptuales) abortamos
-		    if (total < 16) return 0;
+		    if (total < BlockFiniteFluid.MAXIMUM_CONCEPTUAL_LEVEL) return BlockFiniteFluid.MINIMUM_LEVEL;
 
 		    // Si hay suficientes, borramos/extraemos suavemente igual que en EvenLow
 		    int original = levelConceptual;
 		    int collected = original;
 		    world.setBlockToAir(pos);
 
-		    collected = collectEqually(world, laterals, collected, 16, targetFluid);
-		    if (collected < 16) collected = collectEqually(world, diagonals, collected, 16, targetFluid);
-		    if (collected < 16 && belowState.getBlock() instanceof BlockFiniteFluid) {
+		    collected = collectEqually(world, laterals, collected, BlockFiniteFluid.MAXIMUM_CONCEPTUAL_LEVEL, targetFluid);
+		    if (collected < BlockFiniteFluid.MAXIMUM_CONCEPTUAL_LEVEL) collected = collectEqually(world, diagonals, collected, BlockFiniteFluid.MAXIMUM_CONCEPTUAL_LEVEL, targetFluid);
+		    if (collected < BlockFiniteFluid.MAXIMUM_CONCEPTUAL_LEVEL && belowState.getBlock() instanceof BlockFiniteFluid) {
 		        int neighborLevel = BlockFiniteFluid.getConceptualVolume(world, below, belowState); //belowState.getValue(BlockFiniteFluid.LEVEL) + 1;
-		        int take = Math.min(neighborLevel, 16 - collected);
+		        int take = Math.min(neighborLevel, BlockFiniteFluid.MAXIMUM_CONCEPTUAL_LEVEL - collected);
 		        int newLevel = neighborLevel - take;
-		        if (newLevel <= 0) world.setBlockToAir(below);
+		        if (newLevel <= BlockFiniteFluid.MINIMUM_LEVEL) world.setBlockToAir(below);
 		        else BlockFiniteFluid.setBlockState(world, below, BlockFiniteFluid.setConceptualVolume(world, below, belowState, newLevel)); //world.setBlockState(below, belowState.withProperty(BlockFiniteFluid.LEVEL, newLevel - 1));
 		        collected += take;
 		    }
 
-		    return Math.max(0, collected - original);
+		    return Math.max(BlockFiniteFluid.MINIMUM_LEVEL, collected - original);
 		}
 		
 

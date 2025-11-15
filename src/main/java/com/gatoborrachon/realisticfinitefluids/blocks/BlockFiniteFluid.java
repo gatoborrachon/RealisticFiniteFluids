@@ -54,11 +54,27 @@ public class BlockFiniteFluid extends Block implements IFluidBlock {
      * Minimum literal level for the finite fluid blocks (0). The minimum conceptual level is 1.
      */
     public static final int MINIMUM_LEVEL = 0;
+    public static final int MINIMUM_CONCEPTUAL_LEVEL = MINIMUM_LEVEL+1;
     /**
      * Maximum literal level for the finite fluid blocks (15). The maximum conceptual level is 16.
      */
-    public static final int MAXIMUM_LEVEL = 15;
+    public static final int MAXIMUM_LEVEL = 7; //ESTE ES EL MAESTRO ALV
+    private static final int MAXIMUM_REAL_LEVEL = 15; //ESTE ES EL MAESTRO ALV
+    public static final int MAXIMUM_CONCEPTUAL_LEVEL = MAXIMUM_LEVEL+1;
 
+    /**
+     * Quartiles
+     */
+    public static final int Q1_LOW = MINIMUM_LEVEL + (MAXIMUM_LEVEL - MINIMUM_LEVEL) / 4;
+    public static final int Q1_HIGH = Q1_LOW + 1;
+    
+    public static final int Q2_LOW = MINIMUM_LEVEL + (MAXIMUM_LEVEL - MINIMUM_LEVEL) / 2;
+    public static final int Q2_HIGH = Q2_LOW +1;
+
+    public static final int Q3_LOW = MINIMUM_LEVEL + 3 * (MAXIMUM_LEVEL - MINIMUM_LEVEL) / 4;
+    public static final int Q3_HIGH = Q3_LOW + 1;
+    
+    
     /**
      * The main class for Finite Fluids blocks, has all the base elements that will be required, other classes only add the tick functions and some interactions
      */
@@ -69,13 +85,13 @@ public class BlockFiniteFluid extends Block implements IFluidBlock {
     	
 		setUnlocalizedName(name);
 		setRegistryName(name);
-        this.setDefaultState(this.blockState.getBaseState().withProperty(LEVEL, Integer.valueOf(0)));
+        this.setDefaultState(this.blockState.getBaseState().withProperty(LEVEL, Integer.valueOf(MINIMUM_LEVEL)));
 	}
 	
     // =========================
     // Properties Handling
     // ========================= 
-    public static final PropertyInteger LEVEL = PropertyInteger.create("level", MINIMUM_LEVEL, MAXIMUM_LEVEL); //MEJOR NO TOCAMOS ESTO, SE VA ALV EL REGISTRO DE BLOQUES
+    public static final PropertyInteger LEVEL = PropertyInteger.create("level", MINIMUM_LEVEL, MAXIMUM_REAL_LEVEL); //MEJOR NO TOCAMOS ESTO, SE VA ALV EL REGISTRO DE BLOQUES
     public static final IUnlistedProperty<Map<EnumFacing, IBlockState>> NEIGHBOR_STATES = new UnlistedPropertyNeighborStates();
 	public static final IUnlistedProperty<Float>[] LEVEL_CORNERS = new IUnlistedProperty[] {
     new PropertyFloat("level_nw"),  // h00
@@ -328,7 +344,7 @@ public class BlockFiniteFluid extends Block implements IFluidBlock {
 
 	    // Altura del agua según LEVEL (0-15)
 	    int level = BlockFiniteFluid.getConceptualVolume(null, null, state);
-	    float fluidHeight = level / 16.0F;
+	    float fluidHeight = level / MAXIMUM_CONCEPTUAL_LEVEL;
 	    boolean inside = (pos.getY() + fluidHeight) > eyeY;
 
 	    return inside;
@@ -353,23 +369,6 @@ public class BlockFiniteFluid extends Block implements IFluidBlock {
 	    /*if (!world.canBlockSeeSky(pos)) {
 	        return false;
 	    }*/
-		
-		//EN VEZ DE INTS, USO FLOATS AHORA
-		/*if (blockUpMaterial == Material.SNOW) {
-			world.setBlockState(pos.up(), Blocks.AIR.getDefaultState(), 2);
-		} else {
-		    // 25% chance por tick, para evitar congelación masiva instantánea
-			if (!world.isRaining()) {
-			    if (rand.nextInt(FiniteFluidLogic.evaporationChance/5) != 0) {//rand.nextInt(1) != 0) {
-			        return false;
-			    }
-			} else {
-			    if (rand.nextInt(FiniteFluidLogic.evaporationChance/25) != 0) {//rand.nextInt(1) != 0) {
-			        return false;
-			    }
-			}
-			
-		}*/
 		
 		if (blockUpMaterial == Material.SNOW) {
 			//BlockFiniteFluid.setBlockState(world, pos.up(), Blocks.AIR.getDefaultState(), 2);
@@ -416,7 +415,7 @@ public class BlockFiniteFluid extends Block implements IFluidBlock {
 	    if (state.getBlock() instanceof BlockFiniteFluid) {
 	        int level = BlockFiniteFluid.getVolume(null, null, state); //state.getValue(BlockFiniteFluid.LEVEL);
 
-	        if (level == 15) {
+	        if (level == BlockFiniteFluid.MAXIMUM_LEVEL) {
 	            // Nivel máximo, congelar en hielo
 	            world.setBlockState(pos, Blocks.ICE.getDefaultState(), 2);
 	            return true;
@@ -477,7 +476,7 @@ public class BlockFiniteFluid extends Block implements IFluidBlock {
         {
             return false;
         }
-        else if (BlockFiniteFluid.getVolume(world, pos, null) > 0)
+        else if (BlockFiniteFluid.getVolume(world, pos, null) > MINIMUM_LEVEL)
         {
             return false;
         }
@@ -590,7 +589,7 @@ public class BlockFiniteFluid extends Block implements IFluidBlock {
 			float partialTicks) {
         int level = BlockFiniteFluid.getConceptualVolume(world, pos, state); //state.getValue(LEVEL)+1;
         Vec3d cam = ActiveRenderInfo.projectViewFromEntity(entity, partialTicks);
-        double surfaceY = pos.getY() + (level / 16.0D);
+        double surfaceY = pos.getY() + (level / (double)MAXIMUM_CONCEPTUAL_LEVEL);
 
         // Solo pintamos niebla si la cámara está DENTRO del fluido
         return (cam.y < surfaceY - EPS) ? super.getFogColor(world, pos, state, entity, originalColor, partialTicks) : originalColor;
@@ -603,7 +602,7 @@ public class BlockFiniteFluid extends Block implements IFluidBlock {
     public IBlockState getStateAtViewpoint(IBlockState state, IBlockAccess world, BlockPos pos, Vec3d viewpoint) {
         // Si la cámara está por debajo de la “superficie” (LEVEL/16), seguimos “dentro” del fluido.
         int level = BlockFiniteFluid.getConceptualVolume(world, pos, state); //state.getValue(LEVEL) + 1;     // 1..16
-        double surfaceY = pos.getY() + (level / 16.0D);
+        double surfaceY = pos.getY() + (level / (double)MAXIMUM_CONCEPTUAL_LEVEL);
 
         if (viewpoint.y < surfaceY - EPS) {
             return state; // seguimos “dentro” del fluido
@@ -615,7 +614,7 @@ public class BlockFiniteFluid extends Block implements IFluidBlock {
     @Override
     public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess worldIn, BlockPos pos) {
         int level = BlockFiniteFluid.getConceptualVolume(worldIn, pos, state); //state.getValue(LEVEL)+1; // PropertyInteger LEVEL conceptual = 1-16
-        float height = level / 16.0F;
+        float height = level / (float)MAXIMUM_CONCEPTUAL_LEVEL;
         return new AxisAlignedBB(0.0F, 0.0F, 0.0F, 1.0F, height, 1.0F);
     }
   
@@ -848,15 +847,15 @@ public class BlockFiniteFluid extends Block implements IFluidBlock {
 
     /** Convierte mB -> niveles conceptuales (0..16). 0 significa "no alcanza a colocar nada". */
     private static int mbToConceptual(int mb) {
-        if (mb <= 0) return 0;
-        int c = (int) Math.floor(mb * 16.0 / 1000.0);
-        return Math.max(0, Math.min(16, c));
+        if (mb < MINIMUM_CONCEPTUAL_LEVEL) return MINIMUM_LEVEL;
+        int c = (int) Math.floor(mb * MAXIMUM_CONCEPTUAL_LEVEL / 1000.0);
+        return Math.max(MINIMUM_LEVEL, Math.min(MAXIMUM_CONCEPTUAL_LEVEL, c));
     }
 
     /** Convierte niveles conceptuales (0..16) -> mB aproximados representados por esos niveles */
     private static int conceptualToMB(int conceptual) {
-        if (conceptual <= 0) return 0;
-        return (int) Math.floor(conceptual * 1000.0 / 16.0);
+        if (conceptual < MINIMUM_CONCEPTUAL_LEVEL) return MINIMUM_LEVEL;
+        return (int) Math.floor(conceptual * 1000.0 / MAXIMUM_CONCEPTUAL_LEVEL);
     }
 
     /**
@@ -867,25 +866,25 @@ public class BlockFiniteFluid extends Block implements IFluidBlock {
      */
     @Override
     public int place(World world, BlockPos pos, FluidStack fluidStack, boolean doPlace) {
-        if (fluidStack == null || !fluidStack.getFluid().equals(this.fluid)) return 0;
+        if (fluidStack == null || !fluidStack.getFluid().equals(this.fluid)) return MINIMUM_LEVEL;
 
         int amount = fluidStack.amount;
         int addConceptual = mbToConceptual(amount); // 0..16
 
-        if (addConceptual <= 0) return 0; // no alcanza a crear/elevar nivel
+        if (addConceptual < MINIMUM_CONCEPTUAL_LEVEL) return MINIMUM_LEVEL; // no alcanza a crear/elevar nivel
 
         //IBlockState currentState = world.getBlockState(pos);
         int currentConceptual = BlockFiniteFluid.getConceptualVolume(world, pos, null); // 0..16
         // Si hay otro tipo de bloque fluyente distinto, preferimos colocarlo solo si está vacío/puede reemplazar: dejamos esa decisión al llamador.
         // Sumamos niveles (cap 16)
-        int newTotalConceptual = Math.min(16, currentConceptual + addConceptual);
+        int newTotalConceptual = Math.min(MAXIMUM_CONCEPTUAL_LEVEL, currentConceptual + addConceptual);
         int usedConceptual = newTotalConceptual - currentConceptual;
-        if (usedConceptual <= 0) return 0;
+        if (usedConceptual < MINIMUM_CONCEPTUAL_LEVEL) return MINIMUM_LEVEL;
 
         int usedMB = conceptualToMB(usedConceptual);
 
         if (doPlace) {
-            if (newTotalConceptual <= 0) {
+            if (newTotalConceptual < MINIMUM_CONCEPTUAL_LEVEL) {
                 world.setBlockToAir(pos);
             } else {
                 // Guardamos LEVEL como propiedad 0..15 (conceptual-1)
@@ -916,10 +915,10 @@ public class BlockFiniteFluid extends Block implements IFluidBlock {
         if (blockFluid == null) return null;
 
         int centerConcept = BlockFiniteFluid.getConceptualVolume(world, pos, null); // 0..16
-        if (centerConcept <= 0) return null;
+        if (centerConcept < MINIMUM_CONCEPTUAL_LEVEL) return null;
 
         // 1) Si el bloque central ya está full (16) -> bucket completo
-        if (centerConcept >= 16) {
+        if (centerConcept >= MAXIMUM_CONCEPTUAL_LEVEL) {
             if (doDrain) {
                 world.setBlockToAir(pos);
                 FiniteFluidLogic.FluidWorldInteraction.activateOcean(world, pos);
@@ -960,7 +959,7 @@ public class BlockFiniteFluid extends Block implements IFluidBlock {
         }
 
         // 3) Si hay al menos 16 niveles conceptuales disponibles -> podemos devolver 1000mB
-        if (total >= 16) {
+        if (total >= MAXIMUM_CONCEPTUAL_LEVEL) {
             if (doDrain) {
                 // Usamos tu helper que consume vecinos y central para formar cubeta completa.
                 // bucketRemoveFluidOnlyFullCollect hace la extracción real.
@@ -973,8 +972,8 @@ public class BlockFiniteFluid extends Block implements IFluidBlock {
         // 4) No alcanza para cubeta entera: devolver lo que hay en el bloque (o extraer lo máximo disponible)
         if (doDrain) {
             // Usamos el helper que extrae suavemente hasta 16 niveles (pero si no hay tanto, extrae lo disponible).
-            int collectedLevels = FiniteFluidLogic.FluidWorldInteraction.bucketRemoveFluidEvenLowCollect(world, pos, centerConcept, 16, blockFluid);
-            if (collectedLevels <= 0) return null;
+            int collectedLevels = FiniteFluidLogic.FluidWorldInteraction.bucketRemoveFluidEvenLowCollect(world, pos, centerConcept, MAXIMUM_CONCEPTUAL_LEVEL, blockFluid);
+            if (collectedLevels < MINIMUM_CONCEPTUAL_LEVEL) return null;
             int mb = conceptualToMB(collectedLevels);
             return new FluidStack(blockFluid, mb);
         } else {
@@ -998,7 +997,7 @@ public class BlockFiniteFluid extends Block implements IFluidBlock {
         if (f == null) return false;
 
         int center = BlockFiniteFluid.getConceptualVolume(world, pos, null);
-        if (center > 0) return true; // hay fluidos en el propio bloque
+        if (center >= MINIMUM_CONCEPTUAL_LEVEL) return true; // hay fluidos en el propio bloque
 
         // si no, chequeamos laterales/diagonales/abajo para ver si hay algo que pueda agregarse
         BlockPos[] checks = {
@@ -1010,7 +1009,7 @@ public class BlockFiniteFluid extends Block implements IFluidBlock {
             IBlockState n = world.getBlockState(p);
             if (n.getBlock() instanceof BlockFiniteFluid) {
                 BlockFiniteFluid nb = (BlockFiniteFluid) n.getBlock();
-                if (nb.getFluid() == f && BlockFiniteFluid.getConceptualVolume(world, p, null) > 0) return true;
+                if (nb.getFluid() == f && BlockFiniteFluid.getConceptualVolume(world, p, null) > MINIMUM_LEVEL) return true;
             }
         }
         return false;
@@ -1024,10 +1023,10 @@ public class BlockFiniteFluid extends Block implements IFluidBlock {
     @Override
     public float getFilledPercentage(World world, BlockPos pos) {
         IBlockState state = world.getBlockState(pos);
-        if (!(state.getBlock() instanceof BlockFiniteFluid)) return 0f;
+        if (!(state.getBlock() instanceof BlockFiniteFluid)) return (float)MINIMUM_LEVEL;
         int conceptual = BlockFiniteFluid.getConceptualVolume(world, pos, null); // 0..16
-        if (conceptual <= 0) return 0f;
-        return conceptual / 16f; // 1/16 == 0.0625 ... 16/16 == 1.0
+        if (conceptual < MINIMUM_CONCEPTUAL_LEVEL) return (float)MINIMUM_LEVEL;
+        return conceptual / (float)MAXIMUM_CONCEPTUAL_LEVEL; // 1/16 == 0.0625 ... 16/16 == 1.0
     }    
 
 }

@@ -29,7 +29,7 @@ public class BlockNewWater_Flow extends BlockFiniteFluid
 		setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
 		ModBlocks.BLOCKS.add(this);
 		ModItems.ITEMS.add(new ItemBlock(this).setRegistryName(this.getRegistryName()));
-        this.setDefaultState(this.blockState.getBaseState().withProperty(LEVEL, Integer.valueOf(15)));
+        this.setDefaultState(this.blockState.getBaseState().withProperty(LEVEL, Integer.valueOf(MAXIMUM_LEVEL)));
 
         this.setTickRandomly(FiniteFluidLogic.shouldTickRandomly);
     }
@@ -50,7 +50,7 @@ public class BlockNewWater_Flow extends BlockFiniteFluid
             
             //Aca yo controlo lo de interaccion de flowing con ocean xd
             //Avoid too much block updates over oceanic liquid
-            if (downBlock == FiniteFluidLogic.liquids.get(FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(currentBlock)).oceanBlock && BlockFiniteFluid.getVolume(world, pos, currentaState) < 4) { //8
+            if (downBlock == FiniteFluidLogic.liquids.get(FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(currentBlock)).oceanBlock && BlockFiniteFluid.getVolume(world, pos, currentaState) < Q1_HIGH) { //8
             	int newValue = BlockFiniteFluid.getVolume(world, pos, world.getBlockState(pos))/2; //3
             	//world.setBlockState(pos, currentaState.withProperty(BlockFiniteFluid.LEVEL, newValue));
             	BlockFiniteFluid.setBlockState(world, pos, BlockFiniteFluid.setVolume(world, pos, currentaState, newValue));
@@ -70,7 +70,7 @@ public class BlockNewWater_Flow extends BlockFiniteFluid
                 if (belowBlock1 != Blocks.AIR & !FiniteFluidLogic.GeneralPurposeLogic.hasSideBorder(world, pos, Blocks.AIR))
                 {
                 	BlockPos posBelow = new BlockPos(pos.getX(), pos.getY() - 1 * FiniteFluidLogic.GeneralPurposeLogic.getFluidGravity(), pos.getZ());
-                    if ((float)FiniteFluidLogic.GeneralPurposeLogic.getCalc() > (float)FiniteFluidLogic.GeneralPurposeLogic.getMaxCalc() * 0.65F && BlockFiniteFluid.getVolume(world, pos, world.getBlockState(pos)) < 4 & (!FiniteFluidLogic.GeneralPurposeLogic.isRealisticFluid(belowBlock1) || BlockFiniteFluid.getVolume(world, posBelow, world.getBlockState(posBelow)) < 15))
+                    if ((float)FiniteFluidLogic.GeneralPurposeLogic.getCalc() > (float)FiniteFluidLogic.GeneralPurposeLogic.getMaxCalc() * 0.65F && BlockFiniteFluid.getVolume(world, pos, world.getBlockState(pos)) < Q1_HIGH & (!FiniteFluidLogic.GeneralPurposeLogic.isRealisticFluid(belowBlock1) || BlockFiniteFluid.getVolume(world, posBelow, world.getBlockState(posBelow)) < MAXIMUM_LEVEL))
                     {
                     	world.scheduleUpdate(pos, this, this.tickRate(world));
                         return;
@@ -78,9 +78,9 @@ public class BlockNewWater_Flow extends BlockFiniteFluid
 
                     if ((float)FiniteFluidLogic.GeneralPurposeLogic.getCalc() > (float)FiniteFluidLogic.GeneralPurposeLogic.getMaxCalc() * 0.5F)
                     {
-                        EntityPlayer var7 = world.getClosestPlayer((double)pos.getX(), (double)pos.getY(), (double)pos.getZ(), FiniteFluidLogic.GeneralPurposeLogic.getPlayerDistanceToCalc(), true);
+                        EntityPlayer nearestPlayer = world.getClosestPlayer((double)pos.getX(), (double)pos.getY(), (double)pos.getZ(), FiniteFluidLogic.GeneralPurposeLogic.getPlayerDistanceToCalc(), true);
 
-                        if (var7 == null)
+                        if (nearestPlayer == null)
                         {
                         	world.scheduleUpdate(pos, this, this.tickRate(world));
                             return;
@@ -94,8 +94,8 @@ public class BlockNewWater_Flow extends BlockFiniteFluid
                 if (world.getBlockState(new BlockPos(pos.getX(), pos.getY() - 1 * FiniteFluidLogic.GeneralPurposeLogic.getFluidGravity(), pos.getZ())).getBlock() == Blocks.DIAMOND_BLOCK)
                 {
                     IBlockState currentState = world.getBlockState(pos);
-                    IBlockState newState = BlockFiniteFluid.setVolume(world, pos, currentState, BlockFiniteFluid.MAXIMUM_LEVEL); //currentState.withProperty(BlockFiniteFluid.LEVEL, 15);
-                    if (BlockFiniteFluid.getVolume(world, pos, currentState) < 15) {
+                    IBlockState newState = BlockFiniteFluid.setVolume(world, pos, currentState, MAXIMUM_LEVEL); //currentState.withProperty(BlockFiniteFluid.LEVEL, 15);
+                    if (BlockFiniteFluid.getVolume(world, pos, currentState) < MAXIMUM_LEVEL) { //15
                     	BlockFiniteFluid.setBlockState(world, pos, newState);
                     //world.setBlockState(pos, newState, 3);
                     }
@@ -170,47 +170,47 @@ public class BlockNewWater_Flow extends BlockFiniteFluid
         int waterType = FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(waterBlock);     
         int targetType = FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(targetBlock);
         
-        if (waterType < 0 || targetType < 0) return false;
+        if (waterType < MINIMUM_LEVEL || targetType < MINIMUM_LEVEL) return false;
         
         if (targetBlock instanceof BlockFiniteFluid) {
-            if (waterMeta > 9) {
+            if (waterMeta >= Q3_LOW) {
             	
-                if (targetMeta < 5) {
+                if (targetMeta < Q1_LOW) {
                     //world.setBlockToAir(waterPos);
                     world.setBlockState(targetPos, Blocks.COBBLESTONE.getDefaultState());
                     BlockNewLava_Flow.triggerLavaMixEffects(world, targetPos);
                     return true;
                 }
 
-                if (targetMeta < 10) {
+                if (targetMeta < Q3_LOW) {
                     world.setBlockState(targetPos, Blocks.STONE.getDefaultState());
                     //world.setBlockToAir(waterPos);
                     BlockNewLava_Flow.triggerLavaMixEffects(world, targetPos);
                     return true;
                 }
 
-                if (targetMeta > 9) {
+                if (targetMeta >= Q3_LOW) {
                     world.setBlockToAir(waterPos);
                     world.setBlockState(targetPos, Blocks.OBSIDIAN.getDefaultState());
                     BlockNewLava_Flow.triggerLavaMixEffects(world, targetPos);
                     return true;
                 }
 
-            } else if (waterMeta > 5) {
-                if (targetMeta < 6) {
+            } else if (waterMeta > Q1_HIGH) {
+                if (targetMeta <= Q1_LOW) {
                     world.setBlockState(targetPos, Blocks.STONE.getDefaultState());
                     //world.setBlockToAir(waterPos);
                     BlockNewLava_Flow.triggerLavaMixEffects(world, targetPos);
                     return true;
                 }
 
-                if (targetMeta > 5) {
+                if (targetMeta > Q1_LOW) {
                     //world.setBlockToAir(waterPos);
                     world.setBlockState(targetPos, Blocks.COBBLESTONE.getDefaultState());
                     BlockNewLava_Flow.triggerLavaMixEffects(world, targetPos);
                     return true;
                 }
-                if (targetMeta > 10) {
+                if (targetMeta >= Q3_LOW) {
                     world.setBlockToAir(waterPos);
                     BlockNewLava_Flow.triggerLavaMixEffects(world, targetPos);
                     return true;

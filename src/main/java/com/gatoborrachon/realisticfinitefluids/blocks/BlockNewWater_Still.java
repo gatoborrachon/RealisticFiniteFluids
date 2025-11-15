@@ -28,7 +28,7 @@ public class BlockNewWater_Still extends BlockFiniteFluid
 		setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
 		ModBlocks.BLOCKS.add(this);
 		ModItems.ITEMS.add(new ItemBlock(this).setRegistryName(this.getRegistryName()));
-        this.setDefaultState(this.blockState.getBaseState().withProperty(LEVEL, Integer.valueOf(15)));
+        this.setDefaultState(this.blockState.getBaseState().withProperty(LEVEL, Integer.valueOf(MAXIMUM_LEVEL)));
 
         this.setTickRandomly(FiniteFluidLogic.shouldTickRandomly);
     }
@@ -123,8 +123,8 @@ public class BlockNewWater_Still extends BlockFiniteFluid
                 
                 if (FiniteFluidLogic.GeneralPurposeLogic.checkForNeighborLiquid(world, pos)){
                     return;
-                    //Aca yo controlo lo de interaccion de still con water xd
-                }  else if (stateBelow.getBlock() == ModBlocks.INFINITE_WATER_SOURCE && BlockFiniteFluid.getVolume(world, pos, world.getBlockState(pos)) < 2) {
+                    //Aca yo controlo lo de interaccion de still con ocean xd
+                }  else if (stateBelow.getBlock() == ModBlocks.INFINITE_WATER_SOURCE && BlockFiniteFluid.getVolume(world, pos, world.getBlockState(pos)) < Q1_LOW) {
                     // Este bloque es "absorbido" por el océano
                     world.setBlockToAir(pos);  // O reemplaza por aire
                 }

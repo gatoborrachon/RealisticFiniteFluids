@@ -58,10 +58,10 @@ public class BlockNewLava_Flow extends BlockNewWater_Flow {
         int targetType = FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(targetBlock); 
         
         //a ver si evita un crash aal poner un bloque encima de lava
-        if (lavaType < 0 || targetType < 0) return false;
+        if (lavaType < MINIMUM_LEVEL || targetType < MINIMUM_LEVEL) return false;
 
         if (targetBlock == FiniteFluidLogic.liquids.get(targetType).oceanBlock) {
-            targetMeta = 15;
+            targetMeta = MAXIMUM_LEVEL;
         }
 
         if ("water".equals(FiniteFluidLogic.liquids.get(targetType).name)) {
@@ -72,51 +72,51 @@ public class BlockNewLava_Flow extends BlockNewWater_Flow {
 
             }
 
-            if (lavaMeta > 9) {
+            if (lavaMeta >= Q3_LOW) { //9
             	//System.out.println("      ");
             	//System.out.println(world.getBlockState(targetPos).getBlock());
             	//System.out.println("LAVA META +9:"+lavaMeta);
             	//System.out.println("WATER META :"+targetMeta);
 
                 // Condiciones para decidir qué bloque poner
-                if (targetMeta < 5) {
+                if (targetMeta <= Q1_LOW) { //5
                     world.setBlockToAir(targetPos);
                     BlockNewLava_Flow.triggerLavaMixEffects(world, targetPos);
                     return true;
                 }
 
-                if (targetMeta < 10) {
+                if (targetMeta < Q3_LOW) { //10
                     world.setBlockState(targetPos, Blocks.COBBLESTONE.getDefaultState());
                     BlockNewLava_Flow.triggerLavaMixEffects(world, targetPos);
                     return true;
                 }
 
-                if (targetMeta > 9) {
+                if (targetMeta >= Q3_LOW) { //9
                     world.setBlockState(lavaPos, Blocks.OBSIDIAN.getDefaultState());
                     BlockNewLava_Flow.triggerLavaMixEffects(world, targetPos);
                     return true;
                 }
                 
                 
-            } else if (lavaMeta > 5) {
+            } else if (lavaMeta > Q1_LOW) { //5
             	//System.out.println("      ");
             	//System.out.println(world.getBlockState(targetPos).getBlock());
             	//System.out.println("LAVA META +5:"+lavaMeta);
             	//System.out.println("WATER META :"+targetMeta);
 
-                if (targetMeta < 5) {
+                if (targetMeta < Q1_LOW) { //10
                     world.setBlockToAir(targetPos);
                     BlockNewLava_Flow.triggerLavaMixEffects(world, targetPos);
                     return true;
                 }
 
-                if (targetMeta < 10) {
+                if (targetMeta < Q3_LOW) { //9
                     world.setBlockState(targetPos, Blocks.COBBLESTONE.getDefaultState());
                     BlockNewLava_Flow.triggerLavaMixEffects(world, targetPos);
                     return true;
                 }
 
-                if (targetMeta > 9) {
+                if (targetMeta >= Q3_LOW) {
                     world.setBlockState(targetPos, Blocks.STONE.getDefaultState());
                     BlockNewLava_Flow.triggerLavaMixEffects(world, targetPos);
                     return true;
@@ -130,20 +130,20 @@ public class BlockNewLava_Flow extends BlockNewWater_Flow {
             	//System.out.println("WATER META :"+targetMeta);
 
                 // Condiciones para decidir qué bloque poner
-                if (targetMeta < 5) {
+                if (targetMeta < Q1_LOW) { //5
                     world.setBlockToAir(targetPos);
                     BlockNewLava_Flow.triggerLavaMixEffects(world, targetPos);
                     return true;
                 }
 
-                if (targetMeta < 10) {
+                if (targetMeta < Q3_LOW) { //10
                     world.setBlockState(targetPos, Blocks.COBBLESTONE.getDefaultState());
                     //world.setBlockToAir(lavaPos);
                     BlockNewLava_Flow.triggerLavaMixEffects(world, targetPos);
                     return true;
                 }
 
-                if (targetMeta > 9) {
+                if (targetMeta >= Q3_LOW) { //9
                     world.setBlockToAir(lavaPos);
                     world.setBlockState(targetPos, Blocks.STONE.getDefaultState());
                     BlockNewLava_Flow.triggerLavaMixEffects(world, targetPos);

@@ -63,7 +63,7 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
  * TODO LIST ACTUAL --> 
  * COMPLETADO 1.- Termianr de remover estrucruras que generen agua vanilla (WorldGenLiquids, //BiomeSwamp, etc)
  * COMPLETADO 2.- A WEBO Checar imcompatibilidades (actualmente seria con la IC2 FluidCell, los tanques de BuildCraft, y la generacion realista de ClimaticBiomes)
- * 3.- Ver como hacer que en los biomas donde (con agua vanilla) aparece hielo en la superficie, pues esto mismo funcione con mis bloques, debo buscar como lo hace vanilla normalmente
+ * COMPLETADO 3.- Ver como hacer que en los biomas donde (con agua vanilla) aparece hielo en la superficie, pues esto mismo funcione con mis bloques, debo buscar como lo hace vanilla normalmente
  * COMPLETADO 4.- Evitar que la evaporacion de agua sea activa mientras llueve
  * 5.- Ver que onda con las cubetas de PrimalCore y el Brew Kettle de Growthcraft (porque no funciona a pesar del universal compat coremod)
  * COMPLETADO 6.- Arreglar texturas del flowing water
@@ -73,10 +73,6 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 @Mod(modid = References.MODID, name = References.NAME, version = References.VERSION)
 public class RealisticFiniteFluids
 {
-	
-	
-    //private static Logger logger;
-    
 	@Instance
 	public static RealisticFiniteFluids instance;
 	
@@ -91,12 +87,9 @@ public class RealisticFiniteFluids
         ModConfig.loadConfig(event.getSuggestedConfigurationFile());
        
         if (ModConfig.replaceVanillaFluids) {
-            // Corre tu mixin de reemplazo de agua/lava
             System.out.println("[RFF] Replacing vanilla fluids...");
-            
-            // Una vez terminado, desactiva la flag en el config
             ModConfig.replaceVanillaFluids = false;
-            ModConfig.saveConfig(); // Método que guardaría el config actualizado en disco
+            ModConfig.saveConfig();
             System.out.println("[RFF] Vanilla Fluids Replaced. replaceVanillaFluids is now false.");
         }
                
@@ -106,22 +99,12 @@ public class RealisticFiniteFluids
     public void init(FMLInitializationEvent event)
     {
     	
-    	
-
     }
     
     @EventHandler
     public void postInit(FMLInitializationEvent event)
     {
-        //VanillaWaterOverride.overrideWaterBlock(ModBlocks.FINITE_WATER_FLOWING);
 
     }
-    
-    //public static final ThreadLocal<Boolean> IS_POPULATING = ThreadLocal.withInitial(() -> false);
-
-
-    
-
-
     
 }
