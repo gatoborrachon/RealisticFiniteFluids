@@ -240,7 +240,7 @@ public abstract class MixinItemHose extends Item /*extends MixinItem*/ {
 	                    Fluid blockFluid = finiteBlock.getFluid();
 	                    int spaceLeft = Math.max(0, MAX_LEVELS_TANK - currentLevels);
 	                    if (spaceLeft > 0) {
-	                        int blockConcept = BlockFiniteFluid.getConceptualVolume(state); //state.getValue(BlockFiniteFluid.LEVEL) + 1;
+	                        int blockConcept = BlockFiniteFluid.getConceptualVolume(worldIn, pos, state); //state.getValue(BlockFiniteFluid.LEVEL) + 1;
 	                        int delta = FiniteFluidLogic.FluidWorldInteraction.bucketRemoveFluidEvenLowCollect(worldIn, pos, blockConcept, spaceLeft, ((IFluidBlock)state.getBlock()).getFluid());
 	                        if (delta > 0) {
 	                            currentLevels += delta;

@@ -195,7 +195,7 @@ public class FluidModelEventHandler {
                                                      player.getPosition().add(8, 4, 8))) {
                 IBlockState state = world.getBlockState(pos);
                 if (state.getBlock() instanceof BlockFiniteFluid) {
-                    int level = BlockFiniteFluid.getVolume(state); //state.getValue(BlockFiniteFluid.LEVEL);
+                    int level = BlockFiniteFluid.getVolume(world, pos, state); //state.getValue(BlockFiniteFluid.LEVEL);
 
                     double x = pos.getX() + 0.5;
                     double y = pos.getY() + 1.2;

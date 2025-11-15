@@ -106,6 +106,8 @@ public class EarlyConfig {
         		"appeng.core.api.definitions.ApiItems",
         		"appeng.items.tools.powered.ToolEntropyManipulator",
         		"cassiokf.industrialrenewal.blocks.BlockGutter",
+        		"cassiokf.industrialrenewal.blocks.BlockSteamBoiler",
+                "cassiokf.industrialrenewal.blocks.BlockMining",
                 //"net.msrandom.witchery.init.items.WitcheryGeneralItems",
                 //"buildcraft.lib.fluid.BCFluidBlock",
                 "buildcraft.api.enums.EnumSpring",

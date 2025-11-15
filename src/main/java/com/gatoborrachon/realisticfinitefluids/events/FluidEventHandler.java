@@ -256,7 +256,7 @@ public class FluidEventHandler {
         
         boolean isLava = state.getMaterial() == Material.LAVA;
         //boolean isWater = state.getMaterial() == Material.WATER;
-        int level = BlockFiniteFluid.getConceptualVolume(state); //state.getValue(BlockFiniteFluid.LEVEL)+1; // 0-15 //+1 --> 1-16 LEVEL conceptual
+        int level = BlockFiniteFluid.getConceptualVolume(world, pos, state); //state.getValue(BlockFiniteFluid.LEVEL)+1; // 0-15 //+1 --> 1-16 LEVEL conceptual
 
         //Codigo extraido de mi mixin para la cubeta vacia, si detecta Material.WATER con LEVEL 0, recoge agua cuando no deberia
         //Tal vez no sea tan necesario el world.setBlockToAir, lo voy a comentar a ver que pasa xd

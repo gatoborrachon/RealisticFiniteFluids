@@ -171,7 +171,7 @@ public class ItemFiniteWaterBucket extends ItemBucket  {
                         worldIn.playSound(player, posIn, soundevent, SoundCategory.BLOCKS, 1.0F, 1.0F);
                         //System.out.println("VERGA-2");
                         //worldIn.setBlockState(posIn, ModBlocks.FINITE_WATER_FLOWING.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, 15));                        	
-                    	BlockFiniteFluid.setBlockState(worldIn, posIn, BlockFiniteFluid.setVolume(ModBlocks.FINITE_WATER_FLOWING.getDefaultState(), BlockFiniteFluid.MAXIMUM_LEVEL));
+                    	BlockFiniteFluid.setBlockState(worldIn, posIn, BlockFiniteFluid.setVolume(null, null, ModBlocks.FINITE_WATER_FLOWING.getDefaultState(), BlockFiniteFluid.MAXIMUM_LEVEL));
                         //distributeFluidEqually(worldIn, posIn, 15);
                         /*IBlockState blockWhereToPutWater = worldIn.getBlockState(posIn);
                         if (blockWhereToPutWater.getBlock() instanceof BlockFiniteFluid) {
@@ -241,7 +241,7 @@ public class ItemFiniteWaterBucket extends ItemBucket  {
 
                     	if (targetBlock instanceof BlockFiniteFluid && worldIn.getBlockState(targetPos).getMaterial() == Material.WATER) {
                     		//System.out.println("VERGA WATER BUCKET");
-                    		if (BlockFiniteFluid.getConceptualVolume(targetBlockState) == 16) worldIn.setBlockState(targetPos.up(), ModBlocks.FINITE_WATER_FLOWING.getDefaultState());
+                    		if (BlockFiniteFluid.getConceptualVolume(worldIn, targetPos, targetBlockState) == 16) worldIn.setBlockState(targetPos.up(), ModBlocks.FINITE_WATER_FLOWING.getDefaultState());
                     		else
                             // Lógica de distribución equitativa
                             distributeFluidEqually(worldIn, targetPos, 16); // 15 como nivel completo                    		
@@ -251,7 +251,7 @@ public class ItemFiniteWaterBucket extends ItemBucket  {
                     	} else {
                             //distributeFluidEqually(worldIn, targetPos, 15); // 15 como nivel completo                    		
                             //worldIn.setBlockState(targetPos, ModBlocks.FINITE_WATER_FLOWING.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, 15));                        	
-                        	BlockFiniteFluid.setBlockState(worldIn, targetPos, BlockFiniteFluid.setVolume(ModBlocks.FINITE_WATER_FLOWING.getDefaultState(), BlockFiniteFluid.MAXIMUM_LEVEL));
+                        	BlockFiniteFluid.setBlockState(worldIn, targetPos, BlockFiniteFluid.setVolume(null, null, ModBlocks.FINITE_WATER_FLOWING.getDefaultState(), BlockFiniteFluid.MAXIMUM_LEVEL));
 
                     	}
                         worldIn.playSound(player, pos, SoundEvents.ITEM_BUCKET_EMPTY, SoundCategory.BLOCKS, 1.0F, 1.0F);
@@ -284,17 +284,17 @@ public class ItemFiniteWaterBucket extends ItemBucket  {
             IBlockState centerState = world.getBlockState(pos);
 
             if (centerState.getBlock() instanceof BlockFiniteFluid && centerState.getMaterial() == Material.WATER) {
-                int currentLevel = BlockFiniteFluid.getConceptualVolume(centerState); //centerState.getValue(BlockFiniteFluid.LEVEL)+1;
+                int currentLevel = BlockFiniteFluid.getConceptualVolume(world, pos, centerState); //centerState.getValue(BlockFiniteFluid.LEVEL)+1;
                 int toAdd = Math.min(16 - currentLevel, remaining);
                 if (toAdd > 0) {
                     //world.setBlockState(pos, centerState.withProperty(BlockFiniteFluid.LEVEL, currentLevel + toAdd-1));
-                	BlockFiniteFluid.setBlockState(world, pos, BlockFiniteFluid.setVolume(centerState, currentLevel + toAdd-1));
+                	BlockFiniteFluid.setBlockState(world, pos, BlockFiniteFluid.setVolume(world, pos, centerState, currentLevel + toAdd-1));
                 	remaining -= toAdd;
                 }
 
             } else {
             	//world.setBlockState(pos, ModBlocks.FINITE_WATER_FLOWING.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, remaining-1));
-            	BlockFiniteFluid.setBlockState(world, pos, BlockFiniteFluid.setConceptualVolume(ModBlocks.FINITE_WATER_FLOWING.getDefaultState(), remaining));
+            	BlockFiniteFluid.setBlockState(world, pos, BlockFiniteFluid.setConceptualVolume(null, null, ModBlocks.FINITE_WATER_FLOWING.getDefaultState(), remaining));
             }
 
             // Coordenadas para laterales y diagonales
@@ -309,7 +309,7 @@ public class ItemFiniteWaterBucket extends ItemBucket  {
             // 2. Recolecta objetivos laterales válidos
             for (BlockPos p : laterals) {
                 IBlockState s = world.getBlockState(p);
-                if (s.getBlock() instanceof BlockFiniteFluid && s.getMaterial() == Material.WATER && BlockFiniteFluid.getConceptualVolume(s) < 16) {
+                if (s.getBlock() instanceof BlockFiniteFluid && s.getMaterial() == Material.WATER && BlockFiniteFluid.getConceptualVolume(world, p, s) < 16) {
                     lateralTargets.add(p);
                 }
             }
@@ -317,7 +317,7 @@ public class ItemFiniteWaterBucket extends ItemBucket  {
             // 3. Recolecta objetivos diagonales válidos
             for (BlockPos p : diagonals) {
                 IBlockState s = world.getBlockState(p);
-                if (s.getBlock() instanceof BlockFiniteFluid && s.getMaterial() == Material.WATER && BlockFiniteFluid.getConceptualVolume(s) < 16) {
+                if (s.getBlock() instanceof BlockFiniteFluid && s.getMaterial() == Material.WATER && BlockFiniteFluid.getConceptualVolume(world, p, s) < 16) {
                     diagonalTargets.add(p);
                 }
             }
@@ -335,7 +335,7 @@ public class ItemFiniteWaterBucket extends ItemBucket  {
                 BlockPos above = pos.up();
                 if (world.isAirBlock(above)) {
                     //world.setBlockState(above, ModBlocks.FINITE_WATER_FLOWING.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, remaining -1));
-                	BlockFiniteFluid.setBlockState(world, above, BlockFiniteFluid.setConceptualVolume(ModBlocks.FINITE_WATER_FLOWING.getDefaultState(), remaining));
+                	BlockFiniteFluid.setBlockState(world, above, BlockFiniteFluid.setConceptualVolume(null, null, ModBlocks.FINITE_WATER_FLOWING.getDefaultState(), remaining));
                 	remaining = 0;
                 }
             }
