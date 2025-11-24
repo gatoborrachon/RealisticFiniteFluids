@@ -1,3 +1,12 @@
+v1.7.0
+-Added: Config option to let you decide whether fluids (water/lava) should be infinite. (shouldFluidsBeInfinite)
+-Refactor (BIG ONE): Removed Ocean Blocks (all the logic is carried by Flowing and Still fluids, for compat purposes)
+-Refactor: Refactored all the references (i could find) about LEVELs (0,1,15,16, and others like 5,9,10,14, etc) to let me get these medium values (between 0-15/1-16) from a global Reference Value
+*This will allow me to modify the max and minimum values from 1 point
+-Refactor: Changed both literal and conceptual getVolume and setVolume for unification purposes (aparently nothing is broken)
+-Refactor: Unified both world.setBlockState() and state.getValue(LEVEL) inside BlockFiniteFluid for global control over blocks placed and Property LEVEL reading.
+*This is intended to implement compat with FluidLogged API
+
 v1.6.3
 -Fixed: Superficial layer of water from rivers and ocean becomes ice on a cold biome when chunk is first generated.
 -Refactor: Names of some classes (BlockNewWater and BlockNewLava)

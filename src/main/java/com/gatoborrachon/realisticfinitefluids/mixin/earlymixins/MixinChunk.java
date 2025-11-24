@@ -4,6 +4,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import com.gatoborrachon.realisticfinitefluids.blocks.BlockFiniteFluid;
 import com.gatoborrachon.realisticfinitefluids.events.FluidEventHandler;
 import com.gatoborrachon.realisticfinitefluids.init.ModBlocks;
 
@@ -72,7 +74,7 @@ public abstract class MixinChunk {
 
                             //== AIR  hace que todos los bloques de aire del interior de las cuevas se conviertan en oro, vale verga
                             //WATER_SOURCE hace que solo los bloques que tengan agua vecina, logramos arreglar los huecos que tienen graba, pero
-                            if (neighborState.getBlock() == ModBlocks.INFINITE_WATER_SOURCE) {
+                            if (BlockFiniteFluid.isOceanBlock(null, null, neighborState, 0)) {//neighborState.getBlock() == ModBlocks.INFINITE_WATER_SOURCE) {
                                 exposedToWater = true;
                                 break;
                             }
@@ -87,7 +89,7 @@ public abstract class MixinChunk {
                                     BlockPos neighborGravel = pos.offset(dir);
                                     IBlockState neighborGravelState = chunk.getBlockState(neighborGravel);
 
-                                    if (neighborGravelState.getBlock() == ModBlocks.INFINITE_WATER_SOURCE || neighborGravelState.getBlock() == Blocks.AIR) {
+                                    if (BlockFiniteFluid.isOceanBlock(null, null, neighborGravelState, 0) /*neighborGravelState.getBlock() == ModBlocks.INFINITE_WATER_SOURCE*/ || neighborGravelState.getBlock() == Blocks.AIR) {
                                     	surroundedByGravel = false;
                                         break;
                                     }

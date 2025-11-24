@@ -8,6 +8,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import com.gatoborrachon.realisticfinitefluids.blocks.BlockFiniteFluid;
 import com.gatoborrachon.realisticfinitefluids.init.ModBlocks;
 
 import net.minecraft.block.material.Material;
@@ -26,7 +27,7 @@ public abstract class MixinMapGenRavine {
 
     @Inject(method = "<clinit>", at = @At("TAIL"))
     private static void modifyStaticLavaBlock(CallbackInfo ci) {
-    	field_186135_a = ModBlocks.INFINITE_LAVA_SOURCE.getDefaultState();
+    	field_186135_a = ModBlocks.FINITE_LAVA_STILL.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, BlockFiniteFluid.MAXIMUM_CONCEPTUAL_LEVEL); //ModBlocks.INFINITE_LAVA_SOURCE.getDefaultState();
     }
     
     @Inject(method = "digBlock", at = @At("HEAD"), cancellable = true, remap = false)

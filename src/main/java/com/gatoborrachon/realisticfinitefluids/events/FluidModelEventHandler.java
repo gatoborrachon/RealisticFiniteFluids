@@ -16,6 +16,7 @@ import net.minecraft.client.renderer.color.BlockColors;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeColorHelper;
@@ -49,12 +50,12 @@ public class FluidModelEventHandler {
 	        }
 	    });
 	    
-	    ModelLoader.setCustomStateMapper(ModBlocks.INFINITE_WATER_SOURCE, new StateMapperBase() {
+	    /*ModelLoader.setCustomStateMapper(ModBlocks.INFINITE_WATER_SOURCE, new StateMapperBase() {
 	        @Override
 	        protected ModelResourceLocation getModelResourceLocation(IBlockState state) {
 	            return new ModelResourceLocation("realisticfinitefluids:infinite_water_source", "normal");
 	        }
-	    });
+	    });*/
 	    
 	    
 	    
@@ -73,12 +74,12 @@ public class FluidModelEventHandler {
 	        }
 	    });
 	    
-	    ModelLoader.setCustomStateMapper(ModBlocks.INFINITE_LAVA_SOURCE, new StateMapperBase() {
+	    /*ModelLoader.setCustomStateMapper(ModBlocks.INFINITE_LAVA_SOURCE, new StateMapperBase() {
 	        @Override
 	        protected ModelResourceLocation getModelResourceLocation(IBlockState state) {
 	            return new ModelResourceLocation("realisticfinitefluids:infinite_lava_source", "normal");
 	        }
-	    });
+	    });*/
 
 	    //System.out.println("[DEBUG] StateMapper personalizado registrado");
 	}
@@ -109,11 +110,11 @@ public class FluidModelEventHandler {
         BakedModelFiniteFluid modelStill = new BakedModelFiniteFluid(renderer, spriteStill, FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(ModBlocks.FINITE_WATER_STILL));
         event.getModelRegistry().putObject(modelLocStill, modelStill);   
         
-        //Ocean
+        /*/Ocean
         ModelResourceLocation modelLocOcean = new ModelResourceLocation("realisticfinitefluids:infinite_water_source", "normal");
         BakedModelFiniteFluid modelOcean = new BakedModelFiniteFluid(renderer, spriteStill, FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(ModBlocks.INFINITE_WATER_SOURCE));
         event.getModelRegistry().putObject(modelLocOcean, modelOcean);   
-    
+    	*/
         
         
         
@@ -131,11 +132,11 @@ public class FluidModelEventHandler {
         BakedModelFiniteFluid modelLavaStill = new BakedModelFiniteFluid(renderer, spriteLavaStill, FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(ModBlocks.FINITE_LAVA_FLOWING));
         event.getModelRegistry().putObject(modelLocLavaStill, modelLavaStill);
 
-        //Ocean
+        /*/Ocean
         ModelResourceLocation modelLocLavaOcean = new ModelResourceLocation("realisticfinitefluids:infinite_lava_source", "normal");
         BakedModelFiniteFluid modelLavaOcean = new BakedModelFiniteFluid(renderer, spriteLavaStill, FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(ModBlocks.INFINITE_LAVA_SOURCE));
         event.getModelRegistry().putObject(modelLocLavaOcean, modelLavaOcean);   
-        
+        */
     }
     
 
@@ -151,7 +152,7 @@ public class FluidModelEventHandler {
                 }
                 return 0x3F76E4; // fallback azul vanilla
             },
-            ModBlocks.INFINITE_WATER_SOURCE,
+            //ModBlocks.INFINITE_WATER_SOURCE,
             ModBlocks.FINITE_WATER_FLOWING,
             ModBlocks.FINITE_WATER_STILL
         );
@@ -168,7 +169,7 @@ public class FluidModelEventHandler {
                     ? bc.colorMultiplier(b.getDefaultState(), null, null, tintIndex)
                     : 0xFFFFFFFF;
             },
-            Item.getItemFromBlock(ModBlocks.INFINITE_WATER_SOURCE),
+            //Item.getItemFromBlock(ModBlocks.INFINITE_WATER_SOURCE),
             Item.getItemFromBlock(ModBlocks.FINITE_WATER_FLOWING),
             Item.getItemFromBlock(ModBlocks.FINITE_WATER_STILL)
         );
@@ -196,7 +197,8 @@ public class FluidModelEventHandler {
                 IBlockState state = world.getBlockState(pos);
                 if (state.getBlock() instanceof BlockFiniteFluid) {
                     int level = BlockFiniteFluid.getVolume(world, pos, state); //state.getValue(BlockFiniteFluid.LEVEL);
-
+                    String typeOfBlock = state.getBlock().getLocalizedName().split(" ")[0];
+                    
                     double x = pos.getX() + 0.5;
                     double y = pos.getY() + 1.2;
                     double z = pos.getZ() + 0.5;
@@ -208,6 +210,7 @@ public class FluidModelEventHandler {
                     GlStateManager.scale(-0.025F, -0.025F, 0.025F);
 
                     mc.fontRenderer.drawString(String.valueOf(level), -mc.fontRenderer.getStringWidth(String.valueOf(level)) / 2, 0, 0xFFFFFF);
+                    mc.fontRenderer.drawString(String.valueOf(typeOfBlock), -mc.fontRenderer.getStringWidth(String.valueOf(typeOfBlock)) / 2, 8, 0xFFFFFF);
                     GlStateManager.popMatrix();
                 }
             }

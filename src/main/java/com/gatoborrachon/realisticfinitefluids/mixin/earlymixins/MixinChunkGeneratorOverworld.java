@@ -8,6 +8,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import com.gatoborrachon.realisticfinitefluids.blocks.BlockFiniteFluid;
 import com.gatoborrachon.realisticfinitefluids.init.ModBlocks;
 import com.gatoborrachon.realisticfinitefluids.init.ModConfig;
 
@@ -36,12 +37,12 @@ public class MixinChunkGeneratorOverworld {
     private WorldGenLakes redirectLakeGen(Block blockIn) {
         // Si es agua vanilla, la cambiamos por agua finita
         if (blockIn == Blocks.WATER) {
-            return new WorldGenLakes(ModBlocks.INFINITE_WATER_SOURCE.setLightOpacity(ModConfig.waterLightOpacity));
+            return new WorldGenLakes(ModBlocks.FINITE_WATER_STILL.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, BlockFiniteFluid.MAXIMUM_CONCEPTUAL_LEVEL).getBlock().setLightOpacity(ModConfig.waterLightOpacity)); //ModBlocks.INFINITE_WATER_SOURCE.setLightOpacity(ModConfig.waterLightOpacity));
         }
 
         // También interceptamos LAVA aquí para cambiarla por lava finita
         if (blockIn == Blocks.LAVA) {
-            return new WorldGenLakes(ModBlocks.INFINITE_LAVA_SOURCE);
+            return new WorldGenLakes(ModBlocks.FINITE_LAVA_STILL.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, BlockFiniteFluid.MAXIMUM_CONCEPTUAL_LEVEL).getBlock()); //ModBlocks.INFINITE_LAVA_SOURCE);
         }
 
         // En cualquier otro caso, regresamos el bloque original
@@ -57,7 +58,7 @@ public class MixinChunkGeneratorOverworld {
                 //Field oceanBlockField = ChunkGeneratorOverworld.class.getDeclaredField("field_186001_t"); //field_186001_t --> oceanBlock
             	Field oceanBlockField = ObfuscationReflectionHelper.findField(ChunkGeneratorOverworld.class, "field_186001_t");
             	oceanBlockField.setAccessible(true);
-                oceanBlockField.set(this, ModBlocks.INFINITE_WATER_SOURCE.setLightOpacity(ModConfig.waterLightOpacity).getDefaultState());
+                oceanBlockField.set(this, ModBlocks.FINITE_WATER_STILL.setLightOpacity(ModConfig.waterLightOpacity).getDefaultState().withProperty(BlockFiniteFluid.LEVEL, BlockFiniteFluid.MAXIMUM_CONCEPTUAL_LEVEL)); //ModBlocks.INFINITE_WATER_SOURCE.setLightOpacity(ModConfig.waterLightOpacity).getDefaultState());
             } catch (Exception e) {
                 e.printStackTrace();
             }

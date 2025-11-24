@@ -8,6 +8,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import com.gatoborrachon.realisticfinitefluids.blocks.BlockFiniteFluid;
 import com.gatoborrachon.realisticfinitefluids.init.ModBlocks;
 
 import jaredbgreat.climaticbiome.generation.chunk.ChunkGenClimaticRealistic;
@@ -23,6 +24,6 @@ public class MixinChunkGenClimaticRealistic {
 
     @Inject(method = "<clinit>", at = @At("TAIL"))
     private static void modifyStaticWaterBlock(CallbackInfo ci) {
-        WATER = ModBlocks.INFINITE_WATER_SOURCE.getDefaultState();
+        WATER = ModBlocks.FINITE_WATER_STILL.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, BlockFiniteFluid.MAXIMUM_CONCEPTUAL_LEVEL); //ModBlocks.INFINITE_WATER_SOURCE.getDefaultState();
     }
 }

@@ -42,95 +42,143 @@ public class BlockNewWater_Flow extends BlockFiniteFluid
 	public void updateTick(World world, BlockPos pos, IBlockState state, Random rand) {
         if (!world.isRemote)
         {
+        	
+        	if (pos == new BlockPos(251, 62, 79)) {
+        		System.out.println("level "+getVolume(world, pos, state));
+        		System.out.println("math amount "+FiniteFluidLogic.GeneralPurposeLogic.getCalc());
+        	}
+        	//SETEAR EL TIPO DE FLUIDO ACTUAL EN LOS CALCULOS DE LA LOGICA
         	FiniteFluidLogic.GeneralPurposeLogic.setCurrentFluidIndex(this);
 
+        	//DETERMIANR TANTO EL BLOQUE ACTUAL COMO EL BLOQUE DE ABAJO
             IBlockState currentaState = world.getBlockState(pos);
-            Block currentBlock = currentaState.getBlock();
-            Block downBlock = world.getBlockState(pos.down()).getBlock();
             
             //Aca yo controlo lo de interaccion de flowing con ocean xd
             //Avoid too much block updates over oceanic liquid
-            if (downBlock == FiniteFluidLogic.liquids.get(FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(currentBlock)).oceanBlock && BlockFiniteFluid.getVolume(world, pos, currentaState) < Q1_HIGH) { //8
+            if (isOceanBlock(world, pos.down(), null, FiniteFluidLogic.onFiniteFluidIndex) //downBlock == FiniteFluidLogic.liquids.get(FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(currentBlock)).oceanBlock 
+            	&& BlockFiniteFluid.getVolume(world, pos, currentaState) < Q1_HIGH) { //8
             	int newValue = BlockFiniteFluid.getVolume(world, pos, world.getBlockState(pos))/2; //3
             	//world.setBlockState(pos, currentaState.withProperty(BlockFiniteFluid.LEVEL, newValue));
             	BlockFiniteFluid.setBlockState(world, pos, BlockFiniteFluid.setVolume(world, pos, currentaState, newValue));
             }
             
+            //Despertar bloques oceanicos (para evitar dejarlos sin actualizar, y que se vean raros)
             FiniteFluidLogic.InfiniteWaterSource.wakeOcean(world, pos);
 
+            //REVISAR SI ACTUALMENTE PODEMOS EJECUTAR CALCULOS Y NO SOBRECARGAR EL CPU
             if (FiniteFluidLogic.GeneralPurposeLogic.getCalc() > FiniteFluidLogic.GeneralPurposeLogic.getMaxCalc())
             {
-
             	world.scheduleUpdate(pos, this, this.tickRate(world));
             }
+            
+            //SI SI PODEMOS HACER CALCULOS -->
             else
             {
+            	//Obtenemos el bloque inmediatamente abajo (dependiendo la gravedad del bloque actual, si es un gas o un liquidp)
                 Block belowBlock1 = world.getBlockState(new BlockPos(pos.getX(), pos.getY() - 1 * FiniteFluidLogic.GeneralPurposeLogic.getFluidGravity(), pos.getZ())).getBlock();
 
-                if (belowBlock1 != Blocks.AIR & !FiniteFluidLogic.GeneralPurposeLogic.hasSideBorder(world, pos, Blocks.AIR))
+                //sI EL BLOQUE DE ABAJO NO ES AIRE, Y SI NO TIENE EN SU PROXIMIDAD AL AIRE
+                //OSEA, UNA PLANCHA DE BLOQUES DEBAJO
+                if (belowBlock1 != Blocks.AIR & !FiniteFluidLogic.GeneralPurposeLogic.hasAdjacentTarjetBlocksHorizontal(world, pos, Blocks.AIR))
                 {
+                	//VOLVEMOS A OBTENER LA POSICION DEL BLOQUE ABAJO (DEPENDIENDO LA GRAVEDAD DEL BLOQUE ACTUAL)
                 	BlockPos posBelow = new BlockPos(pos.getX(), pos.getY() - 1 * FiniteFluidLogic.GeneralPurposeLogic.getFluidGravity(), pos.getZ());
-                    if ((float)FiniteFluidLogic.GeneralPurposeLogic.getCalc() > (float)FiniteFluidLogic.GeneralPurposeLogic.getMaxCalc() * 0.65F && BlockFiniteFluid.getVolume(world, pos, world.getBlockState(pos)) < Q1_HIGH & (!FiniteFluidLogic.GeneralPurposeLogic.isRealisticFluid(belowBlock1) || BlockFiniteFluid.getVolume(world, posBelow, world.getBlockState(posBelow)) < MAXIMUM_LEVEL))
+                    
+                	//PRIMERO:
+                	//1.- Si los calculos actuales son mayores al 65% de calculos permitidos
+                	//2.- Y si el volumen del bloque actual es menor al Quartil 1
+                	//3.1.- Y si el bloque de abajo NO es un fluido finito realista
+                	//3.2.- O si el volumen del bloque de abajo es menor al nivel maximo.
+                	if ((float)FiniteFluidLogic.GeneralPurposeLogic.getCalc() > (float)FiniteFluidLogic.GeneralPurposeLogic.getMaxCalc() * 0.65F && BlockFiniteFluid.getVolume(world, pos, world.getBlockState(pos)) < Q1_HIGH & (!FiniteFluidLogic.GeneralPurposeLogic.isRealisticFluid(belowBlock1) || BlockFiniteFluid.getVolume(world, posBelow, world.getBlockState(posBelow)) < MAXIMUM_LEVEL))
                     {
+                		//NOS ESPERAMOS AL PROXIMO TICK
                     	world.scheduleUpdate(pos, this, this.tickRate(world));
                         return;
                     }
 
+                	//SI LOS CALCULOS ACTUALES SON MAYORES AL 50% DE CALCULOS PERMITIDPS
                     if ((float)FiniteFluidLogic.GeneralPurposeLogic.getCalc() > (float)FiniteFluidLogic.GeneralPurposeLogic.getMaxCalc() * 0.5F)
                     {
+                    	//BUSCAMOS AL JUGADOR MAS PROXIMO
                         EntityPlayer nearestPlayer = world.getClosestPlayer((double)pos.getX(), (double)pos.getY(), (double)pos.getZ(), FiniteFluidLogic.GeneralPurposeLogic.getPlayerDistanceToCalc(), true);
 
+                        //SI EL JUGADOR MAS PROXIMO NO EXISTE
                         if (nearestPlayer == null)
                         {
+                        	//NOS ESPERAMOS AL PROXIMO TICK
                         	world.scheduleUpdate(pos, this, this.tickRate(world));
                             return;
                         }
                     }
                 }
 
+                //SI TODO LO ANTERIOR NO SE CUMPLIO --> 
+                //AÑADIMOS UN CALCULO A LA LSITA DE CALCULOS ACTUALES
                 FiniteFluidLogic.GeneralPurposeLogic.addCalc();
 
-
+                //SI EL BLOQUE DE ABAJO (DPENDIENDO GRAVEDAD) ES UN BLOQUE DEBUG
                 if (world.getBlockState(new BlockPos(pos.getX(), pos.getY() - 1 * FiniteFluidLogic.GeneralPurposeLogic.getFluidGravity(), pos.getZ())).getBlock() == Blocks.DIAMOND_BLOCK)
                 {
+                	//LE PONEMOS AL BLOQUE ACTUALEL VOLUMEN MAXIMO SI ES QUE NO YA TIENE EL VOLUMEN MAXIMO
                     IBlockState currentState = world.getBlockState(pos);
                     IBlockState newState = BlockFiniteFluid.setVolume(world, pos, currentState, MAXIMUM_LEVEL); //currentState.withProperty(BlockFiniteFluid.LEVEL, 15);
                     if (BlockFiniteFluid.getVolume(world, pos, currentState) < MAXIMUM_LEVEL) { //15
                     	BlockFiniteFluid.setBlockState(world, pos, newState);
                     //world.setBlockState(pos, newState, 3);
                     }
+                    
+                    //CREAMOS UN BLOQUE NUEVO DEL MISMO FLUIDO ARRIBA CON EL MAXIMO DE FLUIDO
                 	BlockFiniteFluid.setBlockState(world, pos.up(), newState);
                     //world.setBlockState(pos.up(), newState, 3);
                     
-                	FiniteFluidLogic.GeneralPurposeLogic.tryMove(world, pos.up());
+                	//EJECUTAMOS LA LOGICA DE MOVIMIENTO DEL BLOQUE DE ARRIBA
+                	FiniteFluidLogic.GeneralPurposeLogic.tryLiquidMove(world, pos.up());
                     world.scheduleUpdate(pos, this, this.tickRate(world));
                 }
+                
+                //SI NO EXISTEN BLOQUES DE FLUIDO FINITO ALEDAÑOS
                 else if (!FiniteFluidLogic.GeneralPurposeLogic.checkForNeighborLiquid(world, pos))
                 {
+                	//CALCULAMOS EL NIVEL DEL BLOQUE ACTUAL
                     int newLevel = BlockFiniteFluid.getVolume(world, pos, world.getBlockState(pos));
-                    if (FiniteFluidLogic.GeneralPurposeLogic.tryMove(world, pos))
+                    
+                    //Y CALCULAMOS SI NOS PODEMOS MOVER
+                    if (FiniteFluidLogic.GeneralPurposeLogic.tryLiquidMove(world, pos))
                     {
+                    	//SI NOS VOMIMOS, PROGRAMAMOS UN TICK
                     	world.scheduleUpdate(pos, this, this.tickRate(world));
                     }
+                    
+                    //SI NO NOS PODEMOS MOVER --> NOS CONVERTIMOS STILL
                     else
                     {
+                    	//GUARDAMOS EL TIPO DE FLUIDO ACTUAL
                     	FiniteFluidLogic.GeneralPurposeLogic.setCurrentFluidIndex(this);
                     	//int currentFluidIndex = FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(this);
 
+                    	//CALCULAMOS UN BLOCKSTATE DEL FLUDO ACTUAL STILL
                     	Block stillBlock = ((NewFluidType) FiniteFluidLogic.liquids.get(FiniteFluidLogic.onFiniteFluidIndex)).stillBlock;
                     	//IBlockState newState = stillBlock.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, newLevel);
                     	//world.setBlockState(pos, newState, 3);
+                    	
+                    	//Y COLOCAMOS ESTE BLOQUE STILL EN NUESTRO LUGAR CON NUESTRO VOLUMEN ACTUAL
                     	BlockFiniteFluid.setBlockState(world, pos, BlockFiniteFluid.setVolume(null, null, stillBlock.getDefaultState(), newLevel));
                     	
+                    	//CALCULAMOS LA POSICION DEL BLOQUE DE ABAJO POR GRAVEDAD
                     	BlockPos belowBlock = new BlockPos(pos.getX(), pos.getY() - 1 * FiniteFluidLogic.GeneralPurposeLogic.getFluidGravity(), pos.getZ());
+                    	
+                    	//SI EL BLOQUE ACTUAL TIENE EL MISMO MATERIAL QUE EL BLOQUE DE ABAJO
                     	if (world.getBlockState(pos).getMaterial() == world.getBlockState(belowBlock).getMaterial()) {
-                            Random random = new Random();
                             
-                            if (random.nextInt(60) == 0) {
-                            	FiniteFluidLogic.InfiniteWaterSource.borderOceanCheck(world, belowBlock, 1);
+                            //TRAS CIERTA PROBABILIDAD, HACEMOS UNA BUSQUEDA DE BORDES OCEANICOS
+                            if (rand.nextInt(60) == 0) {
+                            	FiniteFluidLogic.InfiniteWaterSource.borderOceanCheck(world, belowBlock, true);
                             }
+                            
+                            //SI NO TIENE EL MISMO MATERAIAL
                     	} else if (world.getBlockState(pos).getMaterial() != world.getBlockState(belowBlock).getMaterial()) {
-                        	FiniteFluidLogic.InfiniteWaterSource.borderOceanCheck(world, belowBlock, 1);                		
+                    		//HACEMOS LA BUSQUEDA DE BORDES DE LIQUIDO OCEANICO TODAS LAS VECES
+                        	FiniteFluidLogic.InfiniteWaterSource.borderOceanCheck(world, belowBlock, true);                		
                     	}
                     }
                 }
@@ -141,7 +189,7 @@ public class BlockNewWater_Flow extends BlockFiniteFluid
     
     
 	@Override
-    public void onEntityCollidedWithBlock(World worldIn, BlockPos pos, IBlockState state, Entity entityIn) {
+    public void onEntityCollision(World worldIn, BlockPos pos, IBlockState state, Entity entityIn) {
 		if (entityIn instanceof EntityPlayer && ((EntityPlayer)entityIn).isCreative() && !ModConfig.flowingWaterShouldMoveCreativePlayer /*&& state.getMaterial() == Material.WATER*/) return;
 		
 		Vec3d flow = calculateFlowVector(worldIn, pos);
@@ -153,7 +201,7 @@ public class BlockNewWater_Flow extends BlockFiniteFluid
     }
 	
 
-    @Override
+	@Override
     public boolean interactWithLiquid(World world, BlockPos waterPos, BlockPos targetPos)
     {
         IBlockState waterState = world.getBlockState(waterPos);

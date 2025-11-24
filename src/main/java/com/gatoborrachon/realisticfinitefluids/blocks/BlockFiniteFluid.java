@@ -83,7 +83,7 @@ public class BlockFiniteFluid extends Block implements IFluidBlock {
         this.fluid = fluid;
     	this.fluidMaterial = material;
     	
-		setUnlocalizedName(name);
+		setTranslationKey(name);
 		setRegistryName(name);
         this.setDefaultState(this.blockState.getBaseState().withProperty(LEVEL, Integer.valueOf(MINIMUM_LEVEL)));
 	}
@@ -173,12 +173,6 @@ public class BlockFiniteFluid extends Block implements IFluidBlock {
     // Special RealisticFiniteFluid Functions
     // ========================= 
     
-    //Public functions to interact with Fluids
-    public boolean allowTransfer()
-    {
-        return true;
-    }
-
     @Deprecated
     /**
      * Sets the specified LEVEL from the passed stated to the block on the current pos
@@ -200,9 +194,10 @@ public class BlockFiniteFluid extends Block implements IFluidBlock {
     public static int getVolume(@Nullable IBlockAccess world, @Nullable BlockPos pos, @Nullable IBlockState state)
     {
     	if (state != null) {
-            return state.getValue(LEVEL);
+    		if (state.getBlock() instanceof BlockFiniteFluid) return state.getValue(LEVEL);
     	} else if (world != null && pos != null) {
-    		return world.getBlockState(pos).getValue(LEVEL);
+    		state = world.getBlockState(pos);
+    	    if (state.getBlock() instanceof BlockFiniteFluid) return state.getValue(LEVEL);
     	}
     	return 0;
     }
@@ -237,9 +232,10 @@ public class BlockFiniteFluid extends Block implements IFluidBlock {
      */
     public static int getConceptualVolume(@Nullable IBlockAccess world, @Nullable BlockPos pos, @Nullable IBlockState state) {
     	if (state != null) {
-            return state.getValue(LEVEL)+1;
+    		if (state.getBlock() instanceof BlockFiniteFluid) return state.getValue(LEVEL)+1;
     	} else if (world != null && pos != null) {
-    		return world.getBlockState(pos).getValue(LEVEL)+1;
+    		state = world.getBlockState(pos);
+    	    if (state.getBlock() instanceof BlockFiniteFluid) return world.getBlockState(pos).getValue(LEVEL)+1;
     	}
     	return 1;    
     }
@@ -545,22 +541,47 @@ public class BlockFiniteFluid extends Block implements IFluidBlock {
     	Vec3d flow = new Vec3d(0,0,0);
         for(EnumFacing dir : EnumFacing.Plane.HORIZONTAL) {
             BlockPos neighbor = pos.offset(dir);
-            if (!(world.getBlockState(neighbor).getBlock() instanceof BlockFiniteFluid)) continue;
+            if (!(world.getBlockState(neighbor).getBlock() instanceof BlockFiniteFluid)) return flow;
+            int levelNeighbor = getVolume(world, neighbor, null);
+            int levelCurrent = getVolume(world, pos, null);
             
-            int levelNeighbor = FiniteFluidLogic.GeneralPurposeLogic.getFluidLevel(world, neighbor);
-            int levelCurrent = FiniteFluidLogic.GeneralPurposeLogic.getFluidLevel(world, pos);
             int diff = levelNeighbor - levelCurrent;
             
-            flow = flow.addVector(
-                dir.getFrontOffsetX() * diff, 
+            flow = flow.add(/*.addVector(*/
+                dir.getXOffset()/*.getFrontOffsetX()*/ * diff, 
                 0, 
-                dir.getFrontOffsetZ() * diff
+                dir.getZOffset()/*getFrontOffsetZ()*/ * diff
             );
             
-    		if (flow.lengthVector() > 0) 
+    		if (flow.length()/*.lengthVector()*/ > 0) 
     			flow = flow.normalize();
         }
 		return flow;
+	}
+	
+	public static BlockPos getPositionOnGravityDirection(BlockPos originalPos, int fluidIndex) {
+		return new BlockPos(originalPos.getX(), originalPos.getY() - 1 * FiniteFluidLogic.GeneralPurposeLogic.getFluidGravity(), originalPos.getZ());
+	}
+	
+	/**
+	 * To check if the given block is Oceanic (it should have 1 level more of the MAXIMUM_LEVEL for other normal blocks (Flowing and Still). This only works if we are not using all the values on LEVEL)
+	 * @param world
+	 * @param pos
+	 * @param state
+	 * @param fluidType The current fluidType to search
+	 * @return
+	 */
+	public static boolean isOceanBlock(@Nullable IBlockAccess world, @Nullable BlockPos pos, @Nullable IBlockState state, int fluidType) {
+		//TODO add an exception when we try to use a metadata value above 15 (in that case, we should not use this system)
+		//if MAXIMUM_LEVEL == 15 --> ABORT CALCULATIONS (or let the game crash)
+		
+    	if (state != null) {
+    		if (state.getBlock() instanceof BlockFiniteFluid) return state.getBlock() == FiniteFluidLogic.liquids.get(fluidType).stillBlock && BlockFiniteFluid.getVolume(world, pos, state) > MAXIMUM_LEVEL;
+    	} else if (world != null && pos != null) {
+    		state = world.getBlockState(pos);
+    	    if (state.getBlock() instanceof BlockFiniteFluid) return state.getBlock() == FiniteFluidLogic.liquids.get(fluidType).stillBlock && BlockFiniteFluid.getVolume(world, pos, state) > MAXIMUM_LEVEL;
+    	}
+		return false;
 	}
 	
 	
@@ -626,10 +647,12 @@ public class BlockFiniteFluid extends Block implements IFluidBlock {
     
     @Override
     @SideOnly(Side.CLIENT)
-    public BlockRenderLayer getBlockLayer() {
+    public BlockRenderLayer getRenderLayer() {
         //return BlockRenderLayer.TRANSLUCENT;
-        return this.blockMaterial == Material.WATER ? BlockRenderLayer.TRANSLUCENT : BlockRenderLayer.SOLID;
+        return this.material == Material.WATER ? BlockRenderLayer.TRANSLUCENT : BlockRenderLayer.SOLID;
     }
+    
+    
     
     @Override
     public boolean canRenderInLayer(IBlockState state, BlockRenderLayer layer) {
@@ -672,7 +695,7 @@ public class BlockFiniteFluid extends Block implements IFluidBlock {
 
 	    if (this.fluidMaterial == Material.WATER) {
 	        boolean isFlowing = stateIn.getBlock() instanceof BlockNewWater_Flow; // tu clase para agua en movimiento
-	        boolean isStill = stateIn.getBlock() instanceof BlockNewWater_Still || stateIn.getBlock() instanceof BlockNewInfiniteSource;
+	        boolean isStill = stateIn.getBlock() instanceof BlockNewWater_Still; // || stateIn.getBlock() instanceof BlockNewInfiniteSource;
 
 	        if (isFlowing) {
 	            // Agua en movimiento --> sonido ambiente ocasional

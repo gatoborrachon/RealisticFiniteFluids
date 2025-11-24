@@ -34,7 +34,6 @@ import com.tiviacz.travelersbackpack.gui.inventory.InventoryTravelersBackpack;
 import com.tiviacz.travelersbackpack.items.ItemHose;
 import com.tiviacz.travelersbackpack.util.Reference;
 import com.gatoborrachon.realisticfinitefluids.blocks.BlockFiniteFluid;
-import com.gatoborrachon.realisticfinitefluids.blocks.BlockNewInfiniteSource;
 import com.gatoborrachon.realisticfinitefluids.logic.FiniteFluidLogic;
 import com.gatoborrachon.realisticfinitefluids.logic.NewFluidType;
 import com.tiviacz.travelersbackpack.capability.CapabilityUtils;

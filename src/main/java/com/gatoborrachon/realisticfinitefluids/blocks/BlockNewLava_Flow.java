@@ -60,7 +60,7 @@ public class BlockNewLava_Flow extends BlockNewWater_Flow {
         //a ver si evita un crash aal poner un bloque encima de lava
         if (lavaType < MINIMUM_LEVEL || targetType < MINIMUM_LEVEL) return false;
 
-        if (targetBlock == FiniteFluidLogic.liquids.get(targetType).oceanBlock) {
+        if (isOceanBlock(world, targetPos, null, targetType)) { //targetBlock == FiniteFluidLogic.liquids.get(targetType).oceanBlock) {
             targetMeta = MAXIMUM_LEVEL;
         }
 

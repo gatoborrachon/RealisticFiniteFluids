@@ -4,6 +4,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 
+import com.gatoborrachon.realisticfinitefluids.blocks.BlockFiniteFluid;
 import com.gatoborrachon.realisticfinitefluids.init.ModBlocks;
 
 import net.minecraft.block.state.IBlockState;
@@ -26,7 +27,7 @@ public abstract class MixinBiomeSwamp {
     )
     private IBlockState rff$replaceWater_mcp(IBlockState state) {
         return (state.getBlock() == Blocks.WATER)
-                ? ModBlocks.INFINITE_WATER_SOURCE.getDefaultState()
+                ? ModBlocks.FINITE_WATER_STILL.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, BlockFiniteFluid.MAXIMUM_CONCEPTUAL_LEVEL) //ModBlocks.INFINITE_WATER_SOURCE.getDefaultState()
                 : state;
     }
 
@@ -43,7 +44,7 @@ public abstract class MixinBiomeSwamp {
     )
     private IBlockState rff$replaceWater_srg(IBlockState state) {
         return (state.getBlock() == Blocks.WATER)
-                ? ModBlocks.INFINITE_WATER_SOURCE.getDefaultState()
+                ? ModBlocks.FINITE_WATER_STILL.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, BlockFiniteFluid.MAXIMUM_CONCEPTUAL_LEVEL) //ModBlocks.INFINITE_WATER_SOURCE.getDefaultState()
                 : state;
     }
     

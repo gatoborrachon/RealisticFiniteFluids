@@ -5,6 +5,9 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 
+import com.gatoborrachon.realisticfinitefluids.blocks.BlockFiniteFluid;
+import com.gatoborrachon.realisticfinitefluids.init.ModBlocks;
+
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.world.gen.structure.StructureOceanMonumentPieces;
 
@@ -18,6 +21,6 @@ public class MixinOceanMonumentPiece {
 
     static {
         // Reemplaza el bloque agua por tu bloque custom al cargar la clase
-    	field_175822_f = com.gatoborrachon.realisticfinitefluids.init.ModBlocks.INFINITE_WATER_SOURCE.getDefaultState();
+    	field_175822_f = ModBlocks.FINITE_WATER_STILL.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, BlockFiniteFluid.MAXIMUM_CONCEPTUAL_LEVEL); ////ModBlocks.INFINITE_WATER_SOURCE.getDefaultState();
     }
 }

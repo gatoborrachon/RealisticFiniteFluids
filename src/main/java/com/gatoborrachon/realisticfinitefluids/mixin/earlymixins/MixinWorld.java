@@ -42,7 +42,7 @@ public class MixinWorld {
         Block block = state.getBlock();
 
         // Considera tus bloques como equivalentes a WATER / FLOWING_WATER
-        boolean isFiniteWater = block == ModBlocks.FINITE_WATER_STILL || block == ModBlocks.FINITE_WATER_FLOWING || block == ModBlocks.INFINITE_WATER_SOURCE;
+        boolean isFiniteWater = block == ModBlocks.FINITE_WATER_STILL || block == ModBlocks.FINITE_WATER_FLOWING; // || block == ModBlocks.INFINITE_WATER_SOURCE;
         //boolean isVanillaWater = block == Blocks.WATER || block == Blocks.FLOWING_WATER;
 
         if ((isFiniteWater/* || isVanillaWater*/)
@@ -70,7 +70,7 @@ public class MixinWorld {
         return //block == Blocks.WATER ||
                //block == Blocks.FLOWING_WATER ||
                block == ModBlocks.FINITE_WATER_STILL ||
-               block == ModBlocks.FINITE_WATER_FLOWING ||
-               block == ModBlocks.INFINITE_WATER_SOURCE;
+               block == ModBlocks.FINITE_WATER_FLOWING;// ||
+               //block == ModBlocks.INFINITE_WATER_SOURCE;
     }
 }

@@ -56,7 +56,7 @@ public class ItemFiniteLavaBucket extends ItemBucket  {
             this.setContainerItem(Items.BUCKET); // Te regresa cubeta vacía
             this.setMaxStackSize(1);
             this.setCreativeTab(CreativeTabs.MISC); // Cambia si tienes tu propia tab
-            this.setUnlocalizedName(name);
+            this.setTranslationKey(name);
             this.setRegistryName(name);
     		ModItems.ITEMS.add(this);
 

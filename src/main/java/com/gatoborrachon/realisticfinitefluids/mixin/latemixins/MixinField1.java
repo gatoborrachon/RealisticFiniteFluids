@@ -1,6 +1,7 @@
 package com.gatoborrachon.realisticfinitefluids.mixin.latemixins;
 
 import com.gatoborrachon.realisticfinitefluids.References;
+import com.gatoborrachon.realisticfinitefluids.blocks.BlockFiniteFluid;
 import com.gatoborrachon.realisticfinitefluids.init.ModBlocks;
 
 import net.minecraft.block.Block;
@@ -48,7 +49,7 @@ public abstract class MixinField1 extends MixinVillage {
         
 
         IBlockState log = this.func_175847_a(Blocks.LOG.getDefaultState());
-        IBlockState customWater = ModBlocks.INFINITE_WATER_SOURCE.getDefaultState();
+        IBlockState customWater = ModBlocks.FINITE_WATER_STILL.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, BlockFiniteFluid.MAXIMUM_CONCEPTUAL_LEVEL); //ModBlocks.INFINITE_WATER_SOURCE.getDefaultState();
 
         this.func_175804_a(worldIn, structureBoundingBoxIn, 0, 1, 0, 12, 4, 8, Blocks.AIR.getDefaultState(), Blocks.AIR.getDefaultState(), false);
         this.func_175804_a(worldIn, structureBoundingBoxIn, 1, 0, 1, 2, 0, 7, Blocks.FARMLAND.getDefaultState(), Blocks.FARMLAND.getDefaultState(), false);

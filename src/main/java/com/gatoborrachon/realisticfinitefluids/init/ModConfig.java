@@ -28,6 +28,8 @@ public class ModConfig {
     public static String[] exclusionsPrefixes;
     public static boolean flowingWaterShouldMoveCreativePlayer;
     public static boolean shouldTickRandomly;
+    
+    public static boolean shouldFluidsBeInfinite;
 
 
     private static final String CATEGORY_GENERAL = "general";
@@ -48,7 +50,7 @@ public class ModConfig {
         
         //Fluid Logic
         lakelimit = config.getInt("lakeLimit", CATEGORY_GENERAL, 512, 1, Integer.MAX_VALUE, 
-        		"Minimum quantity of fluid blocks to consider a fluid mass as an ocean. 2048 = Original. 512 = Default.");
+        		"The amount of fluid blocks that will turn into Still/Flowing blocks when you interact with them. 2048 = Original. 512 = Default.");
         
         maxCalc = config.getInt("maxCalc", CATEGORY_GENERAL, 1024, 1, Integer.MAX_VALUE, 
         		"Max number of finite fluid calculations every tick. A cap to (try) avoid holding the server.");
@@ -174,6 +176,9 @@ public class ModConfig {
         
         shouldTickRandomly = config.getBoolean("shouldTickRandomly", CATEGORY_GENERAL, true, 
         		"Whether fluids should have random ticks.");
+        
+        shouldFluidsBeInfinite = config.getBoolean("shouldFluidsBeInfinite", CATEGORY_GENERAL, true, 
+        		"Whether big fluid masses (lakes, oceans) should act as infinite fluid sources.");
         
         //Debug
         debug = config.getBoolean("debug", CATEGORY_GENERAL, false, 

@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.gatoborrachon.realisticfinitefluids.blocks.BlockFiniteFluid;
-import com.gatoborrachon.realisticfinitefluids.blocks.BlockNewInfiniteSource;
 import com.gatoborrachon.realisticfinitefluids.init.ModConfig;
 import com.gatoborrachon.realisticfinitefluids.init.ModItems;
 import com.gatoborrachon.realisticfinitefluids.logic.FiniteFluidLogic;
@@ -80,14 +79,14 @@ public class FluidEventHandler {
             BlockPos neighbor = pos.offset(dir);
             IBlockState neighborState = world.getBlockState(neighbor);
 
-            if (neighborState.getBlock() instanceof BlockNewInfiniteSource) {
+            if (BlockFiniteFluid.isOceanBlock(world, neighbor, neighborState, FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(neighborState.getBlock()))) {
             	exposedToOceanWater = true;
                 break;
             }
         }
         
         if (!world.isRemote && exposedToOceanWater && !(world.getBlockState(pos.down()).getBlock() instanceof BlockFiniteFluid) && !(world.getBlockState(pos).getBlock() instanceof BlockFiniteFluid)) {
-            FiniteFluidLogic.InfiniteWaterSource.borderOceanCheck(world, pos);
+            FiniteFluidLogic.InfiniteWaterSource.borderOceanCheck(world, pos, false);
         }
     }
    
@@ -104,7 +103,7 @@ public class FluidEventHandler {
             BlockPos neighbor = pos.offset(dir);
             IBlockState neighborState = world.getBlockState(neighbor);
 
-            if (neighborState.getBlock() instanceof BlockNewInfiniteSource && dir != EnumFacing.DOWN) {
+            if (BlockFiniteFluid.isOceanBlock(world, neighbor, neighborState, FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(neighborState.getBlock())) && dir != EnumFacing.DOWN) {
             	exposedToOceanWater = true;
                 break;
             }
@@ -126,7 +125,7 @@ public class FluidEventHandler {
         /*&& !(world.getBlockState(pos.down()).getBlock() instanceof BlockFiniteFluid) 
         && !(world.getBlockState(pos).getBlock() instanceof BlockFiniteFluid)*/
         ) {
-            FiniteFluidLogic.InfiniteWaterSource.borderOceanCheck(world, pos);
+            FiniteFluidLogic.InfiniteWaterSource.borderOceanCheck(world, pos, false);
         }
     }
     
@@ -156,7 +155,7 @@ public class FluidEventHandler {
             for (BlockPos pos : event.getAffectedBlocks()) {
             	//System.out.println("BLOQUE VERGA: "+pos);
             	//Block thisBlock = world.getBlockState(pos).getBlock();
-            	if (world.getBlockState(pos).getBlock() instanceof BlockNewInfiniteSource) {
+            	if (BlockFiniteFluid.isOceanBlock(world, pos, null, FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(world.getBlockState(pos).getBlock()))) {
                 	//System.out.println("BLOQUE AGUA: "+pos);
                 	//world.scheduleBlockUpdate(pos, waterTick + 1, 0);
                 	//world.scheduleUpdate(pos, thisBlock, thisBlock.tickRate(world));
@@ -301,13 +300,13 @@ public class FluidEventHandler {
                 IBlockState neighborState = world.getBlockState(neighbor);
                 ////System.out.println("Bloque a explorar " + neighborState.getBlock());
 
-                if (neighborState.getBlock() instanceof BlockNewInfiniteSource) {
+                if (BlockFiniteFluid.isOceanBlock(world, neighbor, neighborState, FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(neighborState.getBlock()))) {
                     exposedToOceanWater = true;
                     
                     if (exposedToOceanWater
                         && !(world.getBlockState(pos.down()).getBlock() instanceof BlockFiniteFluid)
                         && !(world.getBlockState(pos).getBlock() instanceof BlockFiniteFluid)) {
-                        FiniteFluidLogic.InfiniteWaterSource.borderOceanCheck(world, pos);
+                        FiniteFluidLogic.InfiniteWaterSource.borderOceanCheck(world, pos, false);
                     }
                     break;
                 }
