@@ -35,7 +35,7 @@ public abstract class MixinMapGenRavineVanilla {
     }
     
     
-    @Overwrite
+    @Overwrite (remap = false)
     protected boolean isOceanBlock(ChunkPrimer data, int x, int y, int z, int chunkX, int chunkZ) {
         net.minecraft.block.Block block = data.getBlockState(x, y, z).getBlock();
         return block == ModBlocks.FINITE_WATER_FLOWING || block == ModBlocks.FINITE_WATER_STILL;

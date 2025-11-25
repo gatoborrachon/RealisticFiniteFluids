@@ -44,7 +44,7 @@ public class MixinMapGenCaves {
     	//if (y>62) return;
     	Material actualBlockMaterial = state.getMaterial();
         if (actualBlockMaterial == Material.ROCK || actualBlockMaterial == Material.SAND || actualBlockMaterial == Material.GROUND) {
-            boolean nearWaterOrGravel = up.getMaterial() == Material.WATER || up.getMaterial() == Material.SAND || up.getMaterial() == Material.GRASS || up.getMaterial() == Material.GROUND 
+            boolean nearWaterOrGravel = up.getMaterial() == Material.WATER || up.getMaterial() == Material.SAND // || up.getMaterial() == Material.GRASS || up.getMaterial() == Material.GROUND 
                 || isWaterSafe(data, x + 1, y, z)
                 || isWaterSafe(data, x - 1, y, z)
                 || isWaterSafe(data, x, y, z + 1)
@@ -56,8 +56,8 @@ public class MixinMapGenCaves {
                 if (y > 1 && (data.getBlockState(x, y - 1, z).getBlock() == Blocks.AIR)) {
                     data.setBlockState(x, y - 1, z, Blocks.STONE.getDefaultState());
                 } else if (y > 1 && (data.getBlockState(x, y-1, z).getMaterial() == Material.SAND || data.getBlockState(x, y, z).getMaterial() == Material.SAND)
-                		|| y > 1 && (data.getBlockState(x, y-1, z).getMaterial() == Material.GRASS || data.getBlockState(x, y, z).getMaterial() == Material.GRASS)
-                		|| y > 1 && (data.getBlockState(x, y-1, z).getMaterial() == Material.GROUND || data.getBlockState(x, y, z).getMaterial() == Material.GROUND)
+                		//|| y > 1 && (data.getBlockState(x, y-1, z).getMaterial() == Material.GRASS || data.getBlockState(x, y, z).getMaterial() == Material.GRASS)
+                		//|| y > 1 && (data.getBlockState(x, y-1, z).getMaterial() == Material.GROUND || data.getBlockState(x, y, z).getMaterial() == Material.GROUND)
                 		) {
                     data.setBlockState(x, y + 1, z, Blocks.STONE.getDefaultState());                	
                 }

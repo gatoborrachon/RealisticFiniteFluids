@@ -33,7 +33,7 @@ public class MixinMapGenCavesVanilla {
     	field_186126_a = ModBlocks.FINITE_LAVA_STILL.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, BlockFiniteFluid.MAXIMUM_CONCEPTUAL_LEVEL); //ModBlocks.INFINITE_LAVA_SOURCE.getDefaultState();
     }
     
-    @Overwrite
+    @Overwrite (remap = false)
     protected boolean isOceanBlock(ChunkPrimer data, int x, int y, int z, int chunkX, int chunkZ){
         net.minecraft.block.Block block = data.getBlockState(x, y, z).getBlock();
         return block == ModBlocks.FINITE_WATER_FLOWING || block == ModBlocks.FINITE_WATER_STILL;
