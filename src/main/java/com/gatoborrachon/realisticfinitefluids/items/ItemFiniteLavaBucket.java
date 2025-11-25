@@ -332,7 +332,7 @@ public class ItemFiniteLavaBucket extends ItemBucket  {
             // 6. Si todavía sobra, intenta poner un nuevo bloque arriba
             if (remaining > BlockFiniteFluid.MINIMUM_LEVEL && remaining <= BlockFiniteFluid.MAXIMUM_CONCEPTUAL_LEVEL) { //ChatGPT dijo que <16 --> <=16
                 BlockPos above = pos.up();
-                if (world.isAirBlock(above)) {
+                if (world.isAirBlock(above) && !world.getBlockState(above).getBlock().hasTileEntity()) {
                     //world.setBlockState(above, ModBlocks.FINITE_LAVA_FLOWING.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, remaining-1)); //COMO LA ENTRADA SON 16, PUES REGRESAMOS A LITERALES
                 	BlockFiniteFluid.setBlockState(world, above, BlockFiniteFluid.setConceptualVolume(null, null, ModBlocks.FINITE_LAVA_FLOWING.getDefaultState(), remaining));
                     remaining = BlockFiniteFluid.MINIMUM_LEVEL;

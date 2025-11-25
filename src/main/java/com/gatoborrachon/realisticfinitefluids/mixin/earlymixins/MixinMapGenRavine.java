@@ -3,6 +3,7 @@ package com.gatoborrachon.realisticfinitefluids.mixin.earlymixins;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -20,6 +21,9 @@ import net.minecraft.world.gen.MapGenRavine;
 @Mixin(MapGenRavine.class)
 public abstract class MixinMapGenRavine {
 
+	/**
+	 * ESTE CODIGO SE ENCARGA DE CONVERTIR LA LAVA DEL FONDO DE LA RAVINES POR LAVA FINITA
+	 */
     @Shadow(remap = true)
     @Final
     @Mutable
@@ -30,6 +34,10 @@ public abstract class MixinMapGenRavine {
     	field_186135_a = ModBlocks.FINITE_LAVA_STILL.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, BlockFiniteFluid.MAXIMUM_CONCEPTUAL_LEVEL); //ModBlocks.INFINITE_LAVA_SOURCE.getDefaultState();
     }
     
+    /**
+     * ESTE CODIGO SE ENCARGA DE PARCHEAR LOS TECHOS/PAREDES DE LAS RAVINES QUE SE GENERAN DEBAJO DEL MAR, PARA EVITAR QUE TENGAN FUGAS
+     * DE AGUA FINITA
+     */
     @Inject(method = "digBlock", at = @At("HEAD"), cancellable = true, remap = false)
     private void injectCustomGravelAndSandLogic(ChunkPrimer data, int x, int y, int z, int chunkX, int chunkZ,
                                                 boolean foundTop, CallbackInfo ci) {
@@ -37,7 +45,7 @@ public abstract class MixinMapGenRavine {
         IBlockState state = data.getBlockState(x, y, z);
         IBlockState up = (y + 1 < 256) ? data.getBlockState(x, y + 1, z) : null;
 
-        if (state.getMaterial() == Material.ROCK || state.getMaterial() == Material.SAND || state.getMaterial() == Material.GROUND/*state.getBlock() == Blocks.GRAVEL || state.getBlock() == Blocks.SAND || state.getBlock() == Blocks.STONE*/) {
+        if (state.getMaterial() == Material.ROCK || state.getMaterial() == Material.SAND || state.getMaterial() == Material.GROUND) {
             boolean nearWaterOrSand = false;
             if (up != null) {
                 nearWaterOrSand = up.getMaterial() == Material.WATER || up.getMaterial() == Material.SAND

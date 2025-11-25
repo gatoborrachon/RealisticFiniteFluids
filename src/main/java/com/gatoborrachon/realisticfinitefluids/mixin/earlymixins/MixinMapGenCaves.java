@@ -3,6 +3,7 @@ package com.gatoborrachon.realisticfinitefluids.mixin.earlymixins;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -42,8 +43,8 @@ public class MixinMapGenCaves {
                                                 CallbackInfo ci) {
     	//if (y>62) return;
     	Material actualBlockMaterial = state.getMaterial();
-        if (actualBlockMaterial == Material.ROCK || actualBlockMaterial == Material.SAND || actualBlockMaterial == Material.GROUND/*state.getBlock() == Blocks.GRAVEL || state.getBlock() == Blocks.SAND || state.getBlock() == Blocks.STONE || state.getBlock() == Blocks.DIRT*/) {
-            boolean nearWaterOrGravel = up.getMaterial() == Material.WATER || up.getMaterial() == Material.SAND /*.getMaterial() == Material.SAND*/
+        if (actualBlockMaterial == Material.ROCK || actualBlockMaterial == Material.SAND || actualBlockMaterial == Material.GROUND) {
+            boolean nearWaterOrGravel = up.getMaterial() == Material.WATER || up.getMaterial() == Material.SAND || up.getMaterial() == Material.GRASS || up.getMaterial() == Material.GROUND 
                 || isWaterSafe(data, x + 1, y, z)
                 || isWaterSafe(data, x - 1, y, z)
                 || isWaterSafe(data, x, y, z + 1)
@@ -54,7 +55,10 @@ public class MixinMapGenCaves {
 
                 if (y > 1 && (data.getBlockState(x, y - 1, z).getBlock() == Blocks.AIR)) {
                     data.setBlockState(x, y - 1, z, Blocks.STONE.getDefaultState());
-                } else if (y > 1 && (data.getBlockState(x, y-1, z).getMaterial() == Material.SAND || data.getBlockState(x, y, z).getMaterial() == Material.SAND)) {
+                } else if (y > 1 && (data.getBlockState(x, y-1, z).getMaterial() == Material.SAND || data.getBlockState(x, y, z).getMaterial() == Material.SAND)
+                		|| y > 1 && (data.getBlockState(x, y-1, z).getMaterial() == Material.GRASS || data.getBlockState(x, y, z).getMaterial() == Material.GRASS)
+                		|| y > 1 && (data.getBlockState(x, y-1, z).getMaterial() == Material.GROUND || data.getBlockState(x, y, z).getMaterial() == Material.GROUND)
+                		) {
                     data.setBlockState(x, y + 1, z, Blocks.STONE.getDefaultState());                	
                 }
 
@@ -65,9 +69,25 @@ public class MixinMapGenCaves {
 
     private boolean isWaterSafe(ChunkPrimer data, int x, int y, int z) {
         return x >= 0 && x < 16 && z >= 0 && z < 16 && y >= 0 && y < 256
-            && (data.getBlockState(x, y, z).getMaterial() == Material.WATER  || data.getBlockState(x, y, z).getMaterial() == Material.SAND);
+            && (data.getBlockState(x, y, z).getMaterial() == Material.WATER  || data.getBlockState(x, y, z).getMaterial() == Material.SAND || data.getBlockState(x, y, z).getMaterial() == Material.GRASS || data.getBlockState(x, y, z).getMaterial() == Material.GROUND);
     }
     
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    /**
+     * METODO VIEJO
+     */
     /*@Inject(method = "digBlock", at = @At("HEAD"), cancellable = true)
     private void injectCustomGravelLogic(ChunkPrimer data, int x, int y, int z, int chunkX, int chunkZ,
                                          boolean foundTop, IBlockState state, IBlockState up,

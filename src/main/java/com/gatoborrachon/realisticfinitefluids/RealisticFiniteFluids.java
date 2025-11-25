@@ -4,8 +4,13 @@ import com.gatoborrachon.realisticfinitefluids.events.FluidEventHandler;
 import com.gatoborrachon.realisticfinitefluids.events.FluidModelEventHandler;
 import com.gatoborrachon.realisticfinitefluids.init.ModConfig;
 import com.gatoborrachon.realisticfinitefluids.proxy.CommonProxy;
+import com.gatoborrachon.realisticfinitefluids.util.RFFFluidFixer;
 
+import net.minecraft.util.datafix.DataFixer;
+import net.minecraft.util.datafix.FixTypes;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.util.ModFixs;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.Mod.EventHandler;
@@ -82,16 +87,27 @@ public class RealisticFiniteFluids
     @EventHandler
     public void preInit(FMLPreInitializationEvent event)
     {
+        ModFixs modFixs = FMLCommonHandler.instance().getDataFixer().init(References.MODID, References.FIXER_VERSION);
+        modFixs.registerFix(FixTypes.CHUNK, new RFFFluidFixer());
+        
     	MinecraftForge.EVENT_BUS.register(FluidEventHandler.class);
     	MinecraftForge.EVENT_BUS.register(FluidModelEventHandler.class);
         ModConfig.loadConfig(event.getSuggestedConfigurationFile());
        
-        if (ModConfig.replaceVanillaFluids) {
-            System.out.println("[RFF] Replacing vanilla fluids...");
+        /*if (ModConfig.replaceVanillaFluids) {
+        	System.out.println("[RFF] Replacing vanilla fluids...");
             ModConfig.replaceVanillaFluids = false;
-            ModConfig.saveConfig();
             System.out.println("[RFF] Vanilla Fluids Replaced. replaceVanillaFluids is now false.");
+            ModConfig.saveConfig();
         }
+        
+        /*if (ModConfig.replaceOldFiniteFluids) {
+        	System.out.println("[RFF] Replacing old finite fluids...");
+            ModConfig.replaceOldFiniteFluids = false;
+            System.out.println("[RFF] Old Finite Fluids Replaced. replaceOldFiniteFluids is now false.");
+            ModConfig.saveConfig();
+        }*/
+        
                
     }
 

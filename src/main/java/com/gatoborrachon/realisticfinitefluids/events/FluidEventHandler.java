@@ -25,6 +25,7 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.entity.player.FillBucketEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.event.world.ChunkDataEvent;
@@ -337,6 +338,29 @@ public class FluidEventHandler {
         //System.out.println("[DEBUG] Evento cancelado y cubeta personalizada entregada: " + filled);
         
     }
+    
+    
+    
+    
+    
+    
+    /*@SubscribeEvent
+    public static void onMissingBlockMappings(RegistryEvent.MissingMappings<Block> event) {
+        for (RegistryEvent.MissingMappings.Mapping<Block> mapping : event.getAllMappings()) {
+            // Solo los de tu namespace de mod
+            if (!mapping.key.getNamespace().equals("realisticfinitefluids"))
+                continue;
+
+            switch (mapping.key.getPath()) {
+                case "infinite_water_source":
+                    mapping.remap(Block.getBlockFromName("realisticfinitefluids:finite_water_still"));
+                    break;
+                case "infinite_lava_source":
+                    mapping.remap(Block.getBlockFromName("realisticfinitefluids:finite_lava_still"));
+                    break;
+            }
+        }
+    }*/
     
     
     

@@ -22,20 +22,23 @@ public class RealisticFiniteFluidsMixinCoremod implements IFMLLoadingPlugin, IEa
     @Override
     public List<String> getMixinConfigs() {
         String sealMode = EarlyConfig.readBarrierMode();
-        String replaceMode = EarlyConfig.readReplacerMode();
+        //String replaceMode = EarlyConfig.readReplacerMode();
         List<String> configs = new ArrayList<>();
 
         configs.add("mixins.realisticfinitefluids.early.json");
         //LOGGER.info("MODO SELECCIONADO AL FINAL: {}", mode);
         if ("optimized".equalsIgnoreCase(sealMode)) {
-        	configs.add("mixins.realisticfinitefluids.early.optimized.json");
+        	configs.add("mixins.realisticfinitefluids.early.optimized.barrier.json");
         } else if ("unoptimized".equalsIgnoreCase(sealMode)) {
-        	configs.add("mixins.realisticfinitefluids.early.unoptimized.json");
-        }
+        	configs.add("mixins.realisticfinitefluids.early.unoptimized.barrier.json");
+        } else if ("vanilla".equalsIgnoreCase(sealMode)) {
+        	configs.add("mixins.realisticfinitefluids.early.vanilla.barrier.json");
+        } 
+        
         //LOGGER.info("MODO SELECCIONADO AL FINAL: {}", replaceMode);
-        if ("true".equalsIgnoreCase(replaceMode)) {
+        /*if ("true".equalsIgnoreCase(replaceMode)) {
         	configs.add("mixins.realisticfinitefluids.early.fluidreplacer.json");
-        }
+        }*/
         return configs;
     }
     

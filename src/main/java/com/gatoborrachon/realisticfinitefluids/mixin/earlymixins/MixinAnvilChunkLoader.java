@@ -1,6 +1,8 @@
 package com.gatoborrachon.realisticfinitefluids.mixin.earlymixins;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.spongepowered.asm.mixin.Mixin;
@@ -8,11 +10,16 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import com.gatoborrachon.realisticfinitefluids.blocks.BlockFiniteFluid;
+import com.gatoborrachon.realisticfinitefluids.init.ModConfig;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.NibbleArray;
 import net.minecraft.world.chunk.storage.AnvilChunkLoader;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 
@@ -20,18 +27,37 @@ import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 @Mixin(AnvilChunkLoader.class)
 public abstract class MixinAnvilChunkLoader {
 
-    /**
-     * Inyectamos justo después de que el chunk fue leído desde NBT,
-     * antes de que se regrese el objeto "Chunk" al servidor.
-     */
-    // Set estático para recordar qué chunks ya fueron procesados
     private static final Set<ChunkPos> processedChunks = new HashSet<>();
 
+    // -- BLOQUES A REEMPLAZAR -- 
+    private static final Map<String,String> VANILLA_TO_RFF = new HashMap<>();
+    private static final Map<String,String> OCEAN_TO_STILL = new HashMap<>();
+
+    static {
+    	//1.- Bloques vanilla --> Finitos
+        VANILLA_TO_RFF.put("minecraft:water",            "realisticfinitefluids:finite_water_still");
+        VANILLA_TO_RFF.put("minecraft:flowing_water",    "realisticfinitefluids:finite_water_flowing");
+        VANILLA_TO_RFF.put("minecraft:lava",             "realisticfinitefluids:finite_lava_still");
+        VANILLA_TO_RFF.put("minecraft:flowing_lava",     "realisticfinitefluids:finite_lava_flowing");
+
+        //2.- Bloques oceanicos --> Still
+        OCEAN_TO_STILL.put("realisticfinitefluids:infinite_water_source", "realisticfinitefluids:finite_water_still");
+        OCEAN_TO_STILL.put("realisticfinitefluids:infinite_lava_source",  "realisticfinitefluids:finite_lava_still");
+    }
+
+    //Funcion para remapear LEVELs viejos (de 0-15) a nuevos (de 0-7)
+    private int remapLevel(int old) {
+        if (old < 0) old = 0;
+        if (old > 15) old = 15;
+        return old / 2;
+    }
+    
     @Inject(
-        method = "func_75823_a", // readChunkFromNBT
-        at = @At("RETURN"),
-        cancellable = true, remap = true
-    )
+            method = "func_75823_a", // readChunkFromNBT
+            at = @At("RETURN"),
+            cancellable = true,
+            remap = true
+        )
     private void onReadChunkFromNBT(net.minecraft.world.World worldIn, NBTTagCompound nbt, CallbackInfoReturnable<Chunk> cir) {
         Chunk chunk = cir.getReturnValue();
         if (chunk == null) return;
@@ -50,13 +76,18 @@ public abstract class MixinAnvilChunkLoader {
                             if (state != null) {
                                 String blockName = state.getBlock().getRegistryName().toString();
 
+                                
+                                
                                 if (blockName.equals("minecraft:water") || blockName.equals("minecraft:flowing_water")) {
-                                    Block newBlock = Block.getBlockFromName("realisticfinitefluids:infinite_water_source");
+                                    Block newBlock = Block.getBlockFromName("realisticfinitefluids:finite_water_still").getDefaultState().withProperty(BlockFiniteFluid.LEVEL, BlockFiniteFluid.MAXIMUM_CONCEPTUAL_LEVEL).getBlock();
                                     if (newBlock != null) storageArray[i].set(x, y, z, newBlock.getDefaultState());
                                 } else if (blockName.equals("minecraft:lava") || blockName.equals("minecraft:flowing_lava")) {
-                                    Block newBlock = Block.getBlockFromName("realisticfinitefluids:infinite_lava_source");
+                                    Block newBlock = Block.getBlockFromName("realisticfinitefluids:finite_lava_still").getDefaultState().withProperty(BlockFiniteFluid.LEVEL, BlockFiniteFluid.MAXIMUM_CONCEPTUAL_LEVEL).getBlock();
                                     if (newBlock != null) storageArray[i].set(x, y, z, newBlock.getDefaultState());
                                 }
+                                
+                                
+                                
                             }
                         }
                     }
@@ -67,172 +98,112 @@ public abstract class MixinAnvilChunkLoader {
         // marcar chunk como procesado
         processedChunks.add(pos);
     }
-
-	
-    /*@Inject(
-        method = "func_75823_a", // func_75823_a --> readChunkFromNBT
-        at = @At("RETURN"),
-        cancellable = true, remap = true
-    )
-    private void onReadChunkFromNBT(net.minecraft.world.World worldIn, NBTTagCompound nbt, CallbackInfoReturnable<Chunk> cir) {
-        Chunk chunk = cir.getReturnValue();
-
-        if (chunk == null) return;
-
-        // recorrer todas las secciones del chunk
-        chunk.getBlockStorageArray(); // devuelve ExtendedBlockStorage[]
-        for (int i = 0; i < chunk.getBlockStorageArray().length; i++) {
-            if (chunk.getBlockStorageArray()[i] != null) {
-                for (int x = 0; x < 16; x++) {
-                    for (int y = 0; y < 16; y++) {
-                        for (int z = 0; z < 16; z++) {
-                            // bloque actual
-                            net.minecraft.block.state.IBlockState state = chunk.getBlockStorageArray()[i].get(x, y, z);
-
-                            if (state != null) {
-                                String blockName = state.getBlock().getRegistryName().toString();
-
-                                if (blockName.equals("minecraft:water") || blockName.equals("minecraft:flowing_water")) {
-                                    net.minecraft.block.Block newBlock = net.minecraft.block.Block.getBlockFromName("realisticfinitefluids:infinite_water_source");
-                                    if (newBlock != null) {
-                                        chunk.getBlockStorageArray()[i].set(x, y, z, newBlock.getDefaultState());
-                                    }
-                                } else if (blockName.equals("minecraft:lava") || blockName.equals("minecraft:flowing_lava")) {
-                                    net.minecraft.block.Block newBlock = net.minecraft.block.Block.getBlockFromName("realisticfinitefluids:infinite_lava_source");
-                                    if (newBlock != null) {
-                                        chunk.getBlockStorageArray()[i].set(x, y, z, newBlock.getDefaultState());
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }*/
 }
 
 
-/*@Mixin(ChunkProviderServer.class)
-public abstract class MixinChunkProviderServer {
+/*
 
-    /*@Inject(method = "func_186025_d", at = @At("RETURN"), remap = true) //func_186025_d --> provideChunk
-    private void replaceVanillaLiquids(int chunkX, int chunkZ, CallbackInfoReturnable<Chunk> cir) {
+
+    @Inject(
+        method = "func_75823_a", // readChunkFromNBT
+        at = @At("HEAD"),
+        cancellable = true,
+        remap = true
+    )
+    private void onReadChunkFromNBT(net.minecraft.world.World worldIn, NBTTagCompound nbt, CallbackInfoReturnable<Chunk> cir) {
         Chunk chunk = cir.getReturnValue();
-        WorldServer world = (WorldServer) chunk.getWorld();
+        if (chunk == null) return;
 
-        if (world.isRemote) return;
-        if (FluidEventHandler.isReplaced(chunk)) return; // ya reemplazado
-        FluidEventHandler.markReplaced(chunk); // marcar antes para evitar recursion
+        ChunkPos pos = chunk.getPos();
+        if (processedChunks.contains(pos)) return;
+        
+        
+        
+        NBTTagList sectionsNBT = nbt.getTagList("Sections", 10);
+        for (int i = 0; i < sectionsNBT.tagCount(); i++) {
+            NBTTagCompound sectionNBT = sectionsNBT.getCompoundTagAt(i);
+            if (!sectionNBT.hasKey("Palette", 9)) continue; // TAG_LIST
 
-        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
-        int replacedCount = 0;
+            NBTTagList palette = sectionNBT.getTagList("Palette", 10);
+            for (int j = 0; j < palette.tagCount(); j++) {
+                NBTTagCompound entry = palette.getCompoundTagAt(j);
+                String name = entry.getString("Name");
+                if (OCEAN_TO_STILL.containsKey(name)) {
+                    // reemplaza el bloque en el NBT
+                    entry.setString("Name", OCEAN_TO_STILL.get(name));
 
-        // Limitar Y para no tocar todo el mundo, por ejemplo hasta nivel de mar + 10
-        int minY = 1;
-        int maxY = world.getSeaLevel() + 100;
-
-        // Limpiar ticks pendientes solo para este chunk y solo para agua/lava
-        List<NextTickListEntry> pendingTicks = world.getPendingBlockUpdates(chunk, true);
-        if (pendingTicks != null) {
-            Iterator<NextTickListEntry> it = pendingTicks.iterator();
-            while (it.hasNext()) {
-                NextTickListEntry entry = it.next();
-                Block b = entry.getBlock();
-                if (b == Blocks.WATER || b == Blocks.FLOWING_WATER || b == Blocks.LAVA || b == Blocks.FLOWING_LAVA) {
-                    it.remove();
-                } else {
-                    world.scheduleUpdate(entry.position, b, 0); // re-agendar otros ticks
+                    // Si hay Properties (como LEVEL), ponle LEVEL = 8
+                    if (!entry.hasKey("Properties", 10)) {
+                        entry.setTag("Properties", new NBTTagCompound());
+                    }
+                    entry.getCompoundTag("Properties").setInteger("LEVEL", BlockFiniteFluid.MAXIMUM_CONCEPTUAL_LEVEL);
                 }
             }
         }
+        
+        
+        
+        
 
-        for (int x = 0; x < 16; x++) {
-            for (int z = 0; z < 16; z++) {
-                for (int y = minY; y <= maxY; y++) {
-                    pos.setPos((chunkX << 4) + x, y, (chunkZ << 4) + z);
-                    IBlockState state = chunk.getBlockState(pos);
-                    Block block = state.getBlock();
+        ExtendedBlockStorage[] storageArray = chunk.getBlockStorageArray();
 
-                    if (block == Blocks.WATER || block == Blocks.FLOWING_WATER) {
-                        chunk.setBlockState(pos.toImmutable(),
-                                ModBlocks.INFINITE_WATER_SOURCE.getDefaultState()
-                                        .withProperty(BlockFiniteFluid.LEVEL, 15));
-                        replacedCount++;
-                    } else if (block == Blocks.LAVA || block == Blocks.FLOWING_LAVA) {
-                        chunk.setBlockState(pos.toImmutable(),
-                                ModBlocks.INFINITE_LAVA_SOURCE.getDefaultState()
-                                        .withProperty(BlockFiniteFluid.LEVEL, 15));
-                        replacedCount++;
+        for (ExtendedBlockStorage section : storageArray) {
+            if (section == null) continue;
+            for (int x = 0; x < 16; x++) {
+                for (int y = 0; y < 16; y++) {
+                    for (int z = 0; z < 16; z++) {
+                        IBlockState state = section.get(x, y, z);
+                        if (state == null) continue;
+
+                        Block block = state.getBlock();
+                        String name = block.getRegistryName().toString();
+
+                        //Remapear bloques vanilla --> Finitos
+                        //if (ModConfig.replaceVanillaFluids) {
+                            if (VANILLA_TO_RFF.containsKey(name)) {
+                                Block newBlock = Block.getBlockFromName(VANILLA_TO_RFF.get(name));
+                                if (newBlock != null) {
+                                    IBlockState newState = newBlock.getDefaultState()
+                                            .withProperty(BlockFiniteFluid.LEVEL, BlockFiniteFluid.MAXIMUM_CONCEPTUAL_LEVEL);
+                                    section.set(x, y, z, newState);
+                                }
+                                continue;
+                            }
+                        //}
+
+                        //if (ModConfig.replaceOldFiniteFluids) {
+                            //Remapear bloques oceanicos --> Still
+                            /*if (OCEAN_TO_STILL.containsKey(name)) {
+                                //System.out.println("BLOQUE: "+name);
+                                Block newBlock = Block.getBlockFromName(OCEAN_TO_STILL.get(name));
+                                if (newBlock != null) {
+                                    IBlockState newState = newBlock.getDefaultState()
+                                            .withProperty(BlockFiniteFluid.LEVEL, BlockFiniteFluid.MAXIMUM_CONCEPTUAL_LEVEL);
+                                    section.set(x, y, z, newState);
+                                }
+                                continue;
+                            }*/ /*
+
+                            //Remapear LEVELs de los demas bloques finitos
+                            if (block instanceof BlockFiniteFluid) {
+                                int oldLevel = state.getValue(BlockFiniteFluid.LEVEL);
+                                int newLevel = remapLevel(oldLevel);
+                                IBlockState newState = state.withProperty(BlockFiniteFluid.LEVEL, newLevel);
+                                section.set(x, y, z, newState);
+                            }
+                        //}
+                        
+                        
                     }
                 }
             }
         }
 
-        System.out.println("[MixinFluidReplace] Reemplazados " + replacedCount + " bloques en chunk: " + chunkX + ", " + chunkZ);
-    }*/
-
-
-
-
-    /*@Inject(method = "func_186025_d", at = @At("RETURN"), remap = true) //func_186025_d --> provideChunk
-    private void replaceVanillaLiquids(int chunkX, int chunkZ, CallbackInfoReturnable<Chunk> cir) {
-        Chunk chunk = cir.getReturnValue();
-        World world = chunk.getWorld();
-
-        if (world.isRemote) return;
-        if (FluidEventHandler.isReplaced(chunk)) return; // ya reemplazado
-
-        // --- LIMPIEZA DE TICKS PENDIENTES ---
-        if (world instanceof WorldServer) {
-            WorldServer ws = (WorldServer) world;
-            List<NextTickListEntry> pendingTicks = ws.getPendingBlockUpdates(chunk, true); // remove=true
-            int removed = 0;
-            if (pendingTicks != null) {
-                for (NextTickListEntry tick : pendingTicks) {
-                    Block b = tick.getBlock();
-                    if (b == Blocks.WATER || b == Blocks.FLOWING_WATER
-                     || b == Blocks.LAVA  || b == Blocks.FLOWING_LAVA) {
-                        removed++;
-                    }
-                }
-            }
-            System.out.println("[MixinFluidReplace] Eliminados " + removed + " ticks pendientes de fluidos en chunk " + chunk.getPos());
-        }
-        // --- FIN LIMPIEZA DE TICKS ---
-
-        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
-        int replacedCount = 0;
-
-        for (int x = 0; x < 16; x++) {
-            for (int z = 0; z < 16; z++) {
-                for (int y = 1; y < world.getHeight(); y++) {
-                    pos.setPos((chunkX << 4) + x, y, (chunkZ << 4) + z);
-                    IBlockState state = chunk.getBlockState(pos);
-
-                    if (state.getBlock() == Blocks.WATER || state.getBlock() == Blocks.FLOWING_WATER) {
-                        chunk.setBlockState(pos.toImmutable(),
-                                ModBlocks.INFINITE_WATER_SOURCE.getDefaultState()
-                                        .withProperty(BlockFiniteFluid.LEVEL, 15));
-                        replacedCount++;
-                    } else if (state.getBlock() == Blocks.LAVA || state.getBlock() == Blocks.FLOWING_LAVA) {
-                        chunk.setBlockState(pos.toImmutable(),
-                                ModBlocks.INFINITE_LAVA_SOURCE.getDefaultState()
-                                        .withProperty(BlockFiniteFluid.LEVEL, 15));
-                        replacedCount++;
-                    }
-                }
-            }
-        }
-
-        FluidEventHandler.markReplaced(chunk);
-        System.out.println("[MixinFluidReplace] Reemplazados " + replacedCount + " bloques en chunk: " + chunkX + ", " + chunkZ);
+        processedChunks.add(pos);
     }
+
     
-    
-}*/
 
 
-
-
+*/
 

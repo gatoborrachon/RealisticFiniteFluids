@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.gatoborrachon.realisticfinitefluids.mixin.earlymixins",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "mixins.realisticfinitefluids.refmap.json",
+  "mixins": [
+	"MixinMapGenCaves",
+	"MixinMapGenRavine",
+	"MixinWorldGenMinable"
+	],
+  "client": [],
+  "server": []
+}

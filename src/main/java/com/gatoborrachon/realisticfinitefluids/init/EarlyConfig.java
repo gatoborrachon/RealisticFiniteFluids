@@ -26,7 +26,7 @@ public class EarlyConfig {
         try {
             File file = new File(CONFIG_PATH);
             //LOGGER.info("¿EL ARCHIVO EXISTE? {}", file.exists());
-            if (!file.exists()) return "optimized";
+            if (!file.exists()) return "vanilla";
             for (String line : Files.readAllLines(file.toPath())) {
                 //LOGGER.info("LINES DEL ARCHIVO:" +line);
                 if (line.startsWith("    S:oceanBarrierMode")) {
@@ -37,26 +37,34 @@ public class EarlyConfig {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return "optimized";
+        return "vanilla";
     }
     
-	public static String readReplacerMode() {
+	/*public static String readReplacerMode() {
         try {
             File file = new File(CONFIG_PATH);
+            ////boolean firstTry = false;
+            ////boolean secondTry = false;
             //LOGGER.info("¿EL ARCHIVO EXISTE? {}", file.exists());
             if (!file.exists()) return "false";
             for (String line : Files.readAllLines(file.toPath())) {
                 //LOGGER.info("LINES DEL ARCHIVO:" +line);
                 if (line.startsWith("    B:replaceVanillaFluids")) {
                     //LOGGER.info("ENCONTRADO replaceVanillaFluids en el archivo");
-                    return line.split("=")[1].trim();
-                }
-            }
+                    ////firstTry = Boolean.parseBoolean(line.split("=")[1].trim());
+                	return line.split("=")[1].trim();
+                } /*else if (line.startsWith("    B:replaceOldFiniteFluids")) {
+                    //LOGGER.info("ENCONTRADO replaceOldFiniteFluids en el archivo");
+                    secondTry = Boolean.parseBoolean(line.split("=")[1].trim());
+                }*/
+            /*} 
+            //LOGGER.info("Replace Vanilla: "+firstTry + " // Replace Finite Fluid: "+secondTry);
+            //return firstTry || secondTry ? "true" : "false"; 
         } catch (Exception e) {
             e.printStackTrace();
         }
         return "false";
-    }
+    }*/
     
 	public static String readUniversalCompat() {
         try {

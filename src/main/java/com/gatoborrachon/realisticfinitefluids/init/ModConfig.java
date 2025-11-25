@@ -30,6 +30,7 @@ public class ModConfig {
     public static boolean shouldTickRandomly;
     
     public static boolean shouldFluidsBeInfinite;
+    public static boolean replaceOldFiniteFluids;
 
 
     private static final String CATEGORY_GENERAL = "general";
@@ -91,8 +92,8 @@ public class ModConfig {
         waterCanFreeze = config.getBoolean("waterCanFreeze", CATEGORY_GENERAL, true, 
         		"whether water can become ice.");
         
-        oceanBarrierMode = config.getString("oceanBarrierMode", CATEGORY_GENERAL, "optimized",
-                "Ocean barrier method (to avoid leaving openings between underwater mines and the ocean): none, optimized, unoptimized.");
+        oceanBarrierMode = config.getString("oceanBarrierMode", CATEGORY_GENERAL, "vanilla",
+                "Ocean barrier method (to avoid leaving openings between underwater mines and the ocean): none, vanilla, optimized, unoptimized.");
 
         bucketRemoveLowFluid = config.getBoolean("bucketRemoveLowFluid", CATEGORY_GENERAL, false, 
         		"Whether buckets should remove finite fluids on the world when there's not enough fluid to make a full bucket.");
@@ -100,8 +101,8 @@ public class ModConfig {
         waterLightOpacity = config.getInt("waterLightOpacity", CATEGORY_GENERAL, 1, 0, Integer.MAX_VALUE, 
         		"The amount of light the water will remove when it passes through it. 3 = Vanilla, 1 = Default.");
         
-        replaceVanillaFluids = config.getBoolean("replaceVanillaFluids", CATEGORY_GENERAL, false, 
-        		"Whether to replace vanilla fluids from already existing worlds or not. This option auto-sets to false when manually set to true (affects game 1 time before resetting itself to false).");
+        //replaceVanillaFluids = config.getBoolean("replaceVanillaFluids", CATEGORY_GENERAL, false, 
+        //		"Whether to replace vanilla fluids from already existing worlds or not. This option auto-sets to false when manually set to true (affects game 1 time before resetting itself to false).");
         
         universalCompat = config.getBoolean("universalCompat", CATEGORY_GENERAL, false, 
         		"Enables the Universal Compat Coremod");
@@ -179,6 +180,10 @@ public class ModConfig {
         
         shouldFluidsBeInfinite = config.getBoolean("shouldFluidsBeInfinite", CATEGORY_GENERAL, true, 
         		"Whether big fluid masses (lakes, oceans) should act as infinite fluid sources.");
+        
+        //replaceOldFiniteFluids = config.getBoolean("replaceOldFiniteFluids", CATEGORY_GENERAL, false, 
+        //		"Whether to replace old finite fluids from already existing worlds or not (old Oceanic blocks and old LEVELs interval). This option auto-sets to false when manually set to true (affects game 1 time before resetting itself to false).");
+        
         
         //Debug
         debug = config.getBoolean("debug", CATEGORY_GENERAL, false, 

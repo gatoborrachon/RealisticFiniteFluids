@@ -17,11 +17,6 @@ public class MixinWorldGenMinable {
 	/**
 	 * EVITAR QUE LAS MASAS DE GRAVA MINABLES APAREZCAN EN MEDIO DEL OCEANO, PARA EVITAR QUE LAS CUEVAS SE INUNDEN POR QUE AHORA EXISTE UNA PARED
 	 * DE GRAVA QUE AL FINAL SE VA A CAER
-	 * 
-	 * @param worldIn
-	 * @param rand
-	 * @param position
-	 * @param cir
 	 */
     @Inject(method = "func_180709_b", at = @At("HEAD"), cancellable = true, remap = true) //func_180709_b --> generate
     private void cancelIfNearWater(World worldIn, Random rand, BlockPos position, CallbackInfoReturnable<Boolean> cir) {
