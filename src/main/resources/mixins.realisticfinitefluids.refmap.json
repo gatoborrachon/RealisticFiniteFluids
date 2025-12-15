@@ -4,71 +4,12 @@
       "harvestBlock": "func_180657_a",
       "turnIntoWater": "func_185679_b"
     },
-	"net.minecraft.world.chunk.Chunk": { 
-		"populate": "func_186030_a"
-	},
-	"net.minecraft.world.gen.ChunkGeneratorOverworld": { 
-		"populate": "func_185931_b"
-	},
 	"net.minecraft.world.gen.feature.WorldGenMinable": { 
 		"generate": "func_180709_b"
 	},
 	"net.minecraft.block.BlockLilyPad": { 
 		"canBlockStay": "func_180671_f",
 		"canSustainBush": "func_185514_i"
-	},
-	"net.minecraft.world.gen.structure.StructureOceanMonumentPieces.Piece": { 
-		"WATER": "field_175822_f"
-	},
-	"net.minecraft.world.gen.structure.StructureComponent": {
-		"boundingBox": "field_74887_e",
-		"fillWithBlocks": "func_175804_a",
-		"setBlockState": "func_175811_a",
-		"clearCurrentPositionBlocksUpwards": "func_74871_b",
-		"replaceAirAndLiquidDownwards": "func_175808_b",
-		"addComponentParts": "func_74875_a"
-	},
-	"net.minecraft.world.gen.structure.StructureVillagePieces$Village": {
-		"averageGroundLvl": "field_143015_k",
-		"getBiomeSpecificBlockState": "func_175847_a",
-		"getAverageGroundLevel": "func_74889_b",
-		"addComponentParts": "func_74875_a"
-	},
-	"net.minecraft.world.gen.structure.StructureVillagePieces$Well": {
-		"averageGroundLvl": "field_143015_k",
-		"getBiomeSpecificBlockState": "func_175847_a",
-		"getAverageGroundLevel": "func_74889_b",
-		"addComponentParts": "func_74875_a"
-	},
-	"net.minecraft.world.gen.structure.StructureVillagePieces$Field1": {
-		"averageGroundLvl": "field_143015_k",
-		"getBiomeSpecificBlockState": "func_175847_a",
-		"getAverageGroundLevel": "func_74889_b",
-		"addComponentParts": "func_74875_a",
-		"cropTypeA": "field_82679_b",
-		"cropTypeB": "field_82680_c",
-		"cropTypeC": "field_82678_d",
-		"cropTypeD": "field_82681_h"
-	},
-	"net.minecraft.world.gen.structure.StructureVillagePieces$Field2": {
-		"averageGroundLvl": "field_143015_k",
-		"getBiomeSpecificBlockState": "func_175847_a",
-		"getAverageGroundLevel": "func_74889_b",
-		"addComponentParts": "func_74875_a",
-		"cropTypeA": "field_82675_b",
-		"cropTypeB": "field_82676_c"
-	},
-	"net.minecraft.world.gen.MapGenCaves": {
-		"BLK_LAVA": "field_186126_a"
-	},
-	"net.minecraft.world.gen.MapGenRavine": {
-		"FLOWING_LAVA": "field_186135_a"
-	},
-	"net.minecraft.world.biome.BiomeSwamp": {
-		"genTerrainBlocks": "func_180622_a"
-	},
-	"net.minecraft.client.renderer.EntityRenderer": {
-		"func_78466_h": "updateFogColor"
 	},
 	"net.minecraft.entity.Entity": {
 		"posX": "field_70165_t",
@@ -89,18 +30,40 @@
 	"net.minecraft.client.renderer.ActiveRenderInfo": {
 		"getBlockStateAtEntityViewpoint": "func_186703_a"
 	},
-	"net.minecraft.world.biome.Biome": {
-		"WATER": "field_185372_h"
+	"net.minecraft.block.BlockDynamicLiquid": {
+		"onBlockAdded": "func_176213_c",
+		"updateTick": "func_180650_b"
 	},
-	"net.minecraft.world.biome.BiomeDecorator": {
-		"genDecorations": "func_150513_a"
+	"net.minecraft.block.BlockStaticLiquid": {
+		"neighborChanged": "func_189540_a",
+		"updateTick": "func_180650_b"
 	},
-	"net.minecraft.world.chunk.storage.AnvilChunkLoader": {
-		"readChunkFromNBT": "func_75823_a"
+	"net.minecraftforge.fluids.BlockFluidClassic": {
+		"canCollideCheck": "func_176209_a",
+		"updateTick": "func_180650_b"
 	},
-	"jaredbgreat.climaticbiome.biomes.decorators.VolcanoDecorator": {
-		"genDecorations": "func_150513_a",
-		"immediateBlockTick": "func_189507_a"
+	"net.minecraft.client.renderer.BlockRendererDispatcher": {
+		"renderBlock": "func_175018_a",
+		"blockModelRenderer": "field_175027_c",
+		"getModelForState": "func_184389_a",
+		"fluidRenderer": "field_175025_e"
+	},
+	"net.minecraft.item.ItemBucket": {
+		"onItemRightClick": "func_77659_a",
+		"field_77876_a": "field_77876_a"
+	},
+	"net.minecraftforge.client.model.ModelFluid.FluidLoader": {
+		"loadModel": "func_177594_c"
+	},
+	"net.minecraft.client.renderer.BlockFluidRenderer": {
+		"renderFluid": "func_178270_a",
+		"blockColors": "field_187500_a",
+		"atlasSpritesLava": "field_178272_a",
+		"atlasSpritesWater": "field_178271_b",
+		"atlasSpriteWaterOverlay": "field_187501_d"
+	},
+	"net.minecraft.block.BlockLiquid": {
+		"LEVEL": "field_176367_b"
 	}
   }
 }

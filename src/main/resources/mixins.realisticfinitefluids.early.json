@@ -5,18 +5,11 @@
   "compatibilityLevel": "JAVA_8",
   "refmap": "mixins.realisticfinitefluids.refmap.json",
   "mixins": [
-	"MixinBlockLilyPad",
-	"MixinFluid",
 	"MixinFluidUtil",
-	"MixinForgeHooks",
-	"MixinChunkGeneratorOverworld",
-	"MixinBlockIce",
-	"MixinOceanMonumentPiece",
-	"MixinBiomeSwamp",
-	"MixinStructureComponent",
 	"MixinEntity",
-	"MixinBiomeDecorator",
-	"MixinWorld"
+	"MixinActiveRenderInfo",
+	"MixinWorldGenMinable",
+	"MixinItemBucket"
 	],
   "client": [],
   "server": []

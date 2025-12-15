@@ -3,9 +3,14 @@ package com.gatoborrachon.realisticfinitefluids;
 import com.gatoborrachon.realisticfinitefluids.events.FluidEventHandler;
 import com.gatoborrachon.realisticfinitefluids.events.FluidModelEventHandler;
 import com.gatoborrachon.realisticfinitefluids.init.ModConfig;
+import com.gatoborrachon.realisticfinitefluids.logic.FiniteFluidLogic;
 import com.gatoborrachon.realisticfinitefluids.proxy.CommonProxy;
+import com.gatoborrachon.realisticfinitefluids.util.RFFFluidFixer;
 
+import net.minecraft.util.datafix.FixTypes;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.util.ModFixs;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.Mod.EventHandler;
@@ -63,20 +68,28 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
  * TODO LIST ACTUAL --> 
  * COMPLETADO 1.- Termianr de remover estrucruras que generen agua vanilla (WorldGenLiquids, //BiomeSwamp, etc)
  * COMPLETADO 2.- A WEBO Checar imcompatibilidades (actualmente seria con la IC2 FluidCell, los tanques de BuildCraft, y la generacion realista de ClimaticBiomes)
- * 3.- Ver como hacer que en los biomas donde (con agua vanilla) aparece hielo en la superficie, pues esto mismo funcione con mis bloques, debo buscar como lo hace vanilla normalmente
+ * COMPLETADO 3.- Ver como hacer que en los biomas donde (con agua vanilla) aparece hielo en la superficie, pues esto mismo funcione con mis bloques, debo buscar como lo hace vanilla normalmente
  * COMPLETADO 4.- Evitar que la evaporacion de agua sea activa mientras llueve
  * 5.- Ver que onda con las cubetas de PrimalCore y el Brew Kettle de Growthcraft (porque no funciona a pesar del universal compat coremod)
  * COMPLETADO 6.- Arreglar texturas del flowing water
  * 
  */
 
+
+
+
+//TODO --> 
+// COMPLETADO 1) Volver a hacer el DataFixer ()
+// COMPLETADO 2) Hacer unaa lista de todos los Fluids (que aparezca en config, para una referencia estatica de todos los Fluids)
+// COMPLETADO 3) Arreglar los remaps de los Mixins
+
+// COMPLETADO 4) Arreglar el bug visual del agua (hasta el final, me vale verga)
+// 5) Arreglar la textura de los items de cada fluid
+
 @Mod(modid = References.MODID, name = References.NAME, version = References.VERSION)
 public class RealisticFiniteFluids
 {
 	
-	
-    //private static Logger logger;
-    
 	@Instance
 	public static RealisticFiniteFluids instance;
 	
@@ -86,42 +99,27 @@ public class RealisticFiniteFluids
     @EventHandler
     public void preInit(FMLPreInitializationEvent event)
     {
+        //System.out.println("[RFF] CHECK PreInit");
+        ModFixs modFixs = FMLCommonHandler.instance().getDataFixer().init(References.MODID, References.FIXER_VERSION);
+        modFixs.registerFix(FixTypes.CHUNK, new RFFFluidFixer());
+        
     	MinecraftForge.EVENT_BUS.register(FluidEventHandler.class);
     	MinecraftForge.EVENT_BUS.register(FluidModelEventHandler.class);
         ModConfig.loadConfig(event.getSuggestedConfigurationFile());
-       
-        if (ModConfig.replaceVanillaFluids) {
-            // Corre tu mixin de reemplazo de agua/lava
-            System.out.println("[RFF] Replacing vanilla fluids...");
-            
-            // Una vez terminado, desactiva la flag en el config
-            ModConfig.replaceVanillaFluids = false;
-            ModConfig.saveConfig(); // Método que guardaría el config actualizado en disco
-            System.out.println("[RFF] Vanilla Fluids Replaced. replaceVanillaFluids is now false.");
-        }
-               
+        FiniteFluidLogic.initFiniteFluidVariables();
+        
+        
     }
 
     @EventHandler
-    public void init(FMLInitializationEvent event)
-    {
+    public void init(FMLInitializationEvent event) {
+        //System.out.println("[RFF] CHECK Init");
     	
-    	
-
     }
     
     @EventHandler
-    public void postInit(FMLInitializationEvent event)
-    {
-        //VanillaWaterOverride.overrideWaterBlock(ModBlocks.FINITE_WATER_FLOWING);
-
+    public void postInit(FMLInitializationEvent event) {
+        //System.out.println("[RFF] CHECK PostInit");
     }
-    
-    //public static final ThreadLocal<Boolean> IS_POPULATING = ThreadLocal.withInitial(() -> false);
-
-
-    
-
-
     
 }

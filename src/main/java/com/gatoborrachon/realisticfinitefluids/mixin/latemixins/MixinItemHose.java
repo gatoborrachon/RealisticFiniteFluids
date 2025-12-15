@@ -33,8 +33,8 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 import com.tiviacz.travelersbackpack.gui.inventory.InventoryTravelersBackpack;
 import com.tiviacz.travelersbackpack.items.ItemHose;
 import com.tiviacz.travelersbackpack.util.Reference;
-import com.gatoborrachon.realisticfinitefluids.blocks.BlockFiniteFluid;
-import com.gatoborrachon.realisticfinitefluids.blocks.BlockNewInfiniteSource;
+import com.gatoborrachon.realisticfinitefluids.References;
+import com.gatoborrachon.realisticfinitefluids.interfaces.IRealisticFiniteFluid;
 import com.gatoborrachon.realisticfinitefluids.logic.FiniteFluidLogic;
 import com.gatoborrachon.realisticfinitefluids.logic.NewFluidType;
 import com.tiviacz.travelersbackpack.capability.CapabilityUtils;
@@ -48,7 +48,7 @@ public abstract class MixinItemHose extends Item /*extends MixinItem*/ {
 	    private static final String NBT_KEY_FLUID_LEFT   = "FiniteFluidLeft";    // registry name (e.g. "water")
 	    private static final String NBT_KEY_FLUID_RIGHT  = "FiniteFluidRight";
 
-	    private static final int LEVELS_PER_BUCKET = 16;   // 1000 mb
+	    private static final int LEVELS_PER_BUCKET = References.MAXIMUM_CONCEPTUAL_LEVEL;   // 1000 mb
 
 	    @Shadow
 	    public abstract FluidTank getSelectedFluidTank(ItemStack stack, InventoryTravelersBackpack inv);
@@ -107,8 +107,8 @@ public abstract class MixinItemHose extends Item /*extends MixinItem*/ {
 	        return tag != null && tag.hasKey(nbtKeyLevelsForSide(side));
 	    }
 	    private static int getFiniteLevels(ItemStack stack, int side) {
-	        if (!hasFiniteLevels(stack, side)) return 0;
-	        return Math.max(0, stack.getTagCompound().getInteger(nbtKeyLevelsForSide(side)));
+	        if (!hasFiniteLevels(stack, side)) return References.MINIMUM_LEVEL;
+	        return Math.max(References.MINIMUM_LEVEL, stack.getTagCompound().getInteger(nbtKeyLevelsForSide(side)));
 	    }
 	    private static String getFiniteFluidName(ItemStack stack, int side) {
 	        if (stack == null || stack.getTagCompound() == null) return "";
@@ -120,11 +120,11 @@ public abstract class MixinItemHose extends Item /*extends MixinItem*/ {
 	        NBTTagCompound tag = stack.getTagCompound();
 	        if (tag == null) tag = new NBTTagCompound();
 
-	        if (levels <= 0) {
+	        if (levels <= References.MINIMUM_LEVEL) {
 	            tag.removeTag(nbtKeyLevelsForSide(side));
 	            tag.removeTag(nbtKeyFluidForSide(side));
 	        } else {
-	            int clamped = clampMax > 0 ? Math.min(levels, clampMax) : levels;
+	            int clamped = clampMax > References.MINIMUM_LEVEL ? Math.min(levels, clampMax) : levels;
 	            tag.setInteger(nbtKeyLevelsForSide(side), clamped);
 	            if (fluidName != null && !fluidName.isEmpty()) {
 	                tag.setString(nbtKeyFluidForSide(side), fluidName);
@@ -135,7 +135,7 @@ public abstract class MixinItemHose extends Item /*extends MixinItem*/ {
 
 	    // =============== Conversión Levels <-> mB (bucket=1000mB=16 levels) ===============
 	    private static int levelsToMB(int levels) {
-	        if (levels <= 0) return 0;
+	        if (levels <= References.MINIMUM_LEVEL) return References.MINIMUM_LEVEL;
 	        // floor para no sobrellenar
 	        return (int)Math.floor(levels * 1000.0 / LEVELS_PER_BUCKET);
 	    }
@@ -155,7 +155,7 @@ public abstract class MixinItemHose extends Item /*extends MixinItem*/ {
 	    private static void syncTankFromLevels(FluidTank tank, int levelsConceptual, @Nullable String fluidName) {
 	        if (tank == null) return;
 	        tank.drain(Integer.MAX_VALUE, true); // limpiar
-	        if (levelsConceptual <= 0 || fluidName == null || fluidName.isEmpty()) return;
+	        if (levelsConceptual <= References.MINIMUM_LEVEL || fluidName == null || fluidName.isEmpty()) return;
 	        if (!FluidRegistry.isFluidRegistered(fluidName)) return;
 	        int mb = levelsToMB(levelsConceptual);
 	        if (mb <= 0) return;
@@ -226,6 +226,8 @@ public abstract class MixinItemHose extends Item /*extends MixinItem*/ {
 	        if ((storedFluidName == null || storedFluidName.isEmpty()) && tankFluid != null) {
 	            storedFluidName = tankFluid.getName();
 	        }
+	        
+
 
 	        // === MODO 1: SUCK (sólo recoger; JAMÁS colocar) ===
 	        if (hoseMode == 1) {
@@ -235,12 +237,12 @@ public abstract class MixinItemHose extends Item /*extends MixinItem*/ {
 	                Block block = state.getBlock();
 
 	                // ---- Caso 1 & 3: apuntando a finito -> recoger suavemente ----
-	                if (block instanceof BlockFiniteFluid) {
-	                    BlockFiniteFluid finiteBlock = (BlockFiniteFluid) block;
+	                if (block instanceof IRealisticFiniteFluid) {
+	                	IRealisticFiniteFluid finiteBlock = (IRealisticFiniteFluid) block;
 	                    Fluid blockFluid = finiteBlock.getFluid();
 	                    int spaceLeft = Math.max(0, MAX_LEVELS_TANK - currentLevels);
 	                    if (spaceLeft > 0) {
-	                        int blockConcept = state.getValue(BlockFiniteFluid.LEVEL) + 1;
+	                        int blockConcept = finiteBlock.getConceptualVolume(worldIn, pos, state); //state.getValue(BlockFiniteFluid.LEVEL) + 1;
 	                        int delta = FiniteFluidLogic.FluidWorldInteraction.bucketRemoveFluidEvenLowCollect(worldIn, pos, blockConcept, spaceLeft, ((IFluidBlock)state.getBlock()).getFluid());
 	                        if (delta > 0) {
 	                            currentLevels += delta;
@@ -328,7 +330,7 @@ public abstract class MixinItemHose extends Item /*extends MixinItem*/ {
 	                        Block finiteFlowing = ((NewFluidType) FiniteFluidLogic.liquids.get(fluidTypeId)).flowingBlock;
 
 	                        // Caso 5: sneak + colocar suavemente en red (pos y adyacentes)
-	                        if (atBlock instanceof BlockFiniteFluid) {
+	                        if (atBlock instanceof IRealisticFiniteFluid) {
 	                            List<BlockPos> targets = Arrays.asList(placePos, placePos.north(), placePos.south(), placePos.east(), placePos.west());
 	                            // Vamos a colocar ya sea 1 cubo (16) o todo si estamos en sneak
 	                            int toPlace = sneak ? currentLevels : Math.min(currentLevels, LEVELS_PER_BUCKET);
@@ -344,7 +346,7 @@ public abstract class MixinItemHose extends Item /*extends MixinItem*/ {
 	                            }
 	                        } else {
 	                            // Caso 6 (sneak): distribuir incluso si no está lleno (un solo target)
-	                            if (sneak && currentLevels <= 16) {
+	                            if (sneak && currentLevels <= References.MAXIMUM_CONCEPTUAL_LEVEL) {
 	                                List<BlockPos> targets = Arrays.asList(placePos);
 	                                int remaining = FiniteFluidLogic.FluidWorldInteraction.distributeEquallyNoAdyFluid(worldIn, targets, currentLevels, finiteFlowing);
 	                                int placed = currentLevels - remaining;

@@ -8,8 +8,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import com.gatoborrachon.realisticfinitefluids.blocks.BlockFiniteFluid;
-import com.gatoborrachon.realisticfinitefluids.init.ModBlocks;
+import com.gatoborrachon.realisticfinitefluids.References;
+import com.gatoborrachon.realisticfinitefluids.interfaces.IRealisticFiniteFluid;
 import com.gatoborrachon.realisticfinitefluids.logic.FiniteFluidLogic;
 import com.gatoborrachon.realisticfinitefluids.logic.NewFluidType;
 
@@ -37,7 +37,7 @@ public abstract class MixinItemFluidCell {
 
     private static final String NBT_KEY_LEVELS = "FiniteLevels"; // niveles conceptuales 1..16
     //private static final String NBT_KEY_FLUID = "FiniteFluid";   // registry name, e.g. "water"
-    private static final int MAX_LEVELS = 16;
+    private static final int MAX_LEVELS = References.MAXIMUM_CONCEPTUAL_LEVEL;
 
     @Inject(method = "onItemUse", at = @At("HEAD"), cancellable = true)
     private void onItemUseCustom(EntityPlayer player, World world, BlockPos pos, EnumHand hand,
@@ -104,13 +104,16 @@ public abstract class MixinItemFluidCell {
             block = state.getBlock();
         }
         
-        boolean targetIsFinite = (block instanceof BlockFiniteFluid);
+        boolean targetIsFinite = (block instanceof IRealisticFiniteFluid);
     	////System.out.println("targetIsFinite: "+targetIsFinite);
 
         // si ni el item ni el target están relacionados con finite fluids -> NO interceptamos
         if (!targetIsFinite && currentLevels == 0 && tankMB == 0) {
             return; // dejamos que el comportamiento original suceda
         }
+        
+        IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)FiniteFluidLogic.liquids.get(FiniteFluidLogic.onFiniteFluidIndex).flowingBlock);
+
 
         /* 
 //1) +NORMAL + FluidCell CON liquido + apuntando a bloque de agua finita (obviamente considera si apuntas a lava/agua y tenemos agua/lava en la IC2 FluidCell) --> collectSmoothly solo si la celda no esta llena (menos de 16 niveles conceptuales)
@@ -134,7 +137,7 @@ CASOS QUE REQUIEREN CONFIRMAR EL BLOQUE A COLOCAR --> Caso 2, 6, 1.2, 5
 
         // si apuntamos a un BlockFiniteFluid, intenta las interacciones especiales
         if (targetIsFinite) {
-            BlockFiniteFluid finiteBlock = (BlockFiniteFluid) block;
+            IRealisticFiniteFluid finiteBlock = (IRealisticFiniteFluid) block;
             Fluid blockFluid = finiteBlock.getFluid(); // asumes que existe getter returning Fluid
             ////System.out.println("blockFluid: "+blockFluid);
             
@@ -172,7 +175,7 @@ CASOS QUE REQUIEREN CONFIRMAR EL BLOQUE A COLOCAR --> Caso 2, 6, 1.2, 5
             	////System.out.println("DEBUG CASO 1.1");
 
                 // RECoger suavemente
-                int blockLevelConceptual = state.getValue(BlockFiniteFluid.LEVEL) + 1;
+                int blockLevelConceptual = realisticFluid.getConceptualVolume(world, pos, state); //state.getValue(BlockFiniteFluid.LEVEL) + 1;
                 // usa la nueva función que devuelve cuantos niveles conceptuales EXTRA se obtuvieron
                 int delta = FiniteFluidLogic.FluidWorldInteraction.bucketRemoveFluidEvenLowCollect(world, pos, blockLevelConceptual, MAX_LEVELS - currentLevels, ((IFluidBlock)state.getBlock()).getFluid());
             	////System.out.println("DEBUG CASO 1.1:delta "+delta);
@@ -220,7 +223,7 @@ CASOS QUE REQUIEREN CONFIRMAR EL BLOQUE A COLOCAR --> Caso 2, 6, 1.2, 5
             		
             	////System.out.println("DEBUG CASO 3");
                 // intentar recoger desde el bloque al que apuntamos (equivalente a llenar una celda vacía)
-                int blockLevelConceptual = state.getValue(BlockFiniteFluid.LEVEL) + 1;
+                int blockLevelConceptual = realisticFluid.getConceptualVolume(world, pos, state); //state.getValue(BlockFiniteFluid.LEVEL) + 1;
             	////System.out.println("DEBUG CASO 3:blockLevelConceptual"+blockLevelConceptual);
                 int delta = FiniteFluidLogic.FluidWorldInteraction.bucketRemoveFluidEvenLowCollect(world, pos, blockLevelConceptual, MAX_LEVELS - currentLevels, ((IFluidBlock)state.getBlock()).getFluid());
             	////System.out.println("DEBUG CASO 3:delta"+delta);
@@ -250,7 +253,7 @@ CASOS QUE REQUIEREN CONFIRMAR EL BLOQUE A COLOCAR --> Caso 2, 6, 1.2, 5
             /*if (!world.mayPlace(ModBlocks.FINITE_WATER_FLOWING, placePos, false, side, null)) {
                 placePos = pos.offset(side);
             }*/
-            if (world.isAirBlock(placePos) || world.mayPlace(ModBlocks.FINITE_WATER_FLOWING, placePos, false, side, null)) {
+            if (world.isAirBlock(placePos) || world.mayPlace(FiniteFluidLogic.liquids.get(0).flowingBlock, placePos, false, side, null)) {
                 // colocamos usando distributeEqually solo con un objetivo: la posición
                 List<BlockPos> targets = Arrays.asList(placePos);
                 
@@ -282,13 +285,13 @@ CASOS QUE REQUIEREN CONFIRMAR EL BLOQUE A COLOCAR --> Caso 2, 6, 1.2, 5
         	////System.out.println("DEBUG CASO 2");
         	////System.out.println("DEBUG CASO 2:currentLevels: "+currentLevels);
             BlockPos placePos = pos;
-            if (!world.mayPlace(ModBlocks.FINITE_WATER_FLOWING, placePos, false, side, null)) {
+            if (!world.mayPlace(FiniteFluidLogic.liquids.get(0).flowingBlock, placePos, false, side, null)) {
                 placePos = pos.offset(side);
             }
-            if (world.isAirBlock(placePos) || world.mayPlace(ModBlocks.FINITE_WATER_FLOWING, placePos, false, side, null)) {
+            if (world.isAirBlock(placePos) || world.mayPlace(FiniteFluidLogic.liquids.get(0).flowingBlock, placePos, false, side, null)) {
             	Block blockFluidType = ((NewFluidType)FiniteFluidLogic.liquids.get(fluidType)).flowingBlock;
             	////System.out.println("DEBUG CASO 2:blockFluidType: "+blockFluidType);
-            	IBlockState blockstateToPlace = blockFluidType.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, MAX_LEVELS - 1);
+            	IBlockState blockstateToPlace = realisticFluid.setVolume(null, null, blockFluidType.getDefaultState(), References.MAXIMUM_LEVEL); //blockFluidType.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, MAX_LEVELS - 1);
             	
             	////System.out.println("DEBUG CASO 2:blockstateToPlace: "+blockstateToPlace);
                 world.setBlockState(placePos, blockstateToPlace); //ModBlocks.FINITE_WATER_FLOWING.getDefaultState().withProperty(RFFBlock.LEVEL, MAX_LEVELS - 1));

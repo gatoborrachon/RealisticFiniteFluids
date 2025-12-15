@@ -6,36 +6,26 @@ import zone.rong.mixinbooter.IEarlyMixinLoader;
 
 import java.util.*;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import com.gatoborrachon.realisticfinitefluids.init.EarlyConfig;
+//import org.apache.logging.log4j.LogManager;
+//import org.apache.logging.log4j.Logger;
 
 @IFMLLoadingPlugin.Name("RealisticFiniteFluidsCore")
 @IFMLLoadingPlugin.MCVersion("1.12.2")
 @IFMLLoadingPlugin.SortingIndex(Integer.MIN_VALUE)
 public class RealisticFiniteFluidsMixinCoremod implements IFMLLoadingPlugin, IEarlyMixinLoader {
 
-    private static final Logger LOGGER = LogManager.getLogger("RealisticFiniteFluids");
+    //private static final Logger LOGGER = LogManager.getLogger("RealisticFiniteFluids");
 
     
     @Override
     public List<String> getMixinConfigs() {
-        String sealMode = EarlyConfig.readBarrierMode();
-        String replaceMode = EarlyConfig.readReplacerMode();
         List<String> configs = new ArrayList<>();
 
         configs.add("mixins.realisticfinitefluids.early.json");
-        //LOGGER.info("MODO SELECCIONADO AL FINAL: {}", mode);
-        if ("optimized".equalsIgnoreCase(sealMode)) {
-        	configs.add("mixins.realisticfinitefluids.early.optimized.json");
-        } else if ("unoptimized".equalsIgnoreCase(sealMode)) {
-        	configs.add("mixins.realisticfinitefluids.early.unoptimized.json");
-        }
-        //LOGGER.info("MODO SELECCIONADO AL FINAL: {}", replaceMode);
-        if ("true".equalsIgnoreCase(replaceMode)) {
-        	configs.add("mixins.realisticfinitefluids.early.fluidreplacer.json");
-        }
+    	configs.add("mixins.realisticfinitefluids.early.basefluidsmixins.json");
+    	
+    	//configs.add("mixins.realisticfinitefluids.early.registrydebug.json");
+
         return configs;
     }
     
@@ -47,18 +37,7 @@ public class RealisticFiniteFluidsMixinCoremod implements IFMLLoadingPlugin, IEa
     }
 
     @Override public String[] getASMTransformerClass() {
-        String universalCompatEnabled = EarlyConfig.readUniversalCompat();
-
-        //LOGGER.info("MODO SELECCIONADO AL FINAL: {}", universalCompatEnabled);
-        if ("true".equalsIgnoreCase(universalCompatEnabled)) {
-            return new String[] { "com.gatoborrachon.realisticfinitefluids.coremod.ChunkHellTransformer",
-					  			  "com.gatoborrachon.realisticfinitefluids.coremod.BlocksGlobalTransformer",
-					  			  "com.gatoborrachon.realisticfinitefluids.coremod.BiomeTransformer" };
-        };
-        
-        return new String[] { "com.gatoborrachon.realisticfinitefluids.coremod.ChunkHellTransformer",
-        					  "com.gatoborrachon.realisticfinitefluids.coremod.BiomeTransformer" };
-        
+        return new String[] { };
     }
     
     @Override public String getModContainerClass() { return null; }
@@ -67,6 +46,6 @@ public class RealisticFiniteFluidsMixinCoremod implements IFMLLoadingPlugin, IEa
 
     @Override
     public void injectData(Map<String, Object> data) {
-        // Aquí puedes modificar cosas del classloader si lo necesitas
+    	
     }
 }

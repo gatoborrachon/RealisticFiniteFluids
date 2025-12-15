@@ -1,6 +1,27 @@
+v2.0.0
+-Removed: BlockFiniteFluid's
+-Removed: Universal Compat Coremod
+-Added: Mixins to BlockFluidClassic, BlockDynamicLiquid, and BlockStaticLiquid
+-Added: Compat for the vanilla'n'forge renderers (BlockFluidRenderer, ModelFluid)
+
+
+v1.7.1
+-Added: New fluid barrier method: Vanilla (the best and default to use).
+-Added: DataFixer to 1) automatically turn vanilla fluids into realistic finite fluids (replaceVanillaFluids is no longer required), 2) convert old oceanic fluids into still fluids and 3) convert the old 0-15 LEVEL of already existing fluids into the new 0-7 LEVEL interval.
+-Note: I STILL RECOMMEND TO DO A BACKUP
+
+v1.7.0
+-Added: Config option to let you decide whether mig masses of fluids (water/lava) should be infinite. (shouldFluidsBeInfinite).
+-Refactor (BIG ONE): Removed Ocean Blocks (all the logic is carried by Flowing and Still fluids, for compat purposes).
+-Refactor: Refactored all the references (i could find) about LEVELs (0,1,15,16, and others like 5,9,10,14, etc) to let me get these medium values (between 0-15/1-16) from a global Reference Value.
+*This will allow me to modify the max and minimum values from 1 point.
+-Refactor: Changed both literal and conceptual getVolume and setVolume for unification purposes (aparently nothing is broken).
+-Refactor: Unified both world.setBlockState() and state.getValue(LEVEL) inside BlockFiniteFluid for global control over blocks placed and Property LEVEL reading.
+*This is intended to implement compat with FluidLogged API.
+
 v1.6.3
 -Fixed: Superficial layer of water from rivers and ocean becomes ice on a cold biome when chunk is first generated.
--Refactor: Names of some classes (BlockNewWater and BlockNewLava)
+-Refactor: Names of some classes (BlockNewWater and BlockNewLava).
 
 v1.6.2
 -Added: Config options to let you modify the behavior of the flow of water on creative players and to control whether fluids should tick randomly.
