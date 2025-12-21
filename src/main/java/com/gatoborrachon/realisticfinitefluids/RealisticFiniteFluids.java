@@ -86,6 +86,13 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 // COMPLETADO 4) Arreglar el bug visual del agua (hasta el final, me vale verga)
 // 5) Arreglar la textura de los items de cada fluid
 
+// 6) Arreglar compat con FluidLogged API (mixin aa su clase que hace referencia a LEVELs y CORNER_LEVELS paraa usar Reference.LEVEL)
+// 7) Arreglar un bug visual con los bloques de fluidos cuando tienen a otro bloque de fluido al lado
+// 8) IMPLEMENTAR net.minecraftforge.event.ForgeEventFactory.fireFluidPlaceBlockEvent(worldIn, blockpos, pos, Blocks.FIRE.getDefaultState()));
+//worldIn.setBlockState(pos.down(), net.minecraftforge.event.ForgeEventFactory.fireFluidPlaceBlockEvent(worldIn, pos.down(), pos, Blocks.STONE.getDefaultState()));
+//JAVA SEARCH --> net.minecraftforge.event.ForgeEventFactory.firePlayerLoadingEvent(net.minecraft.entity.player.EntityPlayer, net.minecraft.world.storage.IPlayerFileData, java.lang.String)
+
+
 @Mod(modid = References.MODID, name = References.NAME, version = References.VERSION)
 public class RealisticFiniteFluids
 {

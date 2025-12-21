@@ -20,7 +20,7 @@ public class References {
 	
     public static final String MODID = "realisticfinitefluids";
     public static final String NAME = "Realistic Finite Fluids";
-    public static final String VERSION = "2.0.0";
+    public static final String VERSION = "2.1.0";
 	public static final String CLIENT_PROXY_CLASS = "com.gatoborrachon.realisticfinitefluids.proxy.ClientProxy";
 	public static final String COMMON_PROXY_CLASS = "com.gatoborrachon.realisticfinitefluids.proxy.CommonProxy";
 	
@@ -83,16 +83,19 @@ public class References {
     
     public static final PropertyInteger LEVEL = PropertyInteger.create("level", MINIMUM_LEVEL, MAXIMUM_REAL_LEVEL); //MEJOR NO TOCAMOS ESTO, SE VA ALV EL REGISTRO DE BLOQUES
     public static final IUnlistedProperty<Map<EnumFacing, IBlockState>> NEIGHBOR_STATES = new UnlistedPropertyNeighborStates();
-	public static final IUnlistedProperty<Float>[] LEVEL_CORNERS = new IUnlistedProperty[] {
+    //public static final PropertyFloat[] LEVEL_CORNERS_EXP = new PropertyFloat[4];
+    public static final IUnlistedProperty<Float>[] LEVEL_CORNERS = new IUnlistedProperty[] {
     new PropertyFloat("level_nw"),  // h00
     new PropertyFloat("level_ne"),  // h10
     new PropertyFloat("level_sw"),  // h01
     new PropertyFloat("level_se")   // h11
     };
+    
 	public static final IUnlistedProperty<Integer> FLUID_COLOR = new UnlistedPropertyColor("fluid_color");
 	public static final IUnlistedProperty<Vec3d> FLOW_DIRECTION = new UnlistedPropertyFlowDirection("flow_direction");
 
 	public static final UnlistedPropertyBoolean IS_STILL = new UnlistedPropertyBoolean("is_still");
+	public static final UnlistedPropertyBoolean IS_GASEOUS = new UnlistedPropertyBoolean("is_gaseous");
     
     
 }

@@ -37,6 +37,7 @@ import com.gatoborrachon.realisticfinitefluids.References;
 import com.gatoborrachon.realisticfinitefluids.interfaces.IRealisticFiniteFluid;
 import com.gatoborrachon.realisticfinitefluids.logic.FiniteFluidLogic;
 import com.gatoborrachon.realisticfinitefluids.logic.NewFluidType;
+import com.gatoborrachon.realisticfinitefluids.logic.RealisticFiniteFluidFunctions;
 import com.tiviacz.travelersbackpack.capability.CapabilityUtils;
 import com.tiviacz.travelersbackpack.fluids.FluidEffectRegistry;
 
@@ -234,7 +235,7 @@ public abstract class MixinItemHose extends Item /*extends MixinItem*/ {
 	            if (fluidRT != null && fluidRT.typeOfHit == RayTraceResult.Type.BLOCK && playerIn.canPlayerEdit(fluidRT.getBlockPos(), fluidRT.sideHit, stack)) {
 	                BlockPos pos = fluidRT.getBlockPos();
 	                IBlockState state = worldIn.getBlockState(pos);
-	                Block block = state.getBlock();
+	                Block block = RealisticFiniteFluidFunctions.getBlock(worldIn, pos, state);
 
 	                // ---- Caso 1 & 3: apuntando a finito -> recoger suavemente ----
 	                if (block instanceof IRealisticFiniteFluid) {
@@ -243,7 +244,7 @@ public abstract class MixinItemHose extends Item /*extends MixinItem*/ {
 	                    int spaceLeft = Math.max(0, MAX_LEVELS_TANK - currentLevels);
 	                    if (spaceLeft > 0) {
 	                        int blockConcept = finiteBlock.getConceptualVolume(worldIn, pos, state); //state.getValue(BlockFiniteFluid.LEVEL) + 1;
-	                        int delta = FiniteFluidLogic.FluidWorldInteraction.bucketRemoveFluidEvenLowCollect(worldIn, pos, blockConcept, spaceLeft, ((IFluidBlock)state.getBlock()).getFluid());
+	                        int delta = FiniteFluidLogic.FluidWorldInteraction.bucketRemoveFluidEvenLowCollect(worldIn, pos, blockConcept, spaceLeft, ((IFluidBlock)RealisticFiniteFluidFunctions.getBlock(worldIn, pos, state)).getFluid());
 	                        if (delta > 0) {
 	                            currentLevels += delta;
 	                            if (currentLevels > MAX_LEVELS_TANK) currentLevels = MAX_LEVELS_TANK;
@@ -308,7 +309,7 @@ public abstract class MixinItemHose extends Item /*extends MixinItem*/ {
 	                int x = solidRT.getBlockPos().getX();
 	                int y = solidRT.getBlockPos().getY();
 	                int z = solidRT.getBlockPos().getZ();
-	                if (!worldIn.getBlockState(solidRT.getBlockPos()).getBlock().isReplaceable(worldIn, solidRT.getBlockPos())) {
+	                if (!RealisticFiniteFluidFunctions.getBlock(worldIn, solidRT.getBlockPos(), worldIn.getBlockState(solidRT.getBlockPos())) .isReplaceable(worldIn, solidRT.getBlockPos())) {
 	                    switch (solidRT.sideHit) {
 	                        case WEST:  --x; break;
 	                        case EAST:  ++x; break;
@@ -321,7 +322,7 @@ public abstract class MixinItemHose extends Item /*extends MixinItem*/ {
 	                }
 	                BlockPos placePos = new BlockPos(x, y, z);
 	                IBlockState at = worldIn.getBlockState(placePos);
-	                Block atBlock = at.getBlock();
+	                Block atBlock = RealisticFiniteFluidFunctions.getBlock(worlyIn, placePos, at);
 
 	                // Si tenemos levels en NBT, intentamos colocar "finito" primero
 	                if (currentLevels > 0) {

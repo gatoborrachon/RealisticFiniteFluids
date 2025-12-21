@@ -17,7 +17,11 @@ public class RealisticFiniteFluidsMixinLoader implements ILateMixinLoader {
         	configs.add("mixins.realisticfinitefluids.ic2.json");
         } if (Loader.isModLoaded("travelersbackpack")) {
         	configs.add("mixins.realisticfinitefluids.travelersbackpack.json");
+        } if (Loader.isModLoaded("fluidlogged_api")) {
+        	configs.add("mixins.realisticfinitefluids.fluidloggedapi.json");
         }
+        
+        
         /* if (Loader.isModLoaded("MODID")) {
         	configs.add("mixins.realisticfinitefluids.MODID.json");
         }*/

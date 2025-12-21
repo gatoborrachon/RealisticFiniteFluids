@@ -1,8 +1,9 @@
 package com.gatoborrachon.realisticfinitefluids.events;
 
-import com.gatoborrachon.realisticfinitefluids.compat.FluidCompat;
+import com.gatoborrachon.realisticfinitefluids.References;
 import com.gatoborrachon.realisticfinitefluids.interfaces.IRealisticFiniteFluid;
 import com.gatoborrachon.realisticfinitefluids.logic.FiniteFluidLogic;
+import com.gatoborrachon.realisticfinitefluids.logic.RealisticFiniteFluidFunctions;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -14,6 +15,7 @@ import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraft.client.renderer.GlStateManager;
@@ -24,8 +26,8 @@ public class FluidModelEventHandler {
 
 	@SubscribeEvent(priority = EventPriority.LOWEST)
 	public static void onModelRegistry(ModelRegistryEvent event) {
-        //System.out.println("[RFF] CHECK ModelRegistryEvent");
-        FluidCompat.registerNewModelForFluids();
+		//TODO Registrar bien este bloque
+	    ForgeRegistries.BLOCKS.register(References.DEBUG_BLOCK);
 	}
 	
     //DEBUG
@@ -52,8 +54,8 @@ public class FluidModelEventHandler {
             for (BlockPos pos : BlockPos.getAllInBox(player.getPosition().add(-8, -4, -8),
                                                      player.getPosition().add(8, 4, 8))) {
                 IBlockState state = world.getBlockState(pos);
-                if (state.getBlock() instanceof IRealisticFiniteFluid) {
-                    int level = ((IRealisticFiniteFluid)state.getBlock()).getVolume(world, pos, state); //state.getValue(BlockFiniteFluid.LEVEL);
+                if (RealisticFiniteFluidFunctions.getBlock(world, pos, state) instanceof IRealisticFiniteFluid) {
+                    int level = ((IRealisticFiniteFluid)RealisticFiniteFluidFunctions.getBlock(world, pos, state)).getVolume(world, pos, state); //state.getValue(BlockFiniteFluid.LEVEL);
                     //String typeOfBlock = state.getBlock().getLocalizedName().split(" ")[0];
                     
                     double x = pos.getX() + 0.5;
@@ -61,7 +63,7 @@ public class FluidModelEventHandler {
                     double z = pos.getZ() + 0.5;
 
                     GlStateManager.pushMatrix();
-                    GlStateManager.translate(x, y, z);
+                    GlStateManager.translate(x, y-0.5, z);
                     GlStateManager.rotate(-mc.getRenderManager().playerViewY, 0, 1, 0);
                     GlStateManager.rotate(mc.getRenderManager().playerViewX, 1, 0, 0);
                     GlStateManager.scale(-0.025F, -0.025F, 0.025F);

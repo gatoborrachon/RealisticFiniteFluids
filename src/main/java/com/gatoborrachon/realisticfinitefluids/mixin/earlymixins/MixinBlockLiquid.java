@@ -3,18 +3,21 @@ package com.gatoborrachon.realisticfinitefluids.mixin.earlymixins;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.gatoborrachon.realisticfinitefluids.References;
+import com.gatoborrachon.realisticfinitefluids.logic.RealisticFiniteFluidFunctions;
 
 import net.minecraft.block.BlockLiquid;
-import net.minecraft.block.properties.PropertyInteger;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.launchwrapper.Launch;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.IBlockAccess;
 
 @Mixin(BlockLiquid.class)
 public abstract class MixinBlockLiquid {
@@ -38,4 +41,13 @@ public abstract class MixinBlockLiquid {
 
         levelField.set(null, References.LEVEL); // reasignamos a tu LEVEL
     }
+    
+    
+    
+    @Overwrite//(remap = References.onDev) //getFlow
+    public Vec3d getFlow(IBlockAccess worldIn, BlockPos pos, IBlockState state) {
+    	return RealisticFiniteFluidFunctions.calculateFlowVector(worldIn, pos, false);
+    }
+    
+    
 }

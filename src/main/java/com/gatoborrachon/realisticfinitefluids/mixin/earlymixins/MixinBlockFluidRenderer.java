@@ -8,6 +8,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import com.gatoborrachon.realisticfinitefluids.References;
 import com.gatoborrachon.realisticfinitefluids.interfaces.IRealisticFiniteFluid;
 import com.gatoborrachon.realisticfinitefluids.logic.FiniteFluidLogic;
+import com.gatoborrachon.realisticfinitefluids.logic.RealisticFiniteFluidFunctions;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockDynamicLiquid;
@@ -54,11 +55,11 @@ public class MixinBlockFluidRenderer {
         float colorG = (float)(blockColor >> 8  & 255) / 255.0F;
         float colorB = (float)(blockColor       & 255) / 255.0F;
 
-        Vec3d flow = ((IRealisticFiniteFluid)state.getBlock()).calculateFlowVector(world, pos);       
+        Vec3d flow = ((IRealisticFiniteFluid)RealisticFiniteFluidFunctions.getBlock(world, pos, state)).calculateFlowVector(world, pos, true);       
         
-        int fluidIndex = FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(state.getBlock());
+        int fluidIndex = FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(RealisticFiniteFluidFunctions.getBlock(world, pos, state));
         
-        boolean isFlowing = state.getBlock() instanceof BlockDynamicLiquid;
+        boolean isFlowing = RealisticFiniteFluidFunctions.getBlock(world, pos, state) instanceof BlockDynamicLiquid;
 
         
         
@@ -108,7 +109,7 @@ public class MixinBlockFluidRenderer {
 
     	for (int i = 0; i < horizontals.length; i++) {
     	    EnumFacing face = horizontals[i];
-    	    Block neighborBlock = world.getBlockState(pos.offset(face)).getBlock();
+    	    Block neighborBlock = RealisticFiniteFluidFunctions.getBlock(world, pos.offset(face), world.getBlockState(pos.offset(face)));
 	        int neighborFluidIndex = FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(neighborBlock); 
 	        
     	    renderSide[i] = neighborFluidIndex != fluidIndex && state.shouldSideBeRendered(world, pos, face);

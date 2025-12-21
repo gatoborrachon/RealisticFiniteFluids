@@ -2,6 +2,10 @@ package com.gatoborrachon.realisticfinitefluids.logic;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockAccess;
+import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidRegistry;
 
 public class NewFluidType {
     public final Block flowingBlock;
@@ -26,8 +30,12 @@ public class NewFluidType {
         return block == flowingBlock || block == stillBlock; // || block == oceanBlock;
     }
 
-    public boolean isFluid(IBlockState state) {
-        return isFluid(state.getBlock());
+    public boolean isFluid(IBlockAccess world, BlockPos pos, IBlockState state) {
+        return isFluid(RealisticFiniteFluidFunctions.getBlock(world, pos, state));
+    }
+    
+    public Fluid getFluid() {
+    	return FluidRegistry.getFluid(this.name);
     }
     
     /*public Block getFluid(Block block){

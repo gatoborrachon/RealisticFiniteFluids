@@ -1,3 +1,10 @@
+v2.2.0
+-Added: 
+
+v2.1.0
+-Added: Compat for waterwheels that use getFlowVector() or getFlow()
+-Fixed: Render issue with blocks that are not fluids (i still don't fix the issue with FluidBlocks Item Render)
+
 v2.0.0
 -Removed: BlockFiniteFluid's
 -Removed: Universal Compat Coremod

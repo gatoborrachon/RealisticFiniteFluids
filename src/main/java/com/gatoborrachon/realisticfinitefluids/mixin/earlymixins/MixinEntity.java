@@ -11,7 +11,6 @@ import com.gatoborrachon.realisticfinitefluids.interfaces.IRealisticFiniteFluid;
 import com.gatoborrachon.realisticfinitefluids.logic.RealisticFiniteFluidFunctions;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
@@ -63,8 +62,8 @@ public abstract class MixinEntity {
         BlockPos blockPos = new BlockPos(this.field_70165_t, eyeY, this.field_70161_v);
         IBlockState state = this.field_70170_p.getBlockState(blockPos);
 
-        if (state.getBlock() instanceof IRealisticFiniteFluid && state.getMaterial() == Material.WATER) {
-            Boolean result = ((IRealisticFiniteFluid) state.getBlock())
+        if (RealisticFiniteFluidFunctions.getBlock(field_70170_p, blockPos, state) instanceof IRealisticFiniteFluid && state.getMaterial() == Material.WATER) {
+            Boolean result = ((IRealisticFiniteFluid) RealisticFiniteFluidFunctions.getBlock(field_70170_p, blockPos, state))
                                 .isEntityInsideMaterialForOverlay(this.field_70170_p, blockPos, state, self, eyeY, materialIn);
             if (result != null) {
                 cir.setReturnValue(result);
@@ -102,6 +101,7 @@ public abstract class MixinEntity {
 
         return this.field_70171_ac;
     }
+
     
     
     
@@ -130,7 +130,7 @@ public abstract class MixinEntity {
                 for (int z = minZ; z < maxZ; z++) {
                     BlockPos pos = new BlockPos(x, y, z);
                     IBlockState state = field_70170_p.getBlockState(pos);
-                    Block block = state.getBlock();
+                    Block block = RealisticFiniteFluidFunctions.getBlock(field_70170_p, pos, state);
 
                     // Agua vanilla --> usar el método original
                     /*if (block instanceof BlockLiquid && !(block instanceof IRealisticFiniteFluid)) {
@@ -141,7 +141,7 @@ public abstract class MixinEntity {
 
                     // Lógica custom para agua finita
                     double fluidSurface = pos.getY() + 1.0D;
-                    if (block instanceof IRealisticFiniteFluid) {
+                    if (block instanceof IRealisticFiniteFluid && !((IRealisticFiniteFluid)block).getFluid().isGaseous() ) {
                         int level = RealisticFiniteFluidFunctions.getConceptualVolume(null, null, state);//state.getValue(BlockFiniteFluid.LEVEL) + 1;
                         fluidSurface = pos.getY() + (level / (double)References.MAXIMUM_CONCEPTUAL_LEVEL);
                     } else {
@@ -163,7 +163,7 @@ public abstract class MixinEntity {
         //BlockPos above = new BlockPos(bb.minX, bb.minY + 1, bb.minZ);
         IBlockState stateBelow = field_70170_p.getBlockState(below);
         //IBlockState stateAbove = field_70170_p.getBlockState(above);
-        Block blockBelow = stateBelow.getBlock();
+        Block blockBelow = RealisticFiniteFluidFunctions.getBlock(field_70170_p, below, stateBelow);
         //Block blockAbove = stateAbove.getBlock();
 
         /*if (!(blockBelow instanceof IRealisticFiniteFluid || stateBelow.getMaterial() == Material.WATER)) {
@@ -172,6 +172,7 @@ public abstract class MixinEntity {
             return;
         }*/
         
+        //Esto es para que cuando estamos en un solo LEVEL de agua y no queremos estancarnos
         if (!(blockBelow instanceof IRealisticFiniteFluid || stateBelow.getMaterial() == Material.WATER)) {
             cir.setReturnValue(this.originalHandleWaterMovement());
             cir.cancel();
@@ -184,8 +185,12 @@ public abstract class MixinEntity {
             this.field_70143_R = 0.0F;
             this.field_70171_ac = true;
             this.func_70066_B();
-            //TODO CHECAR ESTA MADDRE
-            if (field_70170_p.getBlockState(new BlockPos(bb.minX, bb.minY, bb.minZ)).getBlock() instanceof BlockFluidClassic) cir.setReturnValue(this.originalHandleWaterMovement());
+            //TODO CHECAR ESTA MADDRE, sirve para que los fluidos de otros mods tengan empuje
+            BlockPos newBlockPos = new BlockPos(bb.minX, bb.minY, bb.minZ);
+            Block supposedBlock = RealisticFiniteFluidFunctions.getBlock(field_70170_p, newBlockPos, field_70170_p.getBlockState(newBlockPos));
+            if (supposedBlock instanceof BlockFluidClassic 
+            		&& !((IRealisticFiniteFluid)supposedBlock).getFluid().isGaseous()) 
+            	cir.setReturnValue(this.originalHandleWaterMovement());
             else cir.setReturnValue(true);
         } else {
             this.field_70171_ac = false;

@@ -95,9 +95,9 @@ public class FluidCompat {
 	    // ------------------------------
 	    // 6. Registrar en Liquids y RENDER_ENTRIES
 	    // ------------------------------
-	    int gravity = (fluid.getDensity() < 0) ? 1 : -1;
+	    //int gravity = (fluid.getDensity() < 0) ? 1 : -1;
+	    int gravity = (fluid.isGaseous()) ? 1 : -1;
 	    addFiniteFluidType(fluid.getName(), fluidBlock, fluidBlock, gravity, indexFromConfig);
-                
         //System.out.println("[RFF] FINAL BLOCK: "+fluid.getBlock());
 	    //System.out.println("[RFF] Registrado fluido finito para: " + fluid.getName());
 	}
@@ -125,98 +125,6 @@ public class FluidCompat {
 		FiniteFluidLogic.blockToFluidIndex.put(still, currentIndex);
 	}
 	
-
-
-	
-	
-	
-	
-	
-    public static Map<String, Fluid> ModelResourceLocationToFluidMap = new HashMap<>();
-
-	public static void registerNewModelForFluids() {
-	    ForgeRegistries.BLOCKS.register(References.DEBUG_BLOCK);
-	    
-		for (Fluid fluid : FluidRegistry.getRegisteredFluids().values()) {
-			if (fluid.getName() != "water" && fluid.getName() != "lava") {
-				Block fluidBlock = fluid.getBlock();
-				String originalNameHash = "blocks/water_still";    
-				
-				
-				if (fluidBlock == null)  {
-					if (FiniteFluidLogic.createBlocksForBlocklessFluids) {
-						fluidBlock = new BlockFluidClassic(fluid, Material.WATER);
-						String name = "finite_" + fluid.getName();
-						fluidBlock.setRegistryName(name);
-						fluidBlock.setTranslationKey(name);
-						ForgeRegistries.BLOCKS.register(fluidBlock);
-
-						Block finalBlock = fluidBlock;
-
-						ModelLoader.setCustomStateMapper(fluidBlock, new StateMapperBase() {
-							@Override
-							protected ModelResourceLocation getModelResourceLocation(IBlockState state) {
-								return new ModelResourceLocation(finalBlock.getRegistryName().toString(), "fluid");
-							}
-						});
-
-						System.out.println("[RFF] Fluid +'"+fluid.getName()+"' has no default Block. Making one for it.");
-						fluid.setBlock(fluidBlock);
-					} else {
-						System.out.println("[RFF] Fluid +'"+fluid.getName()+"' has no default Block.");			    		
-					}  
-			    }
-				
-
-				Field field = null;
-				Map<IRegistryDelegate<Block>, IStateMapper> map = null;
-
-				if (fluidBlock != null) {
-					//Obtenemos el campo static customStateMappers (el cual tiene un registro de bloque-IStateMapper)
-					try {
-						field = ModelLoader.class.getDeclaredField("customStateMappers");
-					} catch (NoSuchFieldException | SecurityException e1) {
-						e1.printStackTrace();
-					}
-					//System.out.println("FIELD: "+field);
-
-					//Seteamos el campo a ser visible + obtenemos el campo.
-					field.setAccessible(true);
-					try {
-						map = (Map<IRegistryDelegate<Block>, IStateMapper>) field.get(null);
-						//System.out.println("MAP: "+map);
-					} catch (IllegalArgumentException | IllegalAccessException e1) {
-						e1.printStackTrace();
-					}
-
-					//Obtenemos el IStateMapper para cada bloque que le metamos.
-					IStateMapper mapper = map.get(fluidBlock.delegate);            
-					//StateMapperBase mapper = (StateMapperBase) map.get(fluidBlock.delegate);            
-
-					//Y le seteamos a un nuevo mapa de IBlockState-ModelResourceLocation el IStateMapper que obtuvimos del bloque en cuestion.
-					if (mapper == null)  {
-						if (FiniteFluidLogic.debug) System.out.println("[RFF] Block '"+fluidBlock.toString()+"' has no IStateMapper. Giving it its own name.");
-						originalNameHash = fluidBlock.getRegistryName().toString(); //"blocks/water_still";
-						continue;
-					}
-					Map<IBlockState, ModelResourceLocation> map2 = mapper
-							.putStateModelLocations(
-									fluidBlock);
-
-					//Obtenemos el ModelResourceLocation para este bloque en especifico, con el cual podemos comparar directamente en la funcion loadModel del 
-					//FluidModel de Forge, y asi nunca pasar por alto a un bloque BlockFluidClassic
-					for (Map.Entry<IBlockState, ModelResourceLocation> e : map2.entrySet()) {
-						//System.out.println(e.getKey() + " -> " + e.getValue());
-						originalNameHash = e.getValue().toString();
-						if (!originalNameHash.equals("blocks/water_still"))  break;
-					}
-				}
-
-				ModelResourceLocationToFluidMap.put(originalNameHash, fluid);
-
-			}
-		}
-	}
 
 	
 }

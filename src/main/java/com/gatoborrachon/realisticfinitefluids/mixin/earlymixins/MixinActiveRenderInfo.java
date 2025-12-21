@@ -5,6 +5,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 
 import com.gatoborrachon.realisticfinitefluids.References;
 import com.gatoborrachon.realisticfinitefluids.interfaces.IRealisticFiniteFluid;
+import com.gatoborrachon.realisticfinitefluids.logic.RealisticFiniteFluidFunctions;
 
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.state.IBlockState;
@@ -28,9 +29,9 @@ public class MixinActiveRenderInfo {
         {
             float f = 0.0F;
             //TODO Confirmar que no me beneficio de usar IRealisticFiniteFluid
-            if (iblockstate.getBlock() instanceof BlockLiquid) // BlockLiquid)
+            if (RealisticFiniteFluidFunctions.getBlock(worldIn, blockpos, iblockstate) instanceof BlockLiquid) // BlockLiquid)
             {
-                f = 1F - ((float)((IRealisticFiniteFluid)iblockstate.getBlock()).getConceptualVolume(worldIn, blockpos, iblockstate)/(float)References.MAXIMUM_CONCEPTUAL_LEVEL); //BlockLiquid.getLiquidHeightPercent(((Integer)iblockstate.getValue(BlockLiquid.LEVEL)).intValue()) - 0.11111111F;
+                f = 1F - ((float)((IRealisticFiniteFluid)RealisticFiniteFluidFunctions.getBlock(worldIn, blockpos, iblockstate)).getConceptualVolume(worldIn, blockpos, iblockstate)/(float)References.MAXIMUM_CONCEPTUAL_LEVEL); //BlockLiquid.getLiquidHeightPercent(((Integer)iblockstate.getValue(BlockLiquid.LEVEL)).intValue()) - 0.11111111F;
             }
 
             float f1 = (float)(blockpos.getY() + 1) - f;
@@ -41,6 +42,6 @@ public class MixinActiveRenderInfo {
             }
         }
 
-        return iblockstate.getBlock().getStateAtViewpoint(iblockstate, worldIn, blockpos, vec3d);
+        return RealisticFiniteFluidFunctions.getBlock(worldIn, blockpos, iblockstate).getStateAtViewpoint(iblockstate, worldIn, blockpos, vec3d);
     }
 }

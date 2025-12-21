@@ -101,7 +101,7 @@ public class MixinItemBucket extends Item {
                 else
                 {
                     IBlockState iblockstate = worldIn.getBlockState(blockpos);
-                    Block initialBlock = iblockstate.getBlock();
+                    Block initialBlock = RealisticFiniteFluidFunctions.getBlock(worldIn, blockpos, iblockstate);
                     Material material = iblockstate.getMaterial();
 
                     if (!(initialBlock instanceof IRealisticFiniteFluid)) 
@@ -139,12 +139,12 @@ public class MixinItemBucket extends Item {
                             IBlockState neighborState = worldIn.getBlockState(neighbor);
                             ////System.out.println("Bloque a explorar " + neighborState.getBlock());
 
-                            if (realisticFluid.isOceanBlock(worldIn, neighbor, neighborState, FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(neighborState.getBlock()))) {
+                            if (realisticFluid.isOceanBlock(worldIn, neighbor, neighborState, FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(RealisticFiniteFluidFunctions.getBlock(worldIn, neighbor, neighborState)))) {
                                 exposedToOceanWater = true;
                                 
                                 if (exposedToOceanWater
-                                    && !(worldIn.getBlockState(blockpos.down()).getBlock() instanceof IRealisticFiniteFluid)
-                                    && !(worldIn.getBlockState(blockpos).getBlock() instanceof IRealisticFiniteFluid)) {
+                                    && !(RealisticFiniteFluidFunctions.getBlock(worldIn, blockpos.down(), worldIn.getBlockState(blockpos.down())) instanceof IRealisticFiniteFluid)
+                                    && !(RealisticFiniteFluidFunctions.getBlock(worldIn, blockpos, worldIn.getBlockState(blockpos)) instanceof IRealisticFiniteFluid)) {
                                     FiniteFluidLogic.OceanFluidsLogic.borderOceanCheck(worldIn, blockpos, false);
                                 }
                                 break;
@@ -202,7 +202,7 @@ public class MixinItemBucket extends Item {
             }
             else
             {
-                boolean flag1 = worldIn.getBlockState(blockpos).getBlock().isReplaceable(worldIn, blockpos);
+                boolean flag1 = RealisticFiniteFluidFunctions.getBlock(worldIn, blockpos, worldIn.getBlockState(blockpos)).isReplaceable(worldIn, blockpos);
                 BlockPos blockpos1 = flag1 && raytraceresult.sideHit == EnumFacing.UP ? blockpos : blockpos.offset(raytraceresult.sideHit);
 
                 if (!playerIn.canPlayerEdit(blockpos1, raytraceresult.sideHit, itemstack))
@@ -240,7 +240,7 @@ public class MixinItemBucket extends Item {
             IBlockState iblockstate = worldIn.getBlockState(posIn);
             Material material = iblockstate.getMaterial();
             boolean flag = !material.isSolid();
-            boolean flag1 = iblockstate.getBlock().isReplaceable(worldIn, posIn);
+            boolean flag1 = RealisticFiniteFluidFunctions.getBlock(worldIn, posIn, iblockstate).isReplaceable(worldIn, posIn);
 
             if (!worldIn.isAirBlock(posIn) && !flag && !flag1)
             {
