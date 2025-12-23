@@ -13,6 +13,7 @@ import com.gatoborrachon.realisticfinitefluids.interfaces.IRealisticFiniteFluid;
 import com.gatoborrachon.realisticfinitefluids.logic.FiniteFluidLogic;
 import com.gatoborrachon.realisticfinitefluids.logic.NewFluidType;
 import com.gatoborrachon.realisticfinitefluids.logic.RealisticFiniteFluidFunctions;
+import com.mojang.realmsclient.dto.PlayerInfo;
 
 import ic2.core.item.ItemFluidCell;
 import net.minecraft.block.Block;
@@ -254,7 +255,7 @@ CASOS QUE REQUIEREN CONFIRMAR EL BLOQUE A COLOCAR --> Caso 2, 6, 1.2, 5
             /*if (!world.mayPlace(ModBlocks.FINITE_WATER_FLOWING, placePos, false, side, null)) {
                 placePos = pos.offset(side);
             }*/
-            if (world.isAirBlock(placePos) || world.mayPlace(FiniteFluidLogic.liquids.get(0).flowingBlock, placePos, false, side, null)) {
+            if (RealisticFiniteFluidFunctions.isAirBlock(world, placePos, true) || world.mayPlace(FiniteFluidLogic.liquids.get(0).flowingBlock, placePos, false, side, null)) {
                 // colocamos usando distributeEqually solo con un objetivo: la posición
                 List<BlockPos> targets = Arrays.asList(placePos);
                 
@@ -289,13 +290,13 @@ CASOS QUE REQUIEREN CONFIRMAR EL BLOQUE A COLOCAR --> Caso 2, 6, 1.2, 5
             if (!world.mayPlace(FiniteFluidLogic.liquids.get(0).flowingBlock, placePos, false, side, null)) {
                 placePos = pos.offset(side);
             }
-            if (world.isAirBlock(placePos) || world.mayPlace(FiniteFluidLogic.liquids.get(0).flowingBlock, placePos, false, side, null)) {
+            if (RealisticFiniteFluidFunctions.isAirBlock(world, placePos, true) || world.mayPlace(FiniteFluidLogic.liquids.get(0).flowingBlock, placePos, false, side, null)) {
             	Block blockFluidType = ((NewFluidType)FiniteFluidLogic.liquids.get(fluidType)).flowingBlock;
             	////System.out.println("DEBUG CASO 2:blockFluidType: "+blockFluidType);
             	IBlockState blockstateToPlace = realisticFluid.setVolume(null, null, blockFluidType.getDefaultState(), References.MAXIMUM_LEVEL); //blockFluidType.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, MAX_LEVELS - 1);
             	
             	////System.out.println("DEBUG CASO 2:blockstateToPlace: "+blockstateToPlace);
-                world.setBlockState(placePos, blockstateToPlace); //ModBlocks.FINITE_WATER_FLOWING.getDefaultState().withProperty(RFFBlock.LEVEL, MAX_LEVELS - 1));
+            	RealisticFiniteFluidFunctions.setBlockState(world, player.getPosition(), placePos, blockstateToPlace); //ModBlocks.FINITE_WATER_FLOWING.getDefaultState().withProperty(RFFBlock.LEVEL, MAX_LEVELS - 1));
                 currentLevels -= MAX_LEVELS;
                 setFiniteLevels(IC2FluidCell, currentLevels);
                 syncFluidMBFromLevels(IC2FluidCell, currentLevels, finiteFluid);

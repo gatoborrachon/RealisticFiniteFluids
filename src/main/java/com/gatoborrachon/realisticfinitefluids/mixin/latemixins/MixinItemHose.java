@@ -10,7 +10,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.material.Material;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
@@ -260,13 +259,14 @@ public abstract class MixinItemHose extends Item /*extends MixinItem*/ {
 
 	                // ---- Compat vanilla/Forge: IFluidBlock / BlockLiquid (recoger bucket) ----
 	                // Mantiene la lógica original, pero al llenar, actualizamos NBT (levels + fluid)
-	                if (block instanceof IFluidBlock) {
+	                /*if (block instanceof IFluidBlock) {
 	                    Fluid fluid = ((IFluidBlock) block).getFluid();
 	                    FluidStack fs = new FluidStack(fluid, Reference.BUCKET);
 	                    if (tank.getFluidAmount() == 0 || tank.getFluid().isFluidEqual(fs)) {
 	                        int amount = tank.fill(fs, false);
 	                        if (amount > 0 && tank.getFluidAmount() + amount <= tank.getCapacity()) {
-	                            worldIn.setBlockToAir(pos);
+	                		    RealisticFiniteFluidFunctions.setBlockToAir(worldIn, pos);
+	                            //worldIn.setBlockToAir(pos);
 	                            tank.fill(fs, true);
 	                            inv.markTankDirty();
 	                            // NBT ++ 1000mb => +16 levels
@@ -295,7 +295,7 @@ public abstract class MixinItemHose extends Item /*extends MixinItem*/ {
 	                            return new ActionResult<>(EnumActionResult.SUCCESS, stack);
 	                        }
 	                    }
-	                }
+	                }*/
 	            }
 
 	            // Importante: en modo SUCK nunca colocamos, así que terminamos aquí
@@ -322,7 +322,7 @@ public abstract class MixinItemHose extends Item /*extends MixinItem*/ {
 	                }
 	                BlockPos placePos = new BlockPos(x, y, z);
 	                IBlockState at = worldIn.getBlockState(placePos);
-	                Block atBlock = RealisticFiniteFluidFunctions.getBlock(worlyIn, placePos, at);
+	                Block atBlock = RealisticFiniteFluidFunctions.getBlock(worldIn, placePos, at);
 
 	                // Si tenemos levels en NBT, intentamos colocar "finito" primero
 	                if (currentLevels > 0) {
@@ -410,7 +410,7 @@ public abstract class MixinItemHose extends Item /*extends MixinItem*/ {
 	                            if (!worldIn.isRemote && replaceable && !material.isLiquid()) {
 	                                worldIn.destroyBlock(placePos, true);
 	                            }
-	                            if (worldIn.setBlockState(placePos, fluidStack.getFluid().getBlock().getDefaultState())) {
+	                            if (RealisticFiniteFluidFunctions.setBlockState(worldIn, playerIn.getPosition(), placePos, fluidStack.getFluid().getBlock().getDefaultState())) {
 	                                tank.drain(Reference.BUCKET, true);
 	                                worldIn.getBlockState(placePos).neighborChanged(worldIn, placePos, fluidStack.getFluid().getBlock(), placePos);
 	                            }

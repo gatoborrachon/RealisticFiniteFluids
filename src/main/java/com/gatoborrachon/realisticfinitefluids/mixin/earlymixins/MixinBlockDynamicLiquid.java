@@ -5,7 +5,6 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.Random;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.spongepowered.asm.mixin.Mixin;
@@ -21,10 +20,6 @@ import com.gatoborrachon.realisticfinitefluids.interfaces.IRealisticFiniteFluid;
 import com.gatoborrachon.realisticfinitefluids.logic.FiniteFluidLogic;
 import com.gatoborrachon.realisticfinitefluids.logic.FiniteFluidLogic.FiniteFluidsLogic;
 import com.gatoborrachon.realisticfinitefluids.logic.FiniteFluidLogic.FluidWorldInteraction;
-import com.google.common.collect.ImmutableList;
-
-import git.jbredwards.fluidlogged_api.api.util.FluidState;
-import git.jbredwards.fluidlogged_api.mod.asm.iface.IDefaultFluidState;
 
 import com.gatoborrachon.realisticfinitefluids.logic.RealisticFiniteFluidFunctions;
 
@@ -390,6 +385,15 @@ public abstract class MixinBlockDynamicLiquid extends BlockLiquid implements IRe
 	@Override
 	public void setBlockState(World world, BlockPos sourcePos, BlockPos destPos, IBlockState state) {
 		RealisticFiniteFluidFunctions.setBlockState(world, sourcePos, destPos, state);
+	}
+	
+	/**
+	 * Unified function to setBlockToAir. Intented for compat with Fluidlogged API
+	 */
+	@Unique
+	@Override
+	public void setBlockToAir(World world, BlockPos destPos) {
+		RealisticFiniteFluidFunctions.setBlockToAir(world, destPos);
 	}
 
 	/**
@@ -788,7 +792,10 @@ public abstract class MixinBlockDynamicLiquid extends BlockLiquid implements IRe
 			}
 		}
 
+		//worldIn.scheduleUpdate(pos, RealisticFiniteFluidFunctions.returnCorrectBlock(worldIn, pos), this.tickRate(worldIn));
 		worldIn.scheduleUpdate(pos, ((Block)(Object)this), this.tickRate(worldIn));
+		//worldIn.scheduleUpdate(pos, this, this.tickRate(worldIn));
+		//worldIn.scheduleUpdate(pos, ((Block)(Object)this), this.tickRate(worldIn));
 	}
 
 
@@ -813,7 +820,9 @@ public abstract class MixinBlockDynamicLiquid extends BlockLiquid implements IRe
 	@Overwrite(remap = References.onDev) //onBlockAdded
 	public void func_176213_c(World worldIn, BlockPos pos, IBlockState state) {
 		if (this.fluidMaterial == Material.LAVA) FiniteFluidLogic.lavaFunctions.burnArea(worldIn, pos);
+		//worldIn.scheduleUpdate(pos, RealisticFiniteFluidFunctions.returnCorrectBlock(worldIn, pos), this.tickRate(worldIn));
 		worldIn.scheduleUpdate(pos, ((Block)(Object)this), this.tickRate(worldIn));
+		//worldIn.scheduleUpdate(pos, this, this.tickRate(worldIn));
 	}
 
 	/**
@@ -861,6 +870,9 @@ public abstract class MixinBlockDynamicLiquid extends BlockLiquid implements IRe
 	public void func_180650_b(World world, BlockPos pos, IBlockState state, Random rand) {
 		if (!world.isRemote)
 		{
+			//System.out.println("VERGA 2: "+pos);
+
+
             //System.out.println("MAX CALC "+FiniteFluidLogic.maxCalc);
 
 			int newLevel = this.getVolume(world, pos, world.getBlockState(pos)); //world.getBlockState(pos).getValue(LEVEL);
@@ -891,8 +903,8 @@ public abstract class MixinBlockDynamicLiquid extends BlockLiquid implements IRe
 					&& getVolume(world, pos, currentaState) < Q1_HIGH) { //8
 				int newValue = getVolume(world, pos, world.getBlockState(pos))/2; //3
 				//world.setBlockState(pos, currentaState.withProperty(BlockFiniteFluid.LEVEL, newValue));
-				setBlockState(world, null, pos, setVolume(world, pos, currentaState, newValue));
-				System.out.println("VERGA?");
+				setBlockState(world, pos, pos, setVolume(world, pos, currentaState, newValue));
+				//System.out.println("VERGA?");
 			}
 
 			//Despertar bloques oceanicos (para evitar dejarlos sin actualizar, y que se vean raros)
@@ -901,7 +913,9 @@ public abstract class MixinBlockDynamicLiquid extends BlockLiquid implements IRe
 			//REVISAR SI ACTUALMENTE PODEMOS EJECUTAR CALCULOS Y NO SOBRECARGAR EL CPU
 			if (FiniteFluidLogic.GeneralPurposeLogic.getCalc() > FiniteFluidLogic.GeneralPurposeLogic.getMaxCalc())
 			{
+				//world.scheduleUpdate(pos, RealisticFiniteFluidFunctions.returnCorrectBlock(world, pos), this.tickRate(world));
 				world.scheduleUpdate(pos, ((Block)(Object)this), this.tickRate(world));
+				//world.scheduleUpdate(pos, this, this.tickRate(world));
 			}
 
 			//SI SI PODEMOS HACER CALCULOS -->
@@ -924,7 +938,9 @@ public abstract class MixinBlockDynamicLiquid extends BlockLiquid implements IRe
 					if ((float)FiniteFluidLogic.GeneralPurposeLogic.getCalc() > (float)FiniteFluidLogic.GeneralPurposeLogic.getMaxCalc() * 0.65F && getVolume(world, pos, world.getBlockState(pos)) < Q1_HIGH & (!FiniteFluidLogic.GeneralPurposeLogic.isFiniteFluid(world, posBelow) || getVolume(world, posBelow, world.getBlockState(posBelow)) < MAXIMUM_LEVEL))
 					{
 						//NOS ESPERAMOS AL PROXIMO TICK
+						//world.scheduleUpdate(pos, RealisticFiniteFluidFunctions.returnCorrectBlock(world, pos), this.tickRate(world));
 						world.scheduleUpdate(pos, ((Block)(Object)this), this.tickRate(world));
+						//world.scheduleUpdate(pos, this, this.tickRate(world));
 						return;
 					}
 
@@ -938,7 +954,9 @@ public abstract class MixinBlockDynamicLiquid extends BlockLiquid implements IRe
 						if (nearestPlayer == null)
 						{
 							//NOS ESPERAMOS AL PROXIMO TICK
+							//world.scheduleUpdate(pos, RealisticFiniteFluidFunctions.returnCorrectBlock(world, pos), this.tickRate(world));
 							world.scheduleUpdate(pos, ((Block)(Object)this), this.tickRate(world));
+							//world.scheduleUpdate(pos, this, this.tickRate(world));
 							return;
 						}
 					}
@@ -955,19 +973,21 @@ public abstract class MixinBlockDynamicLiquid extends BlockLiquid implements IRe
 					IBlockState currentState = world.getBlockState(pos);
 					IBlockState newState = setVolume(world, pos, currentState, MAXIMUM_LEVEL); //currentState.withProperty(BlockFiniteFluid.LEVEL, 15);
 					if (getVolume(world, pos, currentState) < MAXIMUM_LEVEL) { //15
-						setBlockState(world, null, pos, newState);
+						setBlockState(world, pos, pos, newState);
 						//world.setBlockState(pos, newState, 3);
 					}
 
 					//if (world.getBlockState(pos.up()) == Blocks.AIR) {
 						//CREAMOS UN BLOQUE NUEVO DEL MISMO FLUIDO ARRIBA CON EL MAXIMO DE FLUIDO
-						setBlockState(world, null, pos.up(), newState);
+						setBlockState(world, pos, pos.up(), newState);
 						//world.setBlockState(pos.up(), newState, 3);
 
 						//EJECUTAMOS LA LOGICA DE MOVIMIENTO DEL BLOQUE DE ARRIBA
 						FiniteFluidsLogic.tryLiquidMove(world, pos.up());
 					//}
-					world.scheduleUpdate(pos, ((Block)(Object)this), this.tickRate(world));
+					//world.scheduleUpdate(pos, RealisticFiniteFluidFunctions.returnCorrectBlock(world, pos), this.tickRate(world));
+						world.scheduleUpdate(pos, ((Block)(Object)this), this.tickRate(world));
+						//world.scheduleUpdate(pos, this, this.tickRate(world));
 				}
 
 				//SI NO EXISTEN BLOQUES DE FLUIDO FINITO ALEDAÑOS
@@ -979,17 +999,24 @@ public abstract class MixinBlockDynamicLiquid extends BlockLiquid implements IRe
 					//Y CALCULAMOS SI NOS PODEMOS MOVER
 					if (FiniteFluidsLogic.tryLiquidMove(world, pos))
 					{
+						//System.out.println("VERGA FLOWING");
 						//SI NOS MOVIMOS, PROGRAMAMOS UN TICK
+						//world.scheduleUpdate(pos, RealisticFiniteFluidFunctions.returnCorrectBlock(world, pos), this.tickRate(world));
 						world.scheduleUpdate(pos, ((Block)(Object)this), this.tickRate(world));
+						//world.scheduleUpdate(pos, this, this.tickRate(world));
 						//////System.out.println("FLOWING PERMANECE FLOWING: "+pos+" CON LEVEL "+newLevel);
 					}
 
 					//SI NO NOS PODEMOS MOVER --> NOS CONVERTIMOS STILL
 					else
 					{
+						//System.out.println("VERGA STILL");
 						//GUARDAMOS EL TIPO DE FLUIDO ACTUAL
 						//FiniteFluidLogic.GeneralPurposeLogic.setCurrentFluidIndex(((Block)(Object)this));
+						//System.out.println("MICHIRRINES");
 						int currentFluidIndex = FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(RealisticFiniteFluidFunctions.getBlock(world, pos, state));
+						//System.out.println("RealisticFiniteFluidFunctions.getBlock(world, pos, state): "+RealisticFiniteFluidFunctions.getBlock(world, pos, state));
+						//System.out.println("currentFluidIndex: "+currentFluidIndex);
 
 						//////System.out.println("FLOWING VA A STILL: "+pos+" CON LEVEL "+newLevel);
 						//CALCULAMOS UN BLOCKSTATE DEL FLUIDO ACTUAL STILL
@@ -998,7 +1025,7 @@ public abstract class MixinBlockDynamicLiquid extends BlockLiquid implements IRe
 						//world.setBlockState(pos, newState, 3);
 
 						//Y COLOCAMOS ESTE BLOQUE STILL EN NUESTRO LUGAR CON NUESTRO VOLUMEN ACTUAL
-						setBlockState(world, null, pos, setVolume(null, null, stillBlock.getDefaultState(), newLevel));
+						setBlockState(world, pos, pos, setVolume(null, null, stillBlock.getDefaultState(), newLevel));
 
 						//CALCULAMOS LA POSICION DEL BLOQUE DE ABAJO POR GRAVEDAD
 						////BlockPos belowBlock = new BlockPos(pos.getX(), pos.getY() - 1 * FiniteFluidLogic.GeneralPurposeLogic.getFluidGravity(), pos.getZ());
@@ -1120,11 +1147,12 @@ public abstract class MixinBlockDynamicLiquid extends BlockLiquid implements IRe
 
 		if (doPlace) {
 			if (newTotalConceptual < MINIMUM_CONCEPTUAL_LEVEL) {
-				world.setBlockToAir(pos);
+				RealisticFiniteFluidFunctions.setBlockToAir(world, pos);
+				//world.setBlockToAir(pos);
 			} else {
 				// Guardamos LEVEL como propiedad 0..15 (conceptual-1)
 				int levelProp = newTotalConceptual - 1;
-				world.setBlockState(pos, ((Block)(Object)this).getDefaultState().withProperty(LEVEL, levelProp));
+				RealisticFiniteFluidFunctions.setBlockState(world, pos, pos, ((Block)(Object)this).getDefaultState().withProperty(LEVEL, levelProp));
 			}
 			// Notificar vecinos si lo consideras necesario:
 			world.neighborChanged(pos, ((Block)(Object)this), pos);
@@ -1155,7 +1183,8 @@ public abstract class MixinBlockDynamicLiquid extends BlockLiquid implements IRe
 		// 1) Si el bloque central ya está full (16) -> bucket completo
 		if (centerConcept >= MAXIMUM_CONCEPTUAL_LEVEL) {
 			if (doDrain) {
-				world.setBlockToAir(pos);
+				RealisticFiniteFluidFunctions.setBlockToAir(world, pos);
+				//world.setBlockToAir(pos);
 				FiniteFluidLogic.FluidWorldInteraction.activateOcean(world, pos);
 				world.neighborChanged(pos, RealisticFiniteFluidFunctions.getBlock(world, pos, state), pos);
 			}

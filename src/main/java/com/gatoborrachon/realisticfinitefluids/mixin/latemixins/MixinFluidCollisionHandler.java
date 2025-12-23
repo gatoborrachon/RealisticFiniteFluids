@@ -10,8 +10,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 
 import com.gatoborrachon.realisticfinitefluids.References;
-import com.gatoborrachon.realisticfinitefluids.interfaces.IRealisticFiniteFluid;
-import com.gatoborrachon.realisticfinitefluids.logic.RealisticFiniteFluidFunctions;
 
 import git.jbredwards.fluidlogged_api.api.util.FluidloggedUtils;
 import git.jbredwards.fluidlogged_api.mod.asm.iface.IConfigFluidBox;
@@ -58,7 +56,7 @@ public class MixinFluidCollisionHandler {
     }
 	
 	@Overwrite
-    @SuppressWarnings("UnnecessaryLocalVariable")
+    //@SuppressWarnings("UnnecessaryLocalVariable")
     static boolean isPointWithinFluid(@Nonnull final BlockPos pos, final double xIn, final double minY, final double maxY, final double zIn, @Nonnull final IExtendedBlockState state, final boolean checkCache) {
 		//if (!(RealisticFiniteFluidFunctions.getBlock(state) instanceof IRealisticFiniteFluid)) return false;
 		

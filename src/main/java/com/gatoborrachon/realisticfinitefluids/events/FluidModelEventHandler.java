@@ -1,10 +1,11 @@
 package com.gatoborrachon.realisticfinitefluids.events;
 
-import com.gatoborrachon.realisticfinitefluids.References;
+import com.gatoborrachon.realisticfinitefluids.compat.FluidCompat;
 import com.gatoborrachon.realisticfinitefluids.interfaces.IRealisticFiniteFluid;
 import com.gatoborrachon.realisticfinitefluids.logic.FiniteFluidLogic;
 import com.gatoborrachon.realisticfinitefluids.logic.RealisticFiniteFluidFunctions;
 
+//import git.jbredwards.fluidlogged_api.api.util.FluidState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
@@ -15,7 +16,6 @@ import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraft.client.renderer.GlStateManager;
@@ -26,16 +26,15 @@ public class FluidModelEventHandler {
 
 	@SubscribeEvent(priority = EventPriority.LOWEST)
 	public static void onModelRegistry(ModelRegistryEvent event) {
-		//TODO Registrar bien este bloque
-	    ForgeRegistries.BLOCKS.register(References.DEBUG_BLOCK);
+		FluidCompat.registerMissingFluidBlockForFluids();
 	}
 	
     //DEBUG
     @SubscribeEvent
     public static void onRenderWorldLast(RenderWorldLastEvent event) {
-        //if (ModConfig.debug) {
+        //if (ModConfig.visualDebug) {
     	//if (true) return;
-    	if (!FiniteFluidLogic.debug) return;
+    	if (!FiniteFluidLogic.visualDebug) return;
     	
     	
     	////eSystem.out.println("fluids be infinite "+ModConfig.shouldFluidsBeInfinite);
@@ -56,7 +55,8 @@ public class FluidModelEventHandler {
                 IBlockState state = world.getBlockState(pos);
                 if (RealisticFiniteFluidFunctions.getBlock(world, pos, state) instanceof IRealisticFiniteFluid) {
                     int level = ((IRealisticFiniteFluid)RealisticFiniteFluidFunctions.getBlock(world, pos, state)).getVolume(world, pos, state); //state.getValue(BlockFiniteFluid.LEVEL);
-                    //String typeOfBlock = state.getBlock().getLocalizedName().split(" ")[0];
+                    //String typeOfBlock = FluidState.of(state).toString().split("mine")[0];
+                    		//state.getBlock().getLocalizedName().split(" ")[0];
                     
                     double x = pos.getX() + 0.5;
                     double y = pos.getY() + 1.2;

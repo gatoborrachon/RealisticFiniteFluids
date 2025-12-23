@@ -44,8 +44,8 @@ public abstract class MixinBlockLiquid {
     
     
     
-    @Overwrite//(remap = References.onDev) //getFlow
-    public Vec3d getFlow(IBlockAccess worldIn, BlockPos pos, IBlockState state) {
+    @Overwrite(remap = References.onDev) //getFlow
+    public Vec3d func_189543_a(IBlockAccess worldIn, BlockPos pos, IBlockState state) {
     	return RealisticFiniteFluidFunctions.calculateFlowVector(worldIn, pos, false);
     }
     

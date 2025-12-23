@@ -62,7 +62,7 @@ public class IModelFiniteFluidClassic implements IModel {
             return this;
         }
         
-        return new IModelFiniteFluidClassic(fluid);
+        return new IModelFiniteFluidClassic(FluidRegistry.getFluid(fluidName));
     	
     }
 }

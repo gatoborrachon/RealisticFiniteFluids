@@ -21,6 +21,8 @@ public class RealisticFiniteFluidsMixinLoader implements ILateMixinLoader {
         	configs.add("mixins.realisticfinitefluids.fluidloggedapi.json");
         }
         
+        //configs.add("mixins.realisticfinitefluids.early.registrydebug.json");
+        
         
         /* if (Loader.isModLoaded("MODID")) {
         	configs.add("mixins.realisticfinitefluids.MODID.json");

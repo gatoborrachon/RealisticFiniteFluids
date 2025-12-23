@@ -40,16 +40,34 @@ public abstract class MixinBlockFluidBase {
         
         
         //For FluidLogged API Compat
-        
-        Field levelCornersField = BlockFluidBase.class.getField("LEVEL_CORNERS");
+        /*Field levelCornersField = BlockFluidBase.class.getField("LEVEL_CORNERS");
         Field modifiersFieldLevelCorners = Field.class.getDeclaredField("modifiers");
         modifiersFieldLevelCorners.setAccessible(true);
         modifiersFieldLevelCorners.setInt(levelCornersField, levelCornersField.getModifiers() & ~Modifier.FINAL);
 
         levelCornersField.set(null, References.LEVEL_CORNERS);
+        */
         
         
     }
+    
+    
+    /*@Shadow @Final @Mutable
+    public static PropertyFloat[] LEVEL_CORNERS;
+
+    @Inject(method = "<clinit>", at = @At("TAIL"))
+    private static void onClInit(CallbackInfo ci) {
+        LEVEL_CORNERS = (PropertyFloat[]) References.LEVEL_CORNERS;
+        		
+        //		(PropertyFloat[]) new IUnlistedProperty[] {
+        //	    new PropertyFloat("level_nw"),  // h00
+        //	    new PropertyFloat("level_ne"),  // h10
+        //	    new PropertyFloat("level_sw"),  // h01
+        //	    new PropertyFloat("level_se")   // h11
+        //};
+    }*/
+    
+    
     
     @Inject(
             method = "<init>(Lnet/minecraftforge/fluids/Fluid;Lnet/minecraft/block/material/Material;Lnet/minecraft/block/material/MapColor;)V",
@@ -67,7 +85,7 @@ public abstract class MixinBlockFluidBase {
         }
     
     
-    @Overwrite
+    @Overwrite(remap = false)
     public Vec3d getFlowVector(IBlockAccess world, BlockPos pos) {
     	return RealisticFiniteFluidFunctions.calculateFlowVector(world, pos, false);
     }

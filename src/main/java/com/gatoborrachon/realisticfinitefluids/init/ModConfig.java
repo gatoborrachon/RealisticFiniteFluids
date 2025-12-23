@@ -18,7 +18,8 @@ public class ModConfig {
     public static boolean enableEvaporation;
     public static int evaporationChance;
     public static boolean bucketRemoveLowFluid;
-    public static boolean debug;
+    public static boolean visualDebug;
+    public static boolean logDebug;
     public static boolean waterCanFreeze;
     public static int waterLightOpacity;
     public static boolean doPressure;
@@ -28,6 +29,7 @@ public class ModConfig {
     public static boolean shouldFluidsBeInfinite;
     
     public static boolean createBlocksForBlocklessFluids;
+    public static int pressureLimit;
 
 
     private static final String CATEGORY_GENERAL = "general";
@@ -77,6 +79,9 @@ public class ModConfig {
         doPressure = config.getBoolean("doPressure", CATEGORY_GENERAL, true, 
         		"Whether to activate the pressure system.");
         
+        pressureLimit = config.getInt("pressureLimit", CATEGORY_GENERAL, 256, 0, Integer.MAX_VALUE, 
+        		"The maximum tries we will check for blocks to apply pressure.");
+        
         //Evaporation Logic
         enableEvaporation = config.getBoolean("enableEvaporation", CATEGORY_GENERAL, true,
                 "If water should evaporate. Only applies to water with the minimum level of fluid.");
@@ -108,8 +113,11 @@ public class ModConfig {
         		"Create finite fluid Blocks for Fluids that have no default Block assigned.");
 
         //Debug
-        debug = config.getBoolean("debug", CATEGORY_GENERAL, false, 
-        		"Allow debug content. Only for testing purposes.");
+        visualDebug = config.getBoolean("visualDebug", CATEGORY_GENERAL, false, 
+        		"Allow visualDebug content. Only for testing purposes.");
+
+        logDebug = config.getBoolean("logDebug", CATEGORY_GENERAL, false, 
+        		"Allow logDebug prints for special info about registerings.");
 
         
         if (config.hasChanged()) {

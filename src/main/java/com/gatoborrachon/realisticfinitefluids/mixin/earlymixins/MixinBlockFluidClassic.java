@@ -211,7 +211,7 @@ public abstract class MixinBlockFluidClassic extends BlockFluidBase implements I
     // ========================= 
 	//@Unique public static final PropertyInteger LEVEL = References.LEVEL; //MEJOR NO TOCAMOS ESTO, SE VA ALV EL REGISTRO DE BLOQUES
     @Unique private static final IUnlistedProperty<Map<EnumFacing, IBlockState>> NEIGHBOR_STATES = References.NEIGHBOR_STATES;
-    //@Unique private static final IUnlistedProperty<Float>[] LEVEL_CORNERS = References.LEVEL_CORNERS;
+    @Unique private static final IUnlistedProperty<Float>[] LEVEL_CORNERS = References.LEVEL_CORNERS;
 	@Unique private static final IUnlistedProperty<Integer> FLUID_COLOR = References.FLUID_COLOR;
 	@Unique private static final IUnlistedProperty<Vec3d> FLOW_DIRECTION = References.FLOW_DIRECTION;
 	@Unique private static final UnlistedPropertyBoolean IS_STILL = References.IS_STILL;
@@ -240,7 +240,7 @@ public abstract class MixinBlockFluidClassic extends BlockFluidBase implements I
 	@Unique
 	@Override
 	public PropertyFloat getCornerLevel(int index) {
-		return LEVEL_CORNERS[index];
+		return (PropertyFloat) LEVEL_CORNERS[index];
 	}
 	@Unique
 	@Override
@@ -380,6 +380,15 @@ public abstract class MixinBlockFluidClassic extends BlockFluidBase implements I
 	@Override
 	public void setBlockState(World world, BlockPos sourcePos, BlockPos destPos, IBlockState state) {
 		RealisticFiniteFluidFunctions.setBlockState(world, sourcePos, destPos, state);
+	}
+	
+	/**
+	 * Unified function to setBlockToAir. Intented for compat with Fluidlogged API
+	 */
+	@Unique
+	@Override
+	public void setBlockToAir(World world, BlockPos destPos) {
+		RealisticFiniteFluidFunctions.setBlockToAir(world, destPos);
 	}
 
 	/**
@@ -796,7 +805,10 @@ public abstract class MixinBlockFluidClassic extends BlockFluidBase implements I
 			}
 		}
 
+		//worldIn.scheduleUpdate(pos, RealisticFiniteFluidFunctions.returnCorrectBlock(worldIn, pos), this.tickRate(worldIn));
 		worldIn.scheduleUpdate(pos, ((Block)(Object)this), this.tickRate(worldIn));
+		//worldIn.scheduleUpdate(pos, this, this.tickRate(worldIn));
+		//worldIn.scheduleUpdate(pos, ((Block)(Object)this), this.tickRate(worldIn));
 	}
 
 
@@ -859,7 +871,7 @@ public abstract class MixinBlockFluidClassic extends BlockFluidBase implements I
 					//CONTROLA SI LOS BLOQUES OCEANICOS DEBERIAN ACTUAR DE FORMA INFINITA O CONVERTIRSE EN BLOQUES DE AGUA STILL
 					if (!FiniteFluidLogic.shouldFluidsBeInfinite) {
 						Block stillBlock = ((NewFluidType) FiniteFluidLogic.liquids.get(FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(RealisticFiniteFluidFunctions.getBlock(world, pos, state)))).stillBlock;
-						this.setBlockState(world, null, pos, this.setVolume(null, null, stillBlock.getDefaultState(), MAXIMUM_LEVEL));
+						this.setBlockState(world, pos, pos, this.setVolume(null, null, stillBlock.getDefaultState(), MAXIMUM_LEVEL));
 						world.scheduleUpdate(pos, ((Block)(Object)this), this.tickRate(world));
 						return;
 					}
@@ -870,7 +882,7 @@ public abstract class MixinBlockFluidClassic extends BlockFluidBase implements I
 					}
 					else
 					{
-						if (!world.isAirBlock(pos.down()) && (float)FiniteFluidLogic.GeneralPurposeLogic.getCalc() > (float)FiniteFluidLogic.GeneralPurposeLogic.getMaxCalc() * 0.55F)
+						if (!RealisticFiniteFluidFunctions.isAirBlock(world, pos.down(), true) && (float)FiniteFluidLogic.GeneralPurposeLogic.getCalc() > (float)FiniteFluidLogic.GeneralPurposeLogic.getMaxCalc() * 0.55F)
 						{
 							EntityPlayer player = world.getClosestPlayer(pos.getX(), pos.getY(), pos.getZ(), 16.0D, true); //16 --> Maxima distancia del jugador para calcular el movimiento del agua
 
@@ -912,7 +924,8 @@ public abstract class MixinBlockFluidClassic extends BlockFluidBase implements I
 						//Aca yo controlo lo de interaccion de still con ocean xd
 					}  else if (isOceanBlock(world, below, stateBelow, FiniteFluidLogic.onFiniteFluidIndex) /*stateBelow.getBlock() == ModBlocks.INFINITE_WATER_SOURCE*/ && getVolume(world, pos, world.getBlockState(pos)) < Q1_LOW) {
 						// Este bloque es "absorbido" por el océano
-						world.setBlockToAir(pos);  // O reemplaza por aire
+						RealisticFiniteFluidFunctions.setBlockToAir(world, pos);
+						//world.setBlockToAir(pos);  // O reemplaza por aire
 					}
 					//System.out.println("STILL");
 					return;
@@ -950,7 +963,7 @@ public abstract class MixinBlockFluidClassic extends BlockFluidBase implements I
 							&& getVolume(world, pos, currentState) < Q1_HIGH) { //8
 						int newValue = getVolume(world, pos, world.getBlockState(pos))/2; //3
 						//world.setBlockState(pos, currentaState.withProperty(BlockFiniteFluid.LEVEL, newValue));
-						setBlockState(world, null, pos, setVolume(world, pos, currentState, newValue));
+						setBlockState(world, pos, pos, setVolume(world, pos, currentState, newValue));
 					}
 
 					//Despertar bloques oceanicos (para evitar dejarlos sin actualizar, y que se vean raros)
@@ -1013,13 +1026,13 @@ public abstract class MixinBlockFluidClassic extends BlockFluidBase implements I
 							////IBlockState currentState = world.getBlockState(pos);
 							IBlockState newState = setVolume(world, pos, currentState, MAXIMUM_LEVEL); //currentState.withProperty(BlockFiniteFluid.LEVEL, 15);
 							if (getVolume(world, pos, currentState) < MAXIMUM_LEVEL) { //15
-								setBlockState(world, null, pos, newState);
+								setBlockState(world, pos, pos, newState);
 								//world.setBlockState(pos, newState, 3);
 							}
 
 							//if (world.getBlockState(pos.up()) == Blocks.AIR) {
 							//CREAMOS UN BLOQUE NUEVO DEL MISMO FLUIDO ARRIBA CON EL MAXIMO DE FLUIDO
-							setBlockState(world, null, pos.up(), newState);
+							setBlockState(world, pos, pos.up(), newState);
 							//world.setBlockState(pos.up(), newState, 3);
 
 							//EJECUTAMOS LA LOGICA DE MOVIMIENTO DEL BLOQUE DE ARRIBA
@@ -1054,7 +1067,7 @@ public abstract class MixinBlockFluidClassic extends BlockFluidBase implements I
 								//world.setBlockState(pos, newState, 3);
 
 								//Y COLOCAMOS ESTE BLOQUE STILL EN NUESTRO LUGAR CON NUESTRO VOLUMEN ACTUAL
-								setBlockState(world, null, pos, setVolume(null, null, stillBlock.getDefaultState(), newLevel));
+								setBlockState(world, pos, pos, setVolume(null, null, stillBlock.getDefaultState(), newLevel));
 
 								//CALCULAMOS LA POSICION DEL BLOQUE DE ABAJO POR GRAVEDAD
 								////BlockPos belowBlock = new BlockPos(pos.getX(), pos.getY() - 1 * FiniteFluidLogic.GeneralPurposeLogic.getFluidGravity(), pos.getZ());
@@ -1222,7 +1235,7 @@ public abstract class MixinBlockFluidClassic extends BlockFluidBase implements I
 							//LE PONEMOS AL BLOQUE ACTUAL EL VOLUMEN MAXIMO SI ES QUE NO YA TIENE EL VOLUMEN MAXIMO
 							IBlockState newState = setVolume(world, pos, currentState, MAXIMUM_LEVEL); //currentState.withProperty(BlockFiniteFluid.LEVEL, 15);
 							if (getVolume(world, pos, currentState) < MAXIMUM_LEVEL) { //15
-								setBlockState(world, null, pos, newState);
+								setBlockState(world, pos, pos, newState);
 								//world.setBlockState(pos, newState, 3);
 							}
 
@@ -1263,7 +1276,7 @@ public abstract class MixinBlockFluidClassic extends BlockFluidBase implements I
 								//world.setBlockState(pos, newState, 3);
 
 								//Y COLOCAMOS ESTE BLOQUE STILL EN NUESTRO LUGAR CON NUESTRO VOLUMEN ACTUAL
-								setBlockState(world, null, pos, setVolume(null, null, stillBlock.getDefaultState(), newLevel));
+								setBlockState(world, pos, pos, setVolume(null, null, stillBlock.getDefaultState(), newLevel));
 
 								//CALCULAMOS LA POSICION DEL BLOQUE DE ABAJO POR GRAVEDAD
 								////BlockPos belowBlock = new BlockPos(pos.getX(), pos.getY() - 1 * FiniteFluidLogic.GeneralPurposeLogic.getFluidGravity(), pos.getZ());
@@ -1445,11 +1458,12 @@ public abstract class MixinBlockFluidClassic extends BlockFluidBase implements I
 
 		if (doPlace) {
 			if (newTotalConceptual < MINIMUM_CONCEPTUAL_LEVEL) {
-				world.setBlockToAir(pos);
+				RealisticFiniteFluidFunctions.setBlockToAir(world, pos);
+				//world.setBlockToAir(pos);
 			} else {
 				// Guardamos LEVEL como propiedad 0..15 (conceptual-1)
 				int levelProp = newTotalConceptual - 1;
-				world.setBlockState(pos, ((Block)(Object)this).getDefaultState().withProperty(LEVEL, levelProp));
+				RealisticFiniteFluidFunctions.setBlockState(world, pos, pos, ((Block)(Object)this).getDefaultState().withProperty(LEVEL, levelProp));
 			}
 			// Notificar vecinos si lo consideras necesario:
 			world.neighborChanged(pos, ((Block)(Object)this), pos);
@@ -1479,7 +1493,8 @@ public abstract class MixinBlockFluidClassic extends BlockFluidBase implements I
 		// 1) Si el bloque central ya está full (16) -> bucket completo
 		if (centerConcept >= MAXIMUM_CONCEPTUAL_LEVEL) {
 			if (doDrain) {
-				world.setBlockToAir(pos);
+            	RealisticFiniteFluidFunctions.setBlockToAir(world, pos);
+				//world.setBlockToAir(pos);
 				FiniteFluidLogic.FluidWorldInteraction.activateOcean(world, pos);
 				world.neighborChanged(pos, RealisticFiniteFluidFunctions.getBlock(world, pos, state), pos);
 			}

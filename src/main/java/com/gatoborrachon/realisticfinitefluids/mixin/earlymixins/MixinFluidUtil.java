@@ -50,7 +50,7 @@ public abstract class MixinFluidUtil {
 		//int fluidIndex = FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(ModBlocks.FINITE_LAVA_FLOWING);
 
 		// Permitir colocar solo si es aire o es tu propio bloque finito
-		if (world.isAirBlock(pos) || targetBlock instanceof IRealisticFiniteFluid) {
+		if (RealisticFiniteFluidFunctions.isAirBlock(world, pos, true) || targetBlock instanceof IRealisticFiniteFluid) {
 			SoundEvent soundToDisplay = flowingState.getMaterial() == Material.LAVA ? SoundEvents.ITEM_BUCKET_EMPTY_LAVA : SoundEvents.ITEM_BUCKET_EMPTY;
 
 			if (!world.isRemote) {
@@ -84,7 +84,7 @@ public abstract class MixinFluidUtil {
 							//return;
 							
 							if (!(RealisticFiniteFluidFunctions.getBlock(world, pos.up(), world.getBlockState(pos.up())).hasTileEntity()) && targetBlock.isReplaceable(world, pos.up())) {
-								world.setBlockState(pos.up(), FiniteFluidLogic.liquids.get(index).flowingBlock.getDefaultState()); 
+								RealisticFiniteFluidFunctions.setBlockState(world, pos, pos.up(), FiniteFluidLogic.liquids.get(index).flowingBlock.getDefaultState()); 
 								//return;
 							} else 
 								return; //Because, if the current block is full and you can't place above it, then you should not place the fluid no matter what

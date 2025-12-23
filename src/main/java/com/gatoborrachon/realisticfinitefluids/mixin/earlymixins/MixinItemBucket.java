@@ -128,7 +128,8 @@ public class MixinItemBucket extends Item {
 
                         
                     	worldIn.scheduleUpdate(blockpos, initialBlock, initialBlock.tickRate(worldIn));
-                    	worldIn.setBlockToAir(blockpos);
+                    	RealisticFiniteFluidFunctions.setBlockToAir(worldIn, blockpos);
+                    	//worldIn.setBlockToAir(blockpos);
                         
                         // Ejecutamos tu código extra de verificación de borde oceánico
                         boolean exposedToOceanWater = false;
@@ -242,7 +243,7 @@ public class MixinItemBucket extends Item {
             boolean flag = !material.isSolid();
             boolean flag1 = RealisticFiniteFluidFunctions.getBlock(worldIn, posIn, iblockstate).isReplaceable(worldIn, posIn);
 
-            if (!worldIn.isAirBlock(posIn) && !flag && !flag1)
+            if (!RealisticFiniteFluidFunctions.isAirBlock(worldIn, posIn, true) && !flag && !flag1)
             {
                 return false;
             }

@@ -34,6 +34,7 @@ public interface IRealisticFiniteFluid {
 	IBlockState setVolume(World world, BlockPos pos, IBlockState state, int level);
 	IBlockState setConceptualVolume(World world, BlockPos pos, IBlockState state, int level);
 	void setBlockState(World world, @Nullable BlockPos sourcePos, BlockPos destPos, IBlockState state);
+	void setBlockToAir(World world, BlockPos destPos);
 	Boolean isEntityInsideMaterialForOverlay(IBlockAccess world, BlockPos pos, IBlockState state, Entity entity, double eyeY, Material material);
 	boolean tryFreezeWater(World world, BlockPos pos, IBlockState state, Random rand);
 	boolean isNearHotBlock(World world, BlockPos pos);

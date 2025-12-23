@@ -11,6 +11,7 @@ import net.minecraft.util.datafix.FixTypes;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.ModFixs;
 import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.Mod.EventHandler;
@@ -86,11 +87,19 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 // COMPLETADO 4) Arreglar el bug visual del agua (hasta el final, me vale verga)
 // 5) Arreglar la textura de los items de cada fluid
 
-// 6) Arreglar compat con FluidLogged API (mixin aa su clase que hace referencia a LEVELs y CORNER_LEVELS paraa usar Reference.LEVEL)
+// COMPLETADO 6) Arreglar compat con FluidLogged API (mixin aa su clase que hace referencia a LEVELs y CORNER_LEVELS paraa usar Reference.LEVEL)
 // 7) Arreglar un bug visual con los bloques de fluidos cuando tienen a otro bloque de fluido al lado
-// 8) IMPLEMENTAR net.minecraftforge.event.ForgeEventFactory.fireFluidPlaceBlockEvent(worldIn, blockpos, pos, Blocks.FIRE.getDefaultState()));
+// COMPLETADO 8) IMPLEMENTAR net.minecraftforge.event.ForgeEventFactory.fireFluidPlaceBlockEvent(worldIn, blockpos, pos, Blocks.FIRE.getDefaultState()));
 //worldIn.setBlockState(pos.down(), net.minecraftforge.event.ForgeEventFactory.fireFluidPlaceBlockEvent(worldIn, pos.down(), pos, Blocks.STONE.getDefaultState()));
 //JAVA SEARCH --> net.minecraftforge.event.ForgeEventFactory.firePlayerLoadingEvent(net.minecraft.entity.player.EntityPlayer, net.minecraft.world.storage.IPlayerFileData, java.lang.String)
+
+// 9) Config option to change whether 1 level should equal 125mb or 1000mb
+// 10) Decidir si deberia ponerle el interactWithLiquids a los bloques BlockFluidClassic (interacciones vanilla a bloques modded)
+
+
+//FLUIDLOGGED API
+//Arreglar las funciones dde interaccion con el mundo (state.getBlock())
+//Arreglar las funciones de interactWithLiquid() en FiniteFluidLogic() (setBlockToAir + Punto 8))
 
 
 @Mod(modid = References.MODID, name = References.NAME, version = References.VERSION)
@@ -115,7 +124,6 @@ public class RealisticFiniteFluids
         ModConfig.loadConfig(event.getSuggestedConfigurationFile());
         FiniteFluidLogic.initFiniteFluidVariables();
         
-        
     }
 
     @EventHandler
@@ -128,5 +136,8 @@ public class RealisticFiniteFluids
     public void postInit(FMLInitializationEvent event) {
         //System.out.println("[RFF] CHECK PostInit");
     }
+    
+	public static boolean FluidLoggedAPI = Loader.isModLoaded("fluidlogged_api");
+
     
 }

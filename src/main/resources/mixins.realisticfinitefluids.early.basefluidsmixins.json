@@ -8,6 +8,7 @@
 	"MixinBlockFluidClassic",
 	"MixinBlockFluidBase",
 	"MixinModelFluid",
+	"MixinModelFluid$FluidLoader",
 	
 	"MixinBlockStaticLiquid",
 	"MixinBlockDynamicLiquid",

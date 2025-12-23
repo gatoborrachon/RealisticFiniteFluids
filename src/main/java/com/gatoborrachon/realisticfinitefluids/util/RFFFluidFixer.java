@@ -172,7 +172,7 @@ public class RFFFluidFixer implements IFixableData {
                         int blockId = id;
                         String newBlockName = RFF_TO_VANILLA.get(name);
                         FiniteFluidIDsToVanilla.put(String.valueOf(blockId), newBlockName);
-                        if (FiniteFluidLogic.debug) System.out.println("[RFF] Remapeando ID antiguo: " + blockId + " -> " + newBlockName);
+                        if (FiniteFluidLogic.logDebug) System.out.println("[RFF] Remapeando ID antiguo: " + blockId + " -> " + newBlockName);
                     }
                 }
             }
@@ -181,7 +181,7 @@ public class RFFFluidFixer implements IFixableData {
         // Sobrescribimos OCEAN_TO_STILL para que ahora use IDs
         RFF_TO_VANILLA.clear();
         RFF_TO_VANILLA.putAll(FiniteFluidIDsToVanilla);
-        if (FiniteFluidLogic.debug)
+        if (FiniteFluidLogic.logDebug)
         	for (String key : RFF_TO_VANILLA.keySet()) {
         		System.out.println("[RFF] KEY FINAL "+key);
         		System.out.println("[RFF] VALUE FINAL "+RFF_TO_VANILLA.get(key));
