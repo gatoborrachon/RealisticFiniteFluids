@@ -1,3 +1,6 @@
+v.2.1.1
+-Fixed: Crash with Aqua Acrobatics.
+
 v2.1.0
 -Added: Fluidlogged API Compat.
 -Added: ForgeEventFactory.fireFluidPlaceBlockEvent() integration.
@@ -9,8 +12,9 @@ v2.0.0
 -Removed: Universal Compat Coremod.
 -Added: Mixins to BlockFluidClassic, BlockDynamicLiquid, and BlockStaticLiquid.
 -Added: Compat for the vanilla'n'forge renderers (BlockFluidRenderer, ModelFluid).
+-Added: New fluid movement for gasses.
 
-///////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 v1.7.1
 -Added: New fluid barrier method: Vanilla (the best and default to use).

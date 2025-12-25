@@ -4,8 +4,10 @@ import java.util.function.Function;
 
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.At;
 
 import com.gatoborrachon.realisticfinitefluids.render.BakedModelFiniteFluidClassic;
 
@@ -19,13 +21,38 @@ import net.minecraftforge.fluids.Fluid;
 
 @Mixin(ModelFluid.class)
 public abstract class MixinModelFluid  {
-	
+
 	@Shadow
 	@Final
-    private Fluid fluid;
+	private Fluid fluid;
 
+	@Inject(
+			method = "bake",
+			at = @At("HEAD"),
+			cancellable = true,
+			remap = false
+			)
+	private void rff$bake(
+			IModelState state,
+			VertexFormat format,
+			Function<ResourceLocation, TextureAtlasSprite> bakedTextureGetter,
+			CallbackInfoReturnable<IBakedModel> cir
+			) {
+		TextureAtlasSprite spriteFlow = bakedTextureGetter.apply(fluid.getFlowing());
+		TextureAtlasSprite spriteStill = bakedTextureGetter.apply(fluid.getStill());
+
+		cir.setReturnValue(
+				new BakedModelFiniteFluidClassic(
+						state,
+						spriteFlow,
+						spriteStill,
+						this.fluid
+						)
+				);
+	}
 	
-    @Overwrite(remap = false)
+	/*
+	@Overwrite(remap = false)
     public IBakedModel bake(IModelState state, VertexFormat format, Function<ResourceLocation, TextureAtlasSprite> bakedTextureGetter)
     {
 		TextureAtlasSprite spriteFlowCompat = bakedTextureGetter.apply(fluid.getFlowing()); //atlas.getAtlasSprite(fluid.getFlowing().toString());
@@ -34,7 +61,6 @@ public abstract class MixinModelFluid  {
 		
         return new BakedModelFiniteFluidClassic(spriteFlowCompat, spriteStillCompat, this.fluid);
     }
-    
-    
+	*/
 	
 }

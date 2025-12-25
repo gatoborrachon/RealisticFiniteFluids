@@ -2,8 +2,10 @@ package com.gatoborrachon.realisticfinitefluids.mixin.earlymixins;
 
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.gatoborrachon.realisticfinitefluids.References;
 import com.gatoborrachon.realisticfinitefluids.interfaces.IRealisticFiniteFluid;
@@ -32,8 +34,21 @@ public class MixinBlockFluidRenderer {
     @Shadow(remap = References.onDev) @Final private TextureAtlasSprite[] field_178271_b; //atlasSpritesWater
     @Shadow(remap = References.onDev) @Final private TextureAtlasSprite field_187501_d; //atlasSpriteWaterOverlay
 	
-	@Overwrite(remap = References.onDev) //renderFluid
-    public boolean func_178270_a(IBlockAccess world, IBlockState state, BlockPos pos, BufferBuilder bufferBuilderIn)
+    @Inject(
+    		method = "renderFluid",
+    		at = @At("HEAD"), 
+    		cancellable = true,
+            remap = false
+            )
+    private void rff$renderFluid(
+    		IBlockAccess world, 
+    		IBlockState state, 
+    		BlockPos pos,
+    		BufferBuilder bufferBuilderIn,
+            CallbackInfoReturnable<Boolean> cir
+        )
+    //@Overwrite(remap = References.onDev) //renderFluid
+    //public boolean func_178270_a(IBlockAccess world, IBlockState state, BlockPos pos, BufferBuilder bufferBuilderIn)
     {
         // ¿Este fluido es lava?
         boolean isLava = state.getMaterial() == Material.LAVA;
@@ -139,7 +154,8 @@ public class MixinBlockFluidRenderer {
                 && !renderSide[0] && !renderSide[1]
                 && !renderSide[2] && !renderSide[3])
         {
-            return false;
+    		//return false; 
+    		cir.setReturnValue(false);
         }
         
         
@@ -388,8 +404,8 @@ public class MixinBlockFluidRenderer {
 
             
             
-            
-            return renderedAnything;
+            //return renderedAnything;
+            cir.setReturnValue(renderedAnything);
         }
     }
 

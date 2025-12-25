@@ -121,24 +121,6 @@ public class RealisticFiniteFluidFunctions {
 	}
 
 
-	/*	if (world != null && pos != null) {
-			state = world.getBlockState(pos);
-	    	//FluidLogged API Compat
-			if (Loader.isModLoaded("fluidlogged_api")) {
-				FluidState fluidState = FluidloggedUtils.getFluidState(world, pos, state);
-				if (state.getBlock() instanceof IRealisticFiniteFluid) return world.getBlockState(pos).getValue(References.LEVEL)+1;
-				else if (fluidState.getBlock() instanceof IRealisticFiniteFluid) return fluidState.getState().getValue(References.LEVEL)+1; //.getLevel()+1; //.getValue().getValue(References.LEVEL)+1;
-			} else 
-				if (state.getBlock() instanceof IRealisticFiniteFluid) return world.getBlockState(pos).getValue(References.LEVEL)+1;
-		} else if (state != null) {
-			if (state.getBlock() instanceof IRealisticFiniteFluid) return state.getValue(References.LEVEL)+1;
-		}
-
-
-		return 1;  
-	}*/
-
-
 	/**
 	 * Sets the specified LEVEL from the passed stated to the block on the current pos
 	 * @param world the current World
@@ -701,37 +683,16 @@ public class RealisticFiniteFluidFunctions {
 	public static boolean shouldFlowToNeighbor(IBlockAccess world, BlockPos sourcePos, BlockPos destPos) {
 		int sourceLevel = getConceptualVolume(world, sourcePos, null); //world.getBlockState(posFrom).getValue(LEVEL);
 		int destLevel = getConceptualVolume(world, destPos, null); //world.getBlockState(posTo).getValue(LEVEL);
-		/*System.out.println("__");
-		System.out.println("sourcePos: "+sourcePos);
-		System.out.println("destPos: "+destPos);
-		 */
 		if (sourceLevel == destLevel) return false;
 
 		if (sourceLevel - 1 > destLevel)
 		{
-			/*
-			System.out.println("-------------");
-			System.out.println("sourceLevel: "+sourceLevel);
-			System.out.println("destLevel: "+destLevel);			
-			System.out.println("sourceLevel - 1 > destLevel: "+(sourceLevel - 1 > destLevel));
-			 */
 			return true;
 		}
 		else
 		{
 			float effectiveSourceLevel = FiniteFluidLogic.GeneralPurposeLogic.calculateNeighborWaterLevel(world, sourcePos, destPos);            
 			float effectiveDestLevel = FiniteFluidLogic.GeneralPurposeLogic.calculateNeighborWaterLevel(world, destPos, sourcePos);
-			/*System.out.println("-------------");
-			System.out.println("sourceLevel: "+sourceLevel);
-			System.out.println("destLevel: "+destLevel);
-			System.out.println("effectiveSourceLevel: "+effectiveSourceLevel);
-			System.out.println("effectiveDestLevel: "+effectiveDestLevel);
-			System.out.println("[]");
-			System.out.println("effectiveSourceLevel + 1.0F != (float)sourceLevel: "+ (effectiveSourceLevel + 1.0F != (float)sourceLevel));
-			System.out.println("||");
-			System.out.println("effectiveDestLevel + 1.0F != (float)destLevel: "+ (effectiveDestLevel + 1.0F != (float)destLevel));
-			System.out.println("effectiveSourceLevel - 0.8F > effectiveDestLevel: "+ (effectiveSourceLevel - 0.8F > effectiveDestLevel));
-			 */
 			return (effectiveSourceLevel + 1.0F != (float)sourceLevel ||
 					effectiveDestLevel + 1.0F != (float)destLevel) && effectiveSourceLevel - 0.8F > effectiveDestLevel;
 		}
@@ -759,7 +720,7 @@ public class RealisticFiniteFluidFunctions {
 			int diff = levelCurrent - levelNeighbor;
 			//System.out.println("diff: "+diff);
 
-			if (!fluidRequest) diff = diff*3; //TODO Make this configurable, its the strengt at where some waterwheels will produce power
+			if (!fluidRequest) diff = diff +3; // = diff*3; //TODO Make this configurable, its the strengt at where some waterwheels will produce power
 
 			flow = flow.add(/*.addVector(*/
 					dir.getXOffset()/*.getFrontOffsetX()*/ * diff, 
