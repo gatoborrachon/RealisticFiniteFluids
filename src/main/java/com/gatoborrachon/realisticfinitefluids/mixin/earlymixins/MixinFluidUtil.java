@@ -46,11 +46,11 @@ public abstract class MixinFluidUtil {
 		IBlockState flowingState = FiniteFluidLogic.liquids.get(index).flowingBlock.getDefaultState();
 
 		IBlockState targetBlockState = world.getBlockState(pos);
-		Block targetBlock = targetBlockState.getBlock();
+		Block targetBlock = RealisticFiniteFluidFunctions.getBlock(world, pos, targetBlockState);
 		//int fluidIndex = FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(ModBlocks.FINITE_LAVA_FLOWING);
 
 		// Permitir colocar solo si es aire o es tu propio bloque finito
-		if (world.isAirBlock(pos) || targetBlock instanceof IRealisticFiniteFluid) {
+		if (RealisticFiniteFluidFunctions.isAirBlock(world, pos, true) || targetBlock instanceof IRealisticFiniteFluid) {
 			SoundEvent soundToDisplay = flowingState.getMaterial() == Material.LAVA ? SoundEvents.ITEM_BUCKET_EMPTY_LAVA : SoundEvents.ITEM_BUCKET_EMPTY;
 
 			if (!world.isRemote) {
@@ -83,8 +83,8 @@ public abstract class MixinFluidUtil {
 							//world.setBlockState(pos.up(), FiniteFluidLogic.liquids.get(index).flowingBlock.getDefaultState()); 
 							//return;
 							
-							if (!(world.getBlockState(pos.up()).getBlock().hasTileEntity()) && targetBlock.isReplaceable(world, pos.up())) {
-								world.setBlockState(pos.up(), FiniteFluidLogic.liquids.get(index).flowingBlock.getDefaultState()); 
+							if (!(RealisticFiniteFluidFunctions.getBlock(world, pos.up(), world.getBlockState(pos.up())).hasTileEntity()) && targetBlock.isReplaceable(world, pos.up())) {
+								RealisticFiniteFluidFunctions.setBlockState(world, pos, pos.up(), FiniteFluidLogic.liquids.get(index).flowingBlock.getDefaultState()); 
 								//return;
 							} else 
 								return; //Because, if the current block is full and you can't place above it, then you should not place the fluid no matter what
@@ -95,12 +95,12 @@ public abstract class MixinFluidUtil {
 						}
 					} else if (targetBlockState.getMaterial() != containedBlock.getDefaultState().getMaterial()) { //have not same fluidRegistry --> 
 						world.playSound(player, pos, SoundEvents.BLOCK_FIRE_EXTINGUISH, SoundCategory.BLOCKS, 0.5F, 2.6F + (world.rand.nextFloat() - world.rand.nextFloat()) * 0.8F);
-						realisticFluid.setBlockState(world, pos, FiniteFluidLogic.liquids.get(index).flowingBlock.getDefaultState());
+						realisticFluid.setBlockState(world, player.getPosition(), pos, FiniteFluidLogic.liquids.get(index).flowingBlock.getDefaultState());
 						//return;
 					}
 				} else {
 					IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)FiniteFluidLogic.liquids.get(index).flowingBlock);                     	
-					realisticFluid.setBlockState(world, pos, realisticFluid.setVolume(null, null, flowingState, References.MAXIMUM_LEVEL));
+					realisticFluid.setBlockState(world, player.getPosition(), pos, realisticFluid.setVolume(null, null, flowingState, References.MAXIMUM_LEVEL));
 					//return;
 				}
 

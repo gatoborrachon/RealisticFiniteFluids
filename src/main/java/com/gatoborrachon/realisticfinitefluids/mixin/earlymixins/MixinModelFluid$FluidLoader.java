@@ -18,7 +18,7 @@ import net.minecraftforge.fluids.FluidRegistry;
 public abstract class MixinModelFluid$FluidLoader  {
 
 	@Overwrite(remap = false)
-	public IModel loadModel(ResourceLocation modelLocation) {		
+	public IModel loadModel(ResourceLocation modelLocation) {
 		Fluid fluid = FluidCompat.ModelResourceLocationToFluidMap.get(modelLocation.toString());
 		if (fluid != null)
 			return new IModelFiniteFluidClassic(fluid);
@@ -26,7 +26,20 @@ public abstract class MixinModelFluid$FluidLoader  {
 			return new IModelFiniteFluidClassic(FluidRegistry.WATER); // ModelFluid.WATER;
 	}
 
+	@Overwrite(remap = false)
+    public boolean accepts(ResourceLocation modelLocation)
+    {
+        return modelLocation.getNamespace().equals(ForgeVersion.MOD_ID) && (
+            modelLocation.getPath().equals("fluid") ||
+            modelLocation.getPath().equals("models/block/fluid") ||
+            modelLocation.getPath().equals("models/item/fluid")) 
+        		
+        		||
+        		modelLocation.getNamespace().equals(References.MODID)
+        		;
+    }
 	
+	/*
 	@Overwrite(remap = false)
 	public boolean accepts(ResourceLocation modelLocation){
 		return (
@@ -50,5 +63,6 @@ public abstract class MixinModelFluid$FluidLoader  {
 
 				;
 	}
+	*/
 
 }

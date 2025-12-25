@@ -17,106 +17,91 @@ import net.minecraft.client.renderer.block.statemap.IStateMapper;
 import net.minecraft.client.renderer.block.statemap.StateMapperBase;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
+import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fluids.BlockFluidClassic;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.registries.IRegistryDelegate;
-import net.minecraftforge.client.model.ModelLoader;
 
 public class FluidCompat {
 
 	public static void loadFiniteFluids(World world) {
-	    FluidIndexConfig cfg = FluidIndexConfig.load(world);
+		FluidIndexConfig cfg = FluidIndexConfig.load(world);
 
-	    // A) Cargar fluidos existentes    
-	    Iterator<Map.Entry<String, Integer>> it = cfg.storedFluidIndexes.entrySet().iterator();
-	    while (it.hasNext()) {
-	        Map.Entry<String, Integer> e = it.next();
-	        Fluid fluid = FluidRegistry.getFluid(e.getKey());
+		// A) Cargar fluidos existentes    
+		Iterator<Map.Entry<String, Integer>> it = cfg.storedFluidIndexes.entrySet().iterator();
+		while (it.hasNext()) {
+			Map.Entry<String, Integer> e = it.next();
+			Fluid fluid = FluidRegistry.getFluid(e.getKey());
 
-	        if (fluid == null) {
-	            cfg.freeIndexes.add(e.getValue());
-	            it.remove(); //ELIMINAMOS DE LOS INDICES ALMACENADOS
-	            continue;
-	        }
-	        
-	        if (FiniteFluidLogic.debug) System.out.println("[RFF] LEYENDO Fluido: '" + fluid.getName() + "' con el index: '" + e.getValue() + "'");
-	        createFiniteFluid(fluid, e.getValue());
-	    }
+			if (fluid == null) {
+				cfg.freeIndexes.add(e.getValue());
+				it.remove(); //ELIMINAMOS DE LOS INDICES ALMACENADOS
+				continue;
+			}
 
-	    // B) Detectar nuevos fluidos
-	    for (Fluid fluid : FluidRegistry.getRegisteredFluids().values()) {
-	        if (!cfg.storedFluidIndexes.containsKey(fluid.getName())) {
+			if (FiniteFluidLogic.logDebug) System.out.println("[RFF] LEYENDO Fluido: '" + fluid.getName() + "' con el index: '" + e.getValue() + "'");
+			registerFiniteFluids(fluid, e.getValue());
+		}
 
-	            int index = cfg.freeIndexes.isEmpty()
-	                    ? cfg.getNextIndex()
-	                    : cfg.freeIndexes.remove(0);
+		// B) Detectar nuevos fluidos
+		for (Fluid fluid : FluidRegistry.getRegisteredFluids().values()) {
+			if (!cfg.storedFluidIndexes.containsKey(fluid.getName())) {
 
-	            cfg.storedFluidIndexes.put(fluid.getName(), index);
-	            if (FiniteFluidLogic.debug) System.out.println("[RFF] REGISTRANDO Fluido: '"+fluid.getName()+"' con el index: '"+index+"'");
-	            //createFiniteFluid(fluid, index);
-	        }
-	    }
+				int index = cfg.freeIndexes.isEmpty()
+						? cfg.getNextIndex()
+								: cfg.freeIndexes.remove(0);
 
-	    cfg.save(world);
+						cfg.storedFluidIndexes.put(fluid.getName(), index);
+						if (FiniteFluidLogic.logDebug) System.out.println("[RFF] REGISTRANDO Fluido: '"+fluid.getName()+"' con el index: '"+index+"'");
+						//createFiniteFluid(fluid, index);
+			}
+		}
+
+		cfg.save(world);
 	}
-	
-	
-	
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	public static void createFiniteFluid(Fluid fluid, int indexFromConfig) {
+
+
+
+
+	public static void registerFiniteFluids(Fluid fluid, int indexFromConfig) {
 		if (fluid.getName().equals("water")) {
-		    addFiniteFluidType(fluid.getName(), Blocks.FLOWING_WATER, Blocks.WATER, -1, indexFromConfig);
-		    return;
+			addFiniteFluidType(fluid.getName(), Blocks.FLOWING_WATER, Blocks.WATER, -1, indexFromConfig);
+			return;
 		}
-		
+
 		if (fluid.getName().equals("lava")) {
-		    addFiniteFluidType(fluid.getName(), Blocks.FLOWING_LAVA, Blocks.LAVA, -1, indexFromConfig);
-		    return;
+			addFiniteFluidType(fluid.getName(), Blocks.FLOWING_LAVA, Blocks.LAVA, -1, indexFromConfig);
+			return;
 		}
-	
 
-	    // ------------------------------
-	    // 1. Obtener el block original
-	    // ------------------------------
-	    Block fluidBlock = fluid.getBlock();
+		// ------------------------------
+		// 1. Obtener el block original
+		// ------------------------------
+		Block fluidBlock = fluid.getBlock();
 
-	    // ------------------------------
-	    // 6. Registrar en Liquids y RENDER_ENTRIES
-	    // ------------------------------
-	    int gravity = (fluid.getDensity() < 0) ? 1 : -1;
-	    addFiniteFluidType(fluid.getName(), fluidBlock, fluidBlock, gravity, indexFromConfig);
-                
-        //System.out.println("[RFF] FINAL BLOCK: "+fluid.getBlock());
-	    //System.out.println("[RFF] Registrado fluido finito para: " + fluid.getName());
+		// ------------------------------
+		// 6. Registrar en Liquids y RENDER_ENTRIES
+		// ------------------------------
+		//int gravity = (fluid.getDensity() < 0) ? 1 : -1;
+		int gravity = (fluid.isGaseous()) ? 1 : -1;
+		addFiniteFluidType(fluid.getName(), fluidBlock, fluidBlock, gravity, indexFromConfig);
+		//System.out.println("[RFF] FINAL BLOCK: "+fluid.getBlock());
+		//System.out.println("[RFF] Registrado fluido finito para: " + fluid.getName());
 	}
-	
-	
-	
-	
-	
-	
-	
-	
+
+
+
 	public static void addFiniteFluidType(String name, Block flowing, Block still, int gravity, int currentIndex) {
 		FiniteFluidLogic.liquids.put(
-								 currentIndex, 
-								 
+				currentIndex, 
+
 				new NewFluidType(name,
-								 flowing,
-								 still,
-								 gravity, true)
+						flowing,
+						still,
+						gravity, true)
 				);
 
 		////int currentIndex = FiniteFluidLogic.liquids.size() - 1;
@@ -124,25 +109,22 @@ public class FluidCompat {
 		FiniteFluidLogic.blockToFluidIndex.put(flowing, currentIndex);
 		FiniteFluidLogic.blockToFluidIndex.put(still, currentIndex);
 	}
-	
 
 
-	
-	
-	
-	
-	
-    public static Map<String, Fluid> ModelResourceLocationToFluidMap = new HashMap<>();
 
-	public static void registerNewModelForFluids() {
-	    ForgeRegistries.BLOCKS.register(References.DEBUG_BLOCK);
-	    
+
+	public static Map<String, Fluid> ModelResourceLocationToFluidMap = new HashMap<>();
+
+	public static void registerMissingFluidBlockForFluids() {
+		//TODO Registrar bien este bloque
+		ForgeRegistries.BLOCKS.register(References.DEBUG_BLOCK);
+
 		for (Fluid fluid : FluidRegistry.getRegisteredFluids().values()) {
 			if (fluid.getName() != "water" && fluid.getName() != "lava") {
 				Block fluidBlock = fluid.getBlock();
-				String originalNameHash = "blocks/water_still";    
-				
-				
+				String originalNameHash = "blocks/water_still";
+
+
 				if (fluidBlock == null)  {
 					if (FiniteFluidLogic.createBlocksForBlocklessFluids) {
 						fluidBlock = new BlockFluidClassic(fluid, Material.WATER);
@@ -160,14 +142,22 @@ public class FluidCompat {
 							}
 						});
 
-						System.out.println("[RFF] Fluid +'"+fluid.getName()+"' has no default Block. Making one for it.");
+						if (FiniteFluidLogic.logDebug) System.out.println("[RFF] Fluid '"+fluid.getName()+"' has no default Block. Making one for it.");
 						fluid.setBlock(fluidBlock);
 					} else {
-						System.out.println("[RFF] Fluid +'"+fluid.getName()+"' has no default Block.");			    		
+						if (FiniteFluidLogic.logDebug) System.out.println("[RFF] Fluid '"+fluid.getName()+"' has no default Block.");			    		
 					}  
-			    }
+
+					
+					
+					
+				}
+				
+				
+				
 				
 
+				//LOAD MODEL FOR FLUIDS WITH NO TEXTURE
 				Field field = null;
 				Map<IRegistryDelegate<Block>, IStateMapper> map = null;
 
@@ -195,7 +185,7 @@ public class FluidCompat {
 
 					//Y le seteamos a un nuevo mapa de IBlockState-ModelResourceLocation el IStateMapper que obtuvimos del bloque en cuestion.
 					if (mapper == null)  {
-						if (FiniteFluidLogic.debug) System.out.println("[RFF] Block '"+fluidBlock.toString()+"' has no IStateMapper. Giving it its own name.");
+						if (FiniteFluidLogic.logDebug) System.out.println("[RFF] Block '"+fluidBlock.toString()+"' has no IStateMapper. Giving it its own name.");
 						originalNameHash = fluidBlock.getRegistryName().toString(); //"blocks/water_still";
 						continue;
 					}
@@ -214,9 +204,68 @@ public class FluidCompat {
 
 				ModelResourceLocationToFluidMap.put(originalNameHash, fluid);
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 			}
 		}
 	}
 
-	
+
+
+
+
+
+
+
+
+
+
+	/*public static void registerMissingFluidBlockForFluids() {
+		//TODO Registrar bien este bloque
+	    ForgeRegistries.BLOCKS.register(References.DEBUG_BLOCK);
+
+	    for (Fluid fluid : FluidRegistry.getRegisteredFluids().values()) {
+	    	if (fluid.getName() != "water" && fluid.getName() != "lava") {
+	    		Block fluidBlock = fluid.getBlock();
+
+	    		if (fluidBlock == null)  {
+	    			if (FiniteFluidLogic.createBlocksForBlocklessFluids) {
+	    				fluidBlock = new BlockFluidClassic(fluid, Material.WATER);
+	    				String name = "finite_" + fluid.getName();
+	    				fluidBlock.setRegistryName(name);
+	    				fluidBlock.setTranslationKey(name);
+	    				ForgeRegistries.BLOCKS.register(fluidBlock);
+	    				fluid.setBlock(fluidBlock);
+
+	    				ModelLoader.setCustomStateMapper(fluidBlock, new StateMapperBase() {
+	    					@Override
+	    					protected ModelResourceLocation getModelResourceLocation(IBlockState state) {
+	    						return new ModelResourceLocation("fluid"); //fluid.getBlock().getRegistryName(), 
+	    					}
+	    				});
+
+	    				if (FiniteFluidLogic.logDebug) System.out.println("[RFF] Fluid +'"+fluid.getName()+"' has no default Block. Making one for it.");
+	    			} else {
+	    				if (FiniteFluidLogic.logDebug) System.out.println("[RFF] Fluid +'"+fluid.getName()+"' has no default Block.");
+	    			}
+	    		}
+
+	    	}
+	    }
+	}*/
+
+
+
 }

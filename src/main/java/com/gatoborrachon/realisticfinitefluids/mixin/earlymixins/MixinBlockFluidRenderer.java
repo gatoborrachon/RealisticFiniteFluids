@@ -2,12 +2,15 @@ package com.gatoborrachon.realisticfinitefluids.mixin.earlymixins;
 
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.gatoborrachon.realisticfinitefluids.References;
 import com.gatoborrachon.realisticfinitefluids.interfaces.IRealisticFiniteFluid;
 import com.gatoborrachon.realisticfinitefluids.logic.FiniteFluidLogic;
+import com.gatoborrachon.realisticfinitefluids.logic.RealisticFiniteFluidFunctions;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockDynamicLiquid;
@@ -31,8 +34,21 @@ public class MixinBlockFluidRenderer {
     @Shadow(remap = References.onDev) @Final private TextureAtlasSprite[] field_178271_b; //atlasSpritesWater
     @Shadow(remap = References.onDev) @Final private TextureAtlasSprite field_187501_d; //atlasSpriteWaterOverlay
 	
-	@Overwrite(remap = References.onDev) //renderFluid
-    public boolean func_178270_a(IBlockAccess world, IBlockState state, BlockPos pos, BufferBuilder bufferBuilderIn)
+    @Inject(
+    		method = "renderFluid",
+    		at = @At("HEAD"), 
+    		cancellable = true,
+            remap = false
+            )
+    private void rff$renderFluid(
+    		IBlockAccess world, 
+    		IBlockState state, 
+    		BlockPos pos,
+    		BufferBuilder bufferBuilderIn,
+            CallbackInfoReturnable<Boolean> cir
+        )
+    //@Overwrite(remap = References.onDev) //renderFluid
+    //public boolean func_178270_a(IBlockAccess world, IBlockState state, BlockPos pos, BufferBuilder bufferBuilderIn)
     {
         // ¿Este fluido es lava?
         boolean isLava = state.getMaterial() == Material.LAVA;
@@ -54,11 +70,11 @@ public class MixinBlockFluidRenderer {
         float colorG = (float)(blockColor >> 8  & 255) / 255.0F;
         float colorB = (float)(blockColor       & 255) / 255.0F;
 
-        Vec3d flow = ((IRealisticFiniteFluid)state.getBlock()).calculateFlowVector(world, pos);       
+        Vec3d flow = ((IRealisticFiniteFluid)RealisticFiniteFluidFunctions.getBlock(world, pos, state)).calculateFlowVector(world, pos, true);       
         
-        int fluidIndex = FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(state.getBlock());
+        int fluidIndex = FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(RealisticFiniteFluidFunctions.getBlock(world, pos, state));
         
-        boolean isFlowing = state.getBlock() instanceof BlockDynamicLiquid;
+        boolean isFlowing = RealisticFiniteFluidFunctions.getBlock(world, pos, state) instanceof BlockDynamicLiquid;
 
         
         
@@ -108,7 +124,7 @@ public class MixinBlockFluidRenderer {
 
     	for (int i = 0; i < horizontals.length; i++) {
     	    EnumFacing face = horizontals[i];
-    	    Block neighborBlock = world.getBlockState(pos.offset(face)).getBlock();
+    	    Block neighborBlock = RealisticFiniteFluidFunctions.getBlock(world, pos.offset(face), world.getBlockState(pos.offset(face)));
 	        int neighborFluidIndex = FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(neighborBlock); 
 	        
     	    renderSide[i] = neighborFluidIndex != fluidIndex && state.shouldSideBeRendered(world, pos, face);
@@ -138,7 +154,8 @@ public class MixinBlockFluidRenderer {
                 && !renderSide[0] && !renderSide[1]
                 && !renderSide[2] && !renderSide[3])
         {
-            return false;
+    		//return false; 
+    		cir.setReturnValue(false);
         }
         
         
@@ -387,8 +404,8 @@ public class MixinBlockFluidRenderer {
 
             
             
-            
-            return renderedAnything;
+            //return renderedAnything;
+            cir.setReturnValue(renderedAnything);
         }
     }
 

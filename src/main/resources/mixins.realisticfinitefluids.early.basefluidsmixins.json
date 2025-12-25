@@ -7,8 +7,8 @@
   "mixins": [
 	"MixinBlockFluidClassic",
 	"MixinBlockFluidBase",
-	"MixinModelFluid$FluidLoader",
 	"MixinModelFluid",
+	"MixinModelFluid$FluidLoader",
 	
 	"MixinBlockStaticLiquid",
 	"MixinBlockDynamicLiquid",

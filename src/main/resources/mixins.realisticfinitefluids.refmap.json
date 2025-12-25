@@ -63,7 +63,7 @@
 		"atlasSpriteWaterOverlay": "field_187501_d"
 	},
 	"net.minecraft.block.BlockLiquid": {
-		"LEVEL": "field_176367_b"
+		"getFlow": "func_189543_a"
 	}
   }
 }

@@ -46,7 +46,7 @@ public class IModelFiniteFluidClassic implements IModel {
     		TextureAtlasSprite spriteStillCompat = bakedTextureGetter.apply(fluid.getStill()); //atlas.getAtlasSprite(fluid.getStill().toString());
     		//int index = FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(this.fluid.getName());
     		
-    		return new BakedModelFiniteFluidClassic(spriteFlowCompat, spriteStillCompat, this.fluid);
+    		return new BakedModelFiniteFluidClassic(state, spriteFlowCompat, spriteStillCompat, this.fluid);
     }
 
     @Override
@@ -62,7 +62,7 @@ public class IModelFiniteFluidClassic implements IModel {
             return this;
         }
         
-        return new IModelFiniteFluidClassic(fluid);
+        return new IModelFiniteFluidClassic(FluidRegistry.getFluid(fluidName));
     	
     }
 }

@@ -2,6 +2,7 @@ package com.gatoborrachon.realisticfinitefluids.logic;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -13,10 +14,12 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
+import com.gatoborrachon.realisticfinitefluids.RealisticFiniteFluids;
 import com.gatoborrachon.realisticfinitefluids.References;
 import com.gatoborrachon.realisticfinitefluids.init.ModConfig;
 import com.gatoborrachon.realisticfinitefluids.interfaces.IRealisticFiniteFluid;
 
+import git.jbredwards.fluidlogged_api.api.util.FluidloggedUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockBush;
 import net.minecraft.block.BlockFarmland;
@@ -35,6 +38,7 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fluids.BlockFluidClassic;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
@@ -71,7 +75,8 @@ public class FiniteFluidLogic {
     public static boolean enableEvaporation;// true;
     
     public static boolean bucketRemoveLowFluid;
-    public static boolean debug;
+    public static boolean visualDebug;
+    public static boolean logDebug;
     public static boolean waterCanFreeze;
     public static int waterLightOpacity;
     public static boolean flowingWaterShouldMoveCreativePlayer;
@@ -99,7 +104,7 @@ public class FiniteFluidLogic {
     public static void initFiniteFluidVariables() {
         doPressure = ModConfig.doPressure; //true
         lakeLimit = ModConfig.lakelimit; //512;
-        pressureLimit = 256;
+        pressureLimit = /*RealisticFiniteFluids.FluidLoggedAPI ? ModConfig.pressureLimit/2 :*/ ModConfig.pressureLimit; //256
         maxCalc = ModConfig.maxCalc; //1024;
         playerMaxDistanceToCalc = ModConfig.playerMaxDistanceToCalc;// 1024;
         waterTick = ModConfig.waterTickRate;// 4; //20 = tests -- 3 = real
@@ -112,8 +117,10 @@ public class FiniteFluidLogic {
         enableEvaporation = ModConfig.enableEvaporation;// true;
         smallOceanSearch = false;
         
+        
         bucketRemoveLowFluid = ModConfig.bucketRemoveLowFluid;
-        debug = ModConfig.debug;
+        visualDebug = ModConfig.visualDebug;
+        logDebug = ModConfig.logDebug;
         waterCanFreeze = ModConfig.waterCanFreeze;
         waterLightOpacity = ModConfig.waterLightOpacity;
         flowingWaterShouldMoveCreativePlayer = ModConfig.flowingWaterShouldMoveCreativePlayer;
@@ -149,6 +156,13 @@ public class FiniteFluidLogic {
     public static class FiniteFluidsLogic {
 
 		public static boolean tryLiquidMove(World world, BlockPos pos) {
+			////BlockPos newpos = new BlockPos(24, 4, -108);
+			////IBlockState newstate = world.getBlockState(newpos);
+			//FluidState fluidstate = FluidState.of(newstate);
+			////System.out.println("[RFF] block: "+newstate.getBlock());
+			////System.out.println("[RFF] fluidLoggedState: "+FluidState.get(world, newpos));
+			//System.out.println("[RFF] canFluidOccupy: "+FluidloggedUtils.canFluidOccupy(newstate, world, newpos, fluidstate)); //.getFluidFromState(newstate)); //.isStateFluidloggable(newstate, world, newpos, fluidstate));
+			
 		    if (world.isRemote) return false;
 		
 		    Random rand = new Random();
@@ -179,27 +193,7 @@ public class FiniteFluidLogic {
 		        if (liquidMove(world, pos, pos.add(-dx, 0, 0), true)) return true;
 		        if (liquidMove(world, pos, pos.add(dx, 0, 0), true)) return true;
 		    }
-		    
-		    /*
-		    if (flip) {
-		        if (liquidMove(world, pos, pos.add(-dx, getFluidGravity(), 0), true)) {actualFlowPos = new BlockPos(-dx, getFluidGravity(), 0); return true;}
-		        if (liquidMove(world, pos, pos.add(dx, getFluidGravity(), 0), true)) {actualFlowPos = new BlockPos(dx, getFluidGravity(), 0); return true;}
-		        if (liquidMove(world, pos, pos.add(0, getFluidGravity(), -dz), true)) {actualFlowPos = new BlockPos(0, getFluidGravity(), -dx); return true;}
-		        if (liquidMove(world, pos, pos.add(0, getFluidGravity(), dz), true)) {actualFlowPos = new BlockPos(0, getFluidGravity(), dx); return true;}
-		        if (liquidMove(world, pos, pos.add(-dx, 0, 0), true)) {actualFlowPos = new BlockPos(-dx, 0, 0); return true;}
-		        if (liquidMove(world, pos, pos.add(dx, 0, 0), true)) {actualFlowPos = new BlockPos(dx, 0, 0); return true;}
-		        if (liquidMove(world, pos, pos.add(0, 0, -dz), true)) {actualFlowPos = new BlockPos(0, 0, -dx); return true;}
-		        if (liquidMove(world, pos, pos.add(0, 0, dz), true)) {actualFlowPos = new BlockPos(0, 0, dx); return true;}
-		    } else {
-		        if (liquidMove(world, pos, pos.add(0, getFluidGravity(), -dz), true)) {actualFlowPos = new BlockPos(0, getFluidGravity(), -dz); return true;}
-		        if (liquidMove(world, pos, pos.add(0, getFluidGravity(), dz), true)) {actualFlowPos = new BlockPos(0, getFluidGravity(), dz); return true;}
-		        if (liquidMove(world, pos, pos.add(-dx, getFluidGravity(), 0), true)) {actualFlowPos = new BlockPos(-dx, getFluidGravity(), 0); return true;}
-		        if (liquidMove(world, pos, pos.add(dx, getFluidGravity(), 0), true)) {actualFlowPos = new BlockPos(dx, getFluidGravity(), 0); return true;}
-		        if (liquidMove(world, pos, pos.add(0, 0, -dz), true)) {actualFlowPos = new BlockPos(0, 0,-dz); return true;}
-		        if (liquidMove(world, pos, pos.add(0, 0, dz), true)) {actualFlowPos = new BlockPos(0, 0, dz); return true;}
-		        if (liquidMove(world, pos, pos.add(-dx, 0, 0), true)) {actualFlowPos = new BlockPos(-dx, 0, 0); return true;}
-		        if (liquidMove(world, pos, pos.add(dx, 0, 0), true)) {actualFlowPos = new BlockPos(dx, 0, 0); return true;}
-		    }*/
+
 		
 		
 		    return false;
@@ -212,62 +206,72 @@ public class FiniteFluidLogic {
 		}
 
 		private static boolean liquidMove(World world, BlockPos sourcePos, BlockPos destPos, boolean doMove, int recursionDepth) { 
-		    if (world.isRemote) {
+		    //if (sourcePos == new BlockPos(35, 4, -120)) 
+	    	//System.out.println("[RFF] sourcePos: "+sourcePos);  
+			if (world.isRemote) {
 		    	//System.out.println("[RFF] Return 1"); 
 		    return false;
 		    }
 		    
+		    // 1) OBTENEMOS BLOQUES Y STATES TANTO DEL SOURCE COMO DEL DESTINY
 		    IBlockState sourceState = world.getBlockState(sourcePos);
-		    Block sourceBlock = sourceState.getBlock();
+		    Block sourceBlock = RealisticFiniteFluidFunctions.getBlock(world, sourcePos, sourceState);
 		    if (!(sourceBlock instanceof IRealisticFiniteFluid)) { 
 		    	//System.out.println("[RFF] Return 2 FALSE");  
 		    	return false; 
-		    	}//CHECAR QUE ESTO NO ROMPA EL FUNCIONAMIENTO DEL AGUA
+		    	}//CHECAR QUE ESTO NO ROMPA EL FUNCIONAMIENTO DEL AGUA //??
 			IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)sourceBlock);
 		    int sourceLevel = realisticFluid.getVolume(world, sourcePos, sourceState);
 		
 		    IBlockState destState = world.getBlockState(destPos);
-		    Block destBlock = destState.getBlock();
+		    Block destBlock = RealisticFiniteFluidFunctions.getBlock(world, destPos, destState);
 		    int destLevel = destBlock instanceof IRealisticFiniteFluid ? realisticFluid.getVolume(world, destPos, destState) : -1;
 		
+		    // 2) SETEAMOS EL FLUID INDEX 
 		    GeneralPurposeLogic.setCurrentFluidIndex(sourceBlock);
 		    NewFluidType fluid = (NewFluidType) liquids.get(onFiniteFluidIndex);
+		    //System.out.println("[RFF] destBlock: "+destBlock);
 		
+		    
+		    // 3) MANEJAMOS RECURSION PARA BUSCAR EN LIQUIDOS ADYANCETES, DEPENDE DEL MATERIAL DEL SOURCE BLOCK
 		    boolean shouldSearchOutward = false;
 		    if (fluid.flowingBlock instanceof IRealisticFiniteFluid) {
 		        shouldSearchOutward = ((IRealisticFiniteFluid) fluid.flowingBlock).shouldSearchOutward(fluid.flowingBlock.getDefaultState().getMaterial());
 		    }
 		
-		
-		    //Calculos horizontales
+		    // #######################
+		    //        RECURSION
+		    // #######################
+		    //SI PODEMOS HACER BUSQUEDAS ADYACENTES ADICIONALES, Y LA PROFUNDIDAD DE RECURSION ES MENOR A 32 -->
 		    if (shouldSearchOutward && recursionDepth < 32) {
+		    	//CHECAMOS EN LOS ENUMFACING HORIZONTALES DEL BLOQUE DE DEST BLOCK
 		        for (EnumFacing dir : EnumFacing.HORIZONTALS) {
 		            BlockPos neighbor = destPos.offset(dir);
+		            //CHECAMOS LOS VECINOS SIEMPRE Y CUANDO SEAN FLUIDO FINITO DEL MISMO TIPO PERO NO SEAN EL SOURCE BLOCK
 		            if (!neighbor.equals(sourcePos) && GeneralPurposeLogic.isFiniteFluid(world, neighbor)) {
+		            	//LE SACAMOS EL VOLUMEN
 		                int neighborLevel = realisticFluid.getVolume(world, neighbor, world.getBlockState(neighbor));
+		                //Y SI EL BLOQUE DESTINO TIENE MAS LIQUIDO QUE UNO DE ESTOS BLOQUES ADDYACENTES --> 
+		                //REINICIAMOS LA FUNCION, TOMANDO COMO DESTINO ESTE BLOQUE VECINO
 		                if (destLevel > neighborLevel) {
+					    	//System.out.println("[RFF] ");  
+		        	    	//System.out.println("[RFF] sourcePosRec: "+sourcePos);  
 		                	//System.out.println("[RFF] Return 3 "+recursionDepth);
 		                    return liquidMove(world, sourcePos, neighbor, doMove, recursionDepth++);
 		                }
 		            }
 		        }
 		
-		    } else if (!GeneralPurposeLogic.isFiniteFluid(destBlock)) {
+		    // SI NO PODEMOS HACER RECURSION --> CHECAMOS QUE EL BLOQUE DESTINO SEA BLOQUE FINITO
+		    } else if (!GeneralPurposeLogic.isFiniteFluid(world, destPos)) {
+    	    	//System.out.println("[RFF] REMAMADAREMAMADAREMAMADAREMAMADAREMAMADAREMAMADA: "+destLevel);  
 		        destLevel = -1;
 		    }
 		    
-		    //Reducir deuda de calculos
-		    int dy = sourcePos.getY() - destPos.getY(); //Es la diferencia entre la altura de nuestro bloque contra el que estamos comparando
+		    // REDUCIR DEUDA DE CALCULOS
+		    //Es la diferencia entre la altura de nuestro bloque contra el que estamos comparando
 		    //Idealmente tendria que salir un resultado positivo
-		    //System.out.println("doMove "+doMove);
-		    //System.out.println("dy "+dy);
-		    //System.out.println("destLevel "+destLevel);
-		    //System.out.println("sourceLevel "+sourceLevel);
-		    //System.out.println("Math.abs(destLevel - sourceLevel) "+Math.abs(destLevel - sourceLevel));
-		    //System.out.println("getCalc() "+getCalc());
-		    //System.out.println("maxCalc "+(maxCalc));
-		    //System.out.println(" ");
-		
+		    int dy = sourcePos.getY() - destPos.getY(); 
 		    if (doMove && dy == 0 && Math.abs(destLevel - sourceLevel) < 3 && GeneralPurposeLogic.getCalc() > maxCalc * 0.6f) {
 		        --calcAmt;
 		    	//System.out.println("[RFF] Return 4 TRUE");
@@ -275,99 +279,126 @@ public class FiniteFluidLogic {
 		    }
 		
 		    
-		    //Calculos verticales 
+		    /**
+		     * TODO --> CREO QUE ACA ESTA EL PROBLEMA DE PORQUE LOS BLOQUES DESAPARECEN
+		     * NO ESTAN DETECTANDO A SUS BLOQUES HERMANOS,
+		     * UN BLOQUE FLOWING QUE CAE DE LADO HACIA ABAJO, SE IMPONE AUNQUE SU HERMANO ESTE EXACTAMENTE DEBAJO
+		     */
+		    
+		    // #######################
+		    //   CALCULOS VERTICALES
+		    // #######################
+		    //MOVIMIENTO NETO HACIA ABAJO
 		    if (dy == -GeneralPurposeLogic.getFluidGravity()) {
+		    	//SI NOS PODEMOS MOVER --> 
 		        if (GeneralPurposeLogic.canMoveInto(world, destPos, sourcePos, sourceLevel, fluid)) {
+		        	//EJECUTAMOS EL MOVIMIENTO + tryGrab ????? NO SE QUE HAGA
 		            if (doMove) {
-		            	realisticFluid.setBlockState(world, destPos, realisticFluid.setVolume(null, null, fluid.flowingBlock.getDefaultState(), sourceLevel));
+		            	realisticFluid.setBlockState(world, sourcePos, destPos, realisticFluid.setVolume(null, null, fluid.flowingBlock.getDefaultState(), sourceLevel));
 		            	FiniteFluidsLogic.tryGrab(world, sourcePos, destPos, 0, fluid);
 		            }
 		        	//System.out.println("[RFF] Return 5 TRUE");
 		            return true;
 		        }
 		        
-		        //Si el destino tiene agua y tiene espacio para niveles de agua
-		        //Ecualizacion Vertical
-		        if (GeneralPurposeLogic.isFiniteFluid(destBlock) && destLevel < References.MAXIMUM_LEVEL) {
+			    // #########################
+			    //   ECUALIZACION VERTICAL
+			    // #########################
+		        // SI EL DESTINO ES BLOQUE FLUIDO DEL MISMO TIPO
+		        // Y TIENE ESPACIO PARA ALMACENAR AGUA
+		        if (GeneralPurposeLogic.isFiniteFluid(world, destPos) && destLevel < References.MAXIMUM_LEVEL) {
 		            if (doMove) {
-		            	//ECUALIZACION
+		            	//ECUALIZACION VERTICAL -->
+		            	//Convertimos los LEVELs literales (0-7) en LEVELs conceptuales (1-8) para calculos precisos evitando
+		            	//problemas al usar el 0
 		            		int realSource = sourceLevel + 1;
 		                	int realDest   = destLevel + 1;
+		                	//OBTENEMOS UN VALOR PARA TRANSFERIR AL DEST BLOCK
 		                	int transfer = Math.min(References.MAXIMUM_LEVEL - destLevel, realSource);
 		
+		                	//REALIZAMOS LA TRANSFERENCIA
 		                	realSource -= transfer;
 		                	realDest   += transfer;
 		
+		                	//REGRESAMOS AL SISTEMA DE LEVELs LITERALES
 		                	sourceLevel = realSource - 1;
 		                	destLevel   = realDest   - 1;
 		
-		                if (sourceLevel >= References.MINIMUM_LEVEL) //SI COMPARAS CONTRA 0, LOS BLOQUES CON VALOR 0 SE VAN AL CARAJO, DEBE SER CONTRA -1
-		                	realisticFluid.setBlockState(world, sourcePos, realisticFluid.setVolume(null, null, fluid.flowingBlock.getDefaultState(), sourceLevel));
-		                else
+		                	//SI EL LEVEL RESTANTE ES MAYOR O IGUAL AL MINIMUM_LEVEL
+		                	//Esto significa, si el LEVEL del origen todavia da para que exista el bloque, seteamos este LEVEL en el bloque
+		                if (sourceLevel >= References.MINIMUM_LEVEL)
+		                	realisticFluid.setBlockState(world, sourcePos, sourcePos, realisticFluid.setVolume(null, null, fluid.flowingBlock.getDefaultState(), sourceLevel));
+		                else //SI NO ALCANZO EL LEVEL DE ORIGEN PARA QUE EXISTA EL SOURCE BLOCK --> tryGrab???
 		                    FiniteFluidsLogic.tryGrab(world, sourcePos, destPos, 0, fluid);
 		
-		                realisticFluid.setBlockState(world, destPos, realisticFluid.setVolume(null, null, fluid.flowingBlock.getDefaultState(), destLevel));
+		                //SETEAMOS UN BLOQUE DE FLUIDO EN EL DEST POSITION
+		                realisticFluid.setBlockState(world, sourcePos, destPos, realisticFluid.setVolume(null, null, fluid.flowingBlock.getDefaultState(), destLevel));
 		
-		                
+		                //AÑADIMOS EL BLOQUE AL SISTEMA DE PRESION DIRECTA ASI TIENE EL LEVEL MAXIMO
 		                if (doPressure && destLevel == References.MAXIMUM_LEVEL)
-		                	PressureSystemLogic.addToPressure(world, destPos, false); // 0 = false
+		                	PressureSystemLogic.addToPressure(world, destPos, false);
 		            }
 		        	//System.out.println("[RFF] Return 6 TRUE");
 		            return true;
 		        }
 		    	//System.out.println("[RFF] Return 7 FALSE");
+		        //SI NO NOS PODIAMOS MOVER, NI REALIZAMOS ECUALIZACION --> RETURN FALSE;
 		        return false;
 		    }
 			
-		    //Ecualizacion horizontal
-		    if (GeneralPurposeLogic.isFiniteFluid(destBlock)) {
-		        // Ecualizacion normal si son del mismo material
+		    // #########################
+		    //   CALCULOS HORIZONTALES
+		    // #########################
+		    //SI EL BLOQUE DE DESTINO ES UN BLOQUE DE FLUIDO FINITO
+		    //if (FluidloggedUtils.canFluidFlow(world, destPos, destState, GeneralPurposeLogic.getFacingBetween(sourcePos, destPos)) && destBlock != Blocks.AIR)
+		    if (GeneralPurposeLogic.isFiniteFluid(world, destPos)) {
+		        // SI DEBERIAMOS MOVERNOS 
+		    	// + EL DEST LEVEL TIENE MENOS FLUIDO DEL MAXIMO PERMITIDO 
+		    	// + EL SOURCE LEVEL TIENE MAS FLUIDO DEL MINIMO PERMITIDO
 		        if (GeneralPurposeLogic.shouldFlowToNeighbor(world, sourcePos, destPos) && destLevel < References.MAXIMUM_LEVEL && sourceLevel > References.MINIMUM_LEVEL) {
 		            if (doMove) {
-		                int total = sourceLevel + destLevel + 2; //Convertido a LEVELs conceptuales
+						// ###########################
+						//   ECUALIZACION HORIZONTAL
+						// ###########################
+		            	int total = sourceLevel + destLevel + 2; //Convertido a LEVELs conceptuales
 		                sourceLevel = total / 2;
 		                destLevel = total - sourceLevel - 1;
 		                --sourceLevel;
 		                
+			            //SI EL LEVEL RESTANTE ES MAYOR O IGUAL AL MINIMUM_LEVEL
+	                	//Esto significa, si el LEVEL del origen todavia da para que exista el bloque, seteamos este LEVEL en el bloque
 		                if (sourceLevel >= References.MINIMUM_LEVEL)
-		                	realisticFluid.setBlockState(world, sourcePos, realisticFluid.setVolume(null, null, fluid.flowingBlock.getDefaultState(), sourceLevel));
-		                 else 
+		                	realisticFluid.setBlockState(world, sourcePos, sourcePos, realisticFluid.setVolume(null, null, fluid.flowingBlock.getDefaultState(), sourceLevel));
+		                 else //SI NO ALCANZO EL LEVEL DE ORIGEN PARA QUE EXISTA EL SOURCE BLOCK --> tryGrab???
 		                	FiniteFluidsLogic.tryGrab(world, sourcePos, destPos, 0, fluid);
 		
+		                //SETEAMOS UN BLOQUE DE FLUIDO EN EL DEST POSITION
+		                realisticFluid.setBlockState(world, sourcePos, destPos, realisticFluid.setVolume(null, null, fluid.flowingBlock.getDefaultState(), destLevel));
 		
-		                realisticFluid.setBlockState(world, destPos, realisticFluid.setVolume(null, null, fluid.flowingBlock.getDefaultState(), destLevel));
-		
+		                //AÑADIMOS EL BLOQUE AL SISTEMA DE PRESION DIRECTA ASI TIENE EL LEVEL MAXIMO
 		                if (doPressure && destLevel == References.MAXIMUM_LEVEL)
 		                    PressureSystemLogic.addToPressure(world, destPos, false); // 0 = false
 		            }
+			    	//System.out.println("[RFF] ");  
+			    	//System.out.println("[RFF] sourcePos: "+sourcePos);  
+			    	//System.out.println("[RFF] sourceLevel: "+sourceLevel);  
+			    	//System.out.println("[RFF] destLevel "+destLevel );  
+			    	//System.out.println("[RFF] XXXX: "+XXXX);  
 		        	//System.out.println("[RFF] Return 8 TRUE");
 		            return true;
 		        }
 		        
 		        
 		        
-		        //Division de nuestra agua en otros bloques, horizontalmente hablando
+		        //SI EL BLOQUE DESTINO NO ES UN FINITE FLUID DEL MISMO TIPO
+		        //CHECAMOS SI NOS PODEMOS MOVER + SI EL SOURCE LEVEL ES MAYOR AL MINIMO
+		        //(claro que en laa funcion canMoveInto, tambien checamos que el bloque destino
+		        //no sea un bloque finito de cualquier tipo)
 		    } else if (GeneralPurposeLogic.canMoveInto(world, destPos, sourcePos, sourceLevel, fluid) && sourceLevel > References.MINIMUM_LEVEL) {
 		        if (doMove) {
 		            --sourceLevel;
-		            realisticFluid.setBlockState(world, sourcePos, realisticFluid.setVolume(null, null, fluid.flowingBlock.getDefaultState(), sourceLevel));
-		            realisticFluid.setBlockState(world, destPos, realisticFluid.setVolume(null, null, fluid.flowingBlock.getDefaultState(), References.MINIMUM_LEVEL));
-		            
-		        	// --> CONVERTIMOS LITERAL LEVELS (0-7) A CONCEPTUAL LEVELS (1-8)
-		    		/*
-		    		int realSource = sourceLevel + 1;
-		        	int realDest   = 0;
-		            int transfer = (int) Math.floor(realSource/2);
-		
-		        	realSource -= transfer;
-		        	realDest   += transfer;
-		
-		        	sourceLevel = realSource - 1;
-		        	destLevel   = realDest   - 1;
-		            
-		            realisticFluid.setBlockState(world, sourcePos, realisticFluid.setVolume(null, null, fluid.flowingBlock.getDefaultState(), sourceLevel));
-		            realisticFluid.setBlockState(world, destPos, realisticFluid.setVolume(null, null, fluid.flowingBlock.getDefaultState(), destLevel));
-		            */
+		            realisticFluid.setBlockState(world, sourcePos, sourcePos, realisticFluid.setVolume(null, null, fluid.flowingBlock.getDefaultState(), sourceLevel));
+		            realisticFluid.setBlockState(world, sourcePos, destPos, realisticFluid.setVolume(null, null, fluid.flowingBlock.getDefaultState(), References.MINIMUM_LEVEL));
 		        }
 		    	//System.out.println("[RFF] Return 9 TRUE");
 		        return true;
@@ -378,85 +409,95 @@ public class FiniteFluidLogic {
 		}
 		
 		
-		
-		public static boolean tryGrab(World world, BlockPos pos, BlockPos fromPos, int depth, NewFluidType fluid) {
+		/**
+		 * Funcion para intentar agarrar fluido adyancente (hasta grabAmt bloques de distancia) y evitar dejar un hueco entre los bloques.
+		 */
+		public static boolean tryGrab(World world, BlockPos sourcePos, BlockPos destPos, int recursionDepth, NewFluidType fluid) {
 		    if (world.isRemote) return false;
 		
+		    //Seteamos que hemos encontrado agua y su posicion en false/null, y eliminamos el SourceBlock.
+		    //NOTA --> ENTIENDE, EL SOURCEBLOCK ESTA VACIO, PERO VAMOS A EVITAR QUE QUEDE COMPLETAMENTE HUECO
 		    boolean foundWater = false;
 		    BlockPos foundPos = null;
-		    world.setBlockToAir(pos);
-		    world.markBlockRangeForRenderUpdate(pos, pos);
+		    RealisticFiniteFluidFunctions.setBlockToAir(world, sourcePos);
+		    world.markBlockRangeForRenderUpdate(sourcePos, sourcePos);
 		
-		    // Si el bloque desde el que cayó está arriba y no hay aire arriba, cancelar
-		    if (fromPos.getY() > pos.getY() && !world.isAirBlock(fromPos)) {
+		    // Si el bloque "fluyo hacia arriba" y no hay aire en el destino, cancelar
+		    // (Supongo que esto es para los fluidos gaseosos, o para alguna situacion en la recursion dentro de esta funcion)
+		    if (destPos.getY() > sourcePos.getY() && !RealisticFiniteFluidFunctions.isAirBlock(world, destPos, true)) {
 		        return false;
 		    }
-		
-		    if (depth < grabAmt) {
+		    
+		    //grabAmt --> Que tan lejos puede jalar fluido para nuestro SourcePos vacio.
+		    if (recursionDepth < grabAmt) {
 		        // offset 0: misma Y, offset 1: arriba/abajo según gravedad
 		        for (int verticalOffset = 0; verticalOffset < 2 && !foundWater; ++verticalOffset) {
 		            int yOffset = verticalOffset * -GeneralPurposeLogic.getFluidGravity();
 		
+		            //CONDICION PARA SETEAR foundWater A TRUE:
+		            //1.1.- Que el grado de recursion sea igual a 0 
+		            // O 
+		            //1.2.- Que el bloque de destino sea distinto a  la posicion que vamos a checar en base a 
+		            // offsets verticales + central y horizontales
+		            
+		            // Y 
+		            
+		            //2.- Que el bloque a checar sea un Fluido Finito DEL MISMO TIPO (isFiniteFluid())
+		            
+		            
+		            
 		            // Centro (misma XZ)
-		            BlockPos check = pos.add(0, yOffset, 0);
-		            if ((depth == 0 || !check.equals(fromPos)) && GeneralPurposeLogic.isFiniteFluid(world.getBlockState(check).getBlock())) {
-		                foundPos = check;
+		            BlockPos blockPosToCheck = sourcePos.add(0, yOffset, 0); //.add(0, yOffset, 0);
+		            if ((recursionDepth == 0 || !blockPosToCheck.equals(destPos)) && GeneralPurposeLogic.isFiniteFluid(world, blockPosToCheck)) {
+		                foundPos = blockPosToCheck;
 		                foundWater = true;
 		            }
-		
-		            // Oeste
-		            check = pos.add(-1, yOffset, 0);
-		            if (!foundWater && (depth == 0 || !check.equals(fromPos)) && GeneralPurposeLogic.isFiniteFluid(world.getBlockState(check).getBlock())) {
-		                foundPos = check;
-		                foundWater = true;
+		            
+		            // Laterales
+		            for (EnumFacing facing : EnumFacing.HORIZONTALS) {
+			            blockPosToCheck = sourcePos.add(0, yOffset, 0).offset(facing);
+			            if (!foundWater && (recursionDepth == 0 || !blockPosToCheck.equals(destPos)) && GeneralPurposeLogic.isFiniteFluid(world, blockPosToCheck)) {
+			                foundPos = blockPosToCheck;
+			                foundWater = true;
+			            }
+			
 		            }
-		
-		            // Este
-		            check = pos.add(1, yOffset, 0);
-		            if (!foundWater && (depth == 0 || !check.equals(fromPos)) && GeneralPurposeLogic.isFiniteFluid(world.getBlockState(check).getBlock())) {
-		                foundPos = check;
-		                foundWater = true;
-		            }
-		
-		            // Norte
-		            check = pos.add(0, yOffset, -1);
-		            if (!foundWater && (depth == 0 || !check.equals(fromPos)) && GeneralPurposeLogic.isFiniteFluid(world.getBlockState(check).getBlock())) {
-		                foundPos = check;
-		                foundWater = true;
-		            }
-		
-		            // Sur
-		            check = pos.add(0, yOffset, 1);
-		            if (!foundWater && (depth == 0 || !check.equals(fromPos)) && GeneralPurposeLogic.isFiniteFluid(world.getBlockState(check).getBlock())) {
-		                foundPos = check;
-		                foundWater = true;
-		            }
+
 		        }
 		    }
 		
+		    //SI ENCONTRAMOS FLUIDO Y SU POSICION ES DISTINTA A NULL
 		    if (foundWater && foundPos != null) {
+		    	//OBTENEMOS BLOCKSTATE Y VOLUMEN ACTUAL
 		        IBlockState state = world.getBlockState(foundPos);
 				IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)fluid.flowingBlock);
 		        int level = realisticFluid.getVolume(world, foundPos, state);
 		
-		        // Coloca el nuevo bloque con el mismo nivel que el original
-		        //world.setBlockState(pos, fluid.flowingBlock.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, level), 3);
-		        realisticFluid.setBlockState(world, pos, realisticFluid.setVolume(null, null, fluid.flowingBlock.getDefaultState(), level));
+		        // COLOCAMOS EL LEVEL DEL BLOQUE EN CONTRAMOS EN LA POSICION DEL SOURCEBLOCK
+		        realisticFluid.setBlockState(world, sourcePos, sourcePos, realisticFluid.setVolume(null, null, fluid.flowingBlock.getDefaultState(), level));
 		
-		        // Repetir para el bloque del cual se extrajo el agua
-		        tryGrab(world, foundPos, pos, depth + 1, fluid);
-		    } else if (world.isAirBlock(pos)) {
-		        // Si quedó aire, intenta salvar el bloque
-		        tryToSave(world, pos, fluid);
+		        // REPETIMOS EL MISMO PROCESO PARA EL BLOQUE DEL CUAL EXTRAIMOS AGUA,
+		        // ESTO CON EL FIN DE JALAR AGUA A MUCHA DISTANCIA (grabAmt bloques) Y ACERCAR EL AGUA
+		        tryGrab(world, foundPos, sourcePos, recursionDepth + 1, fluid);
+		        
+		    //PERO --> SI TRAS TODOO ESTO, AUN NO LOGRAMOS PONERLE FLUIDO A LA POSICION SOURCE_POS --> 
+		    } else if (RealisticFiniteFluidFunctions.isAirBlock(world, sourcePos, true)) {
+		        // EJECUTAMOS tryToSave
+		        tryToSave(world, sourcePos, fluid);
 		    }
 		
 		    return false;
 		}
 		
+		/**
+		 * 
+		 */
 		public static boolean tryToSave(World world, BlockPos pos, NewFluidType fluid) {
+			//Obtenemos la gravedad del fluido actual, y seteamos el valor de "encontrado" a false
 		    int gravity = fluid.gravity;
 		    boolean found = false;
 		
+		    //EN UN for DE DIFERENTES ALTURAS DE Y --> 
 		    for (int i = 0; i < 2; i++) {
 		        int yOffset = (i == 0) ? 1 : -gravity;
 		        BlockPos checkPos;
@@ -465,20 +506,18 @@ public class FiniteFluidLogic {
 		        if (i == 0) {
 		            checkPos = pos.up();
 		            IBlockState state = world.getBlockState(checkPos);
-		            Block block = state.getBlock();
+		            Block block = RealisticFiniteFluidFunctions.getBlock(world, checkPos, state);
 		            if (fluid.isFluid(block)) {
 		        		IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)block);
 		                int level = realisticFluid.getVolume(world, checkPos, state);
-		                if (level > References.MINIMUM_LEVEL || realisticFluid.isOceanBlock(world, checkPos, state, GeneralPurposeLogic.getFluidIndex(state.getBlock()))) {
+		                if (level > References.MINIMUM_LEVEL || realisticFluid.isOceanBlock(world, checkPos, state, GeneralPurposeLogic.getFluidIndex(RealisticFiniteFluidFunctions.getBlock(world, checkPos, state)))) {
 		                    found = true;
 		                	//System.out.println("VERGA TRYTOSAVE_1");
 		
-		                    if (!realisticFluid.isOceanBlock(world, checkPos, state, GeneralPurposeLogic.getFluidIndex(state.getBlock()))) {
-		                        //world.setBlockState(checkPos, fluid.flowingBlock.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, level - 1), 3);
-		                    	realisticFluid.setBlockState(world, checkPos, realisticFluid.setConceptualVolume(null, null, fluid.flowingBlock.getDefaultState(), level));
+		                    if (!realisticFluid.isOceanBlock(world, checkPos, state, GeneralPurposeLogic.getFluidIndex(RealisticFiniteFluidFunctions.getBlock(world, checkPos, state)))) {
+		                    	realisticFluid.setBlockState(world, pos, checkPos, realisticFluid.setConceptualVolume(null, null, fluid.flowingBlock.getDefaultState(), level));
 		                    }
-		                    //world.setBlockState(pos, fluid.flowingBlock.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, 0), 3);
-		                    realisticFluid.setBlockState(world, pos, realisticFluid.setVolume(null, null, fluid.flowingBlock.getDefaultState(), References.MINIMUM_LEVEL));
+		                    realisticFluid.setBlockState(world, pos, pos, realisticFluid.setVolume(null, null, fluid.flowingBlock.getDefaultState(), References.MINIMUM_LEVEL));
 		                    break;
 		                }
 		            }
@@ -486,19 +525,17 @@ public class FiniteFluidLogic {
 		        	for (EnumFacing dir : EnumFacing.HORIZONTALS) {
 		                checkPos = pos.offset(dir).add(0, yOffset, 0);
 		                IBlockState state = world.getBlockState(checkPos);
-		                Block block = state.getBlock();
+		                Block block = RealisticFiniteFluidFunctions.getBlock(world, checkPos, state);
 		                if (fluid.isFluid(block)) {
 		            		IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)block);
 		                    int level = realisticFluid.getVolume(world, checkPos, state);;
-		                    if (level > References.MINIMUM_LEVEL || realisticFluid.isOceanBlock(world, checkPos, state, GeneralPurposeLogic.getFluidIndex(state.getBlock()))) {
+		                    if (level > References.MINIMUM_LEVEL || realisticFluid.isOceanBlock(world, checkPos, state, GeneralPurposeLogic.getFluidIndex(RealisticFiniteFluidFunctions.getBlock(world, checkPos, state)))) {
 		                        found = true;
 		                    	//System.out.println("VERGA TRYTOSAVE_2");
-		                        if (!realisticFluid.isOceanBlock(world, checkPos, state, GeneralPurposeLogic.getFluidIndex(state.getBlock()))) {
-		                            //world.setBlockState(checkPos, fluid.flowingBlock.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, level - 1), 3);
-		                        	realisticFluid.setBlockState(world, checkPos, realisticFluid.setConceptualVolume(null, null, fluid.flowingBlock.getDefaultState(), level));
+		                        if (!realisticFluid.isOceanBlock(world, checkPos, state, GeneralPurposeLogic.getFluidIndex(RealisticFiniteFluidFunctions.getBlock(world, checkPos, state)))) {
+		                        	realisticFluid.setBlockState(world, pos, checkPos, realisticFluid.setConceptualVolume(null, null, fluid.flowingBlock.getDefaultState(), level));
 		                        }
-		                        //world.setBlockState(pos, fluid.flowingBlock.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, 0), 3);
-		                        realisticFluid.setBlockState(world, pos, realisticFluid.setVolume(null, null, fluid.flowingBlock.getDefaultState(), References.MINIMUM_LEVEL));
+		                        realisticFluid.setBlockState(world, pos, pos, realisticFluid.setVolume(null, null, fluid.flowingBlock.getDefaultState(), References.MINIMUM_LEVEL));
 		                        break;
 		                    }
 		                }
@@ -506,6 +543,12 @@ public class FiniteFluidLogic {
 		            if (found) break;
 		        }
 		    }
+		    
+		    
+		    
+		    
+		    
+		    
 		
 		    if (!found) {
 		        if (FiniteFluidLogic.doPressure) {
@@ -513,9 +556,16 @@ public class FiniteFluidLogic {
 		        }
 		        return false;
 		    }
+		    
+		    
 		
 		    return true;
 		}
+		
+		
+		
+		
+		
 		
 		
 		
@@ -571,9 +621,9 @@ public class FiniteFluidLogic {
             IBlockState sourceState = world.getBlockState(sourcePos);
             IBlockState destState = world.getBlockState(destPos);
 
-            IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)sourceState.getBlock());
-            Block sourceBlock = sourceState.getBlock();
-            Block destBlock = destState.getBlock();
+            IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)RealisticFiniteFluidFunctions.getBlock(world, sourcePos, sourceState));
+            Block sourceBlock = RealisticFiniteFluidFunctions.getBlock(world, sourcePos, sourceState);
+            //Block destBlock = RealisticFiniteFluidFunctions.getBlock(world, destPos, destState);
 
             //SETEAMOS EL TIPO DE FLUIDO DEL SOURCEBLOCK
             FiniteFluidLogic.GeneralPurposeLogic.setCurrentFluidIndex(sourceBlock);
@@ -581,7 +631,7 @@ public class FiniteFluidLogic {
 
 
             // SI EL DESTINO NO ES FLUIDO REALISTA Y TRAS CIERTA PROBABILIDAD
-            if (!FiniteFluidLogic.GeneralPurposeLogic.isFiniteFluid(destBlock) && !(new Random().nextInt(10) == 0)) {
+            if (!FiniteFluidLogic.GeneralPurposeLogic.isFiniteFluid(world, destPos) && !(new Random().nextInt(10) == 0)) {
                 //SI PODEMOS REEMPLAZAR EL BLOQUE DE DESTINO
             	if (FiniteFluidLogic.GeneralPurposeLogic.canMoveInto(world, destPos, sourcePos, References.MAXIMUM_LEVEL, fluid)) {
             		//Y SI SI NOS PODEMOS MOVER REALMENTE
@@ -590,7 +640,7 @@ public class FiniteFluidLogic {
                         //SETEAMOS OTRA VEZ EL TIPO DE FLUIDO DEL SOURCEBLOCK
                     	FiniteFluidLogic.GeneralPurposeLogic.setCurrentFluidIndex(sourceBlock);
                     	//PONEMOS UN BLOQUE DE FLUIDO STILL CON UN POCO DE VALOR
-                    	realisticFluid.setBlockState(world, destPos, realisticFluid.setVolume(null, null, fluid.stillBlock.getDefaultState(), References.Q1_HIGH));
+                    	realisticFluid.setBlockState(world, sourcePos, destPos, realisticFluid.setVolume(null, null, fluid.stillBlock.getDefaultState(), References.Q1_HIGH));
                         //PROGRAMAMOS UN TICK DEL BLOQUE SOURCE 
                     	world.scheduleUpdate(sourcePos, fluid.stillBlock, waterTick + 1);
                         return true;
@@ -610,7 +660,7 @@ public class FiniteFluidLogic {
             	FiniteFluidLogic.GeneralPurposeLogic.setCurrentFluidIndex(sourceBlock);
             	//COLOCAMOS UN BLOQUE DE TIPO OCEANICO Y PROGRAMAMOS UN TICK
                 //world.setBlockState(destPos, fluid.oceanBlock.getDefaultState());
-            	realisticFluid.setBlockState(world, destPos, realisticFluid.setVolume(world, destPos, fluid.stillBlock.getDefaultState(), References.MAXIMUM_CONCEPTUAL_LEVEL));
+            	realisticFluid.setBlockState(world, sourcePos, destPos, realisticFluid.setVolume(world, destPos, fluid.stillBlock.getDefaultState(), References.MAXIMUM_CONCEPTUAL_LEVEL));
             	world.scheduleUpdate(sourcePos, fluid.stillBlock, waterTick + 1);
             }
              
@@ -641,7 +691,7 @@ public class FiniteFluidLogic {
                     pos.down(), pos.up(),
                     pos.north(), pos.south()
             }) {
-                int type = FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(world.getBlockState(offset).getBlock());
+                int type = FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(RealisticFiniteFluidFunctions.getBlock(world, offset, world.getBlockState(offset)));
                 if (detectedType == -1 && type != -1) {
                     detectedType = type;
                     break;
@@ -677,7 +727,7 @@ public class FiniteFluidLogic {
                         
                         if (!FiniteFluidLogic.GeneralPurposeLogic.hasAdjacentOceanBlocksAround(world, pos, type.stillBlock)) {
                             if (realisticFluid.isOceanBlock(world, pos, null, onFiniteFluidIndex)) {
-                            	realisticFluid.setBlockState(world, pos, realisticFluid.setVolume(null, null, type.flowingBlock.getDefaultState(), References.MAXIMUM_LEVEL));
+                            	realisticFluid.setBlockState(world, pos, pos, realisticFluid.setVolume(null, null, type.flowingBlock.getDefaultState(), References.MAXIMUM_LEVEL));
                             }
 
                             onFiniteFluidIndex = savedType;
@@ -716,7 +766,7 @@ public class FiniteFluidLogic {
             if (doPressure) PressureSystemLogic.addToPressure(world, pos, true);
             
             //DETERMINAMOS NUESTRO BLOQUE OBJETIVO, EL QUE LE METEMOS, Y SETEAMOS EL TIPO DE FLUIDO
-            Block target = world.getBlockState(pos).getBlock();
+            Block target = RealisticFiniteFluidFunctions.getBlock(world, pos, world.getBlockState(pos));
             //NewFluidType fluid = (NewFluidType) liquids.get(onFiniteFluidIndex);
             
             //SI EL TARGET ES UN BLOQUE DE TIPO OCEANICO
@@ -743,7 +793,7 @@ public class FiniteFluidLogic {
             int backupType = onFiniteFluidIndex;
 
             //SETEAMOS LOS BLOQUES, VEMOS QUE NADA SEA INVALIDO, Y OBTENEMOS EL FLUID INDEX
-            Block block = world.getBlockState(pos).getBlock();
+            Block block = RealisticFiniteFluidFunctions.getBlock(world, pos, world.getBlockState(pos));
             //System.out.print("BLOQUE EN WAKE OCEAN: "+blockToFluidIndex.get(block)+"\n");
             //System.out.println("POS: "+pos);
             if (block == null || blockToFluidIndex.get(block) == null) return;
@@ -761,7 +811,7 @@ public class FiniteFluidLogic {
                     // CHECAMOS TODOS LOS ENUM FACINGS POR BLOQUES VENICOS
                     for (EnumFacing dir : EnumFacing.values()) {
                         BlockPos neighbor = pos.offset(dir);
-                        Block neighborBlock = world.getBlockState(neighbor).getBlock();
+                        Block neighborBlock = RealisticFiniteFluidFunctions.getBlock(world, neighbor, world.getBlockState(neighbor));
 
                         //SI EL BLOQUE VECINO ES UN BLOQUE OCEANICO DEL MISMO TIPO
                         if (realisticFluid.isOceanBlock(world, neighbor, null, fluidIndex)) {
@@ -800,7 +850,7 @@ public class FiniteFluidLogic {
             //DETERMINAMOS EL TIPO DE TARGET (BLOQUE OCEANICO DEL MISMO TIPO DE FLUIDO)
             //Block target = ((NewFluidType) liquids.get(fluidIndex)).stillBlock;
             ////////int originalIndex = GeneralPurposeLogic.getFluidIndex(world.getBlockState(startBlock).getBlock());
-            IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)world.getBlockState(startBlock).getBlock());
+            IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)RealisticFiniteFluidFunctions.getBlock(world, startBlock, world.getBlockState(startBlock)));
 
 
             //AÑADIMOS EL BLOQUE DE INICIO EN LA LISTA DE VISITADOS Y QUEVEADOS
@@ -858,9 +908,9 @@ public class FiniteFluidLogic {
 
                 //  SI HAY AIRE CERCA, PROGRAMAMOS EL TICK DE FORMA TARDIA
                 for (EnumFacing face : EnumFacing.values()) {
-                    if (world.isAirBlock(pos.offset(face))) {
+                    if (RealisticFiniteFluidFunctions.isAirBlock(world, pos.offset(face), true)) {
                         // Delay la conversión
-                        world.scheduleBlockUpdate(pos, world.getBlockState(pos).getBlock(), 10, 0);
+                        world.scheduleBlockUpdate(pos, RealisticFiniteFluidFunctions.getBlock(world, pos, world.getBlockState(pos)), 10, 0);
                         continue;
                     }
                 }
@@ -873,8 +923,8 @@ public class FiniteFluidLogic {
                 IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)block);
                  //SETEAMOS EL BLOQUE EN CADA POSICION DE LA LISTA DE NODOS A UNO DE FLOWING O STILL
                 int level = References.MAXIMUM_LEVEL;
-                if (GeneralPurposeLogic.getFluidIndex(world.getBlockState(pos).getBlock()) == originalIndex)
-                	realisticFluid.setBlockState(world, pos, realisticFluid.setVolume(null, null, block.getDefaultState(), level));
+                if (GeneralPurposeLogic.getFluidIndex(RealisticFiniteFluidFunctions.getBlock(world, pos, world.getBlockState(pos))) == originalIndex)
+                	realisticFluid.setBlockState(world, pos, pos, realisticFluid.setVolume(null, null, block.getDefaultState(), level));
             }
         }
 
@@ -978,10 +1028,11 @@ public class FiniteFluidLogic {
 
 	                if (y != -1) {
 	                    Biome biome = world.getBiome(new BlockPos(x, y, z));
-	                    IBlockState state = world.getBlockState(new BlockPos(x, y, z));
-	                    Block block = state.getBlock();
+	                    BlockPos newPos = new BlockPos(x, y, z);
+	                    IBlockState state = world.getBlockState(newPos);
+	                    Block block = RealisticFiniteFluidFunctions.getBlock(world, newPos, state);
 	                    //IBlockState stateDown = world.getBlockState(new BlockPos(x, y, z));
-	                    IBlockState stateDown = world.getBlockState(new BlockPos(x, y-1, z));
+	                    IBlockState stateDown = world.getBlockState(newPos.down());
 
 	                    // Evitar cultivos de WEATH TODO implementar cualquier cultivos y mas cosas
 	                    NewFluidType fluidType = ((NewFluidType) liquids.get(0));
@@ -990,9 +1041,9 @@ public class FiniteFluidLogic {
                         IBlockState water = realisticFluid.setVolume(null, null, fluidType.flowingBlock.getDefaultState(), References.MINIMUM_LEVEL);
                         //fluidType.flowingBlock.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, 0);
                         BlockPos spawnPos = new BlockPos(x, y, z);
-	                	if (!(block instanceof BlockBush) && !(realisticFluid.isOceanBlock(null, null, stateDown, getFluidIndex(stateDown.getBlock()))) 
+	                	if (!(block instanceof BlockBush) && !(realisticFluid.isOceanBlock(null, null, stateDown, getFluidIndex(RealisticFiniteFluidFunctions.getBlock(world, newPos.down(), stateDown)))) 
 	                			&& (biome.canRain() && (world.getBiome(spawnPos).getTemperature(spawnPos) >= 0.15F))) {
-	                        realisticFluid.setBlockState(world, spawnPos, water);
+	                        realisticFluid.setBlockState(world, spawnPos.up(), spawnPos, water);
 	                        //world.setBlockState(spawnPos, water, 3);
 	                    }
 	                }
@@ -1011,10 +1062,12 @@ public class FiniteFluidLogic {
 
 	        for (; y > 0; --y) {
 	            IBlockState state = chunk.getBlockState(x, y, z);
-	            if (state.getBlock() == Blocks.ICE || getFluidIndex(state.getBlock()) != -1) {
+	            World newWorld = chunk.getWorld();
+	            BlockPos newPos = new BlockPos(x, y, z);
+	            if (RealisticFiniteFluidFunctions.getBlock(newWorld, newPos, state) == Blocks.ICE || getFluidIndex(RealisticFiniteFluidFunctions.getBlock(newWorld, newPos, state)) != -1) {
 	                return y + 1;
 	            }
-	            if (!state.getBlock().isAir(state, world, new BlockPos(x, y, z)) &&
+	            if (!RealisticFiniteFluidFunctions.getBlock(newWorld, newPos, state).isAir(state, world, new BlockPos(x, y, z)) &&
 	                state.getMaterial().isSolid() &&
 	                state.getMaterial() != net.minecraft.block.material.Material.LEAVES) {
 	                return y + 1;
@@ -1033,7 +1086,7 @@ public class FiniteFluidLogic {
     	 */
     	public static boolean hasAdjacentTarjetBlocksAround(World world, BlockPos pos, Block target) {
     	    for (EnumFacing face : EnumFacing.values()) {
-    	        if (world.getBlockState(pos.offset(face)).getBlock() == target) {
+    	        if (RealisticFiniteFluidFunctions.getBlock(world, pos.offset(face), world.getBlockState(pos.offset(face))) == target) {
     	            return true;
     	        }
     	    }
@@ -1043,7 +1096,7 @@ public class FiniteFluidLogic {
     	public static boolean hasAdjacentOceanBlocksAround(World world, BlockPos pos, Block target) {
     	    for (EnumFacing face : EnumFacing.values()) {
                 //IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)liquids.get(onFiniteFluidIndex).flowingBlock);
-    	        if (world.getBlockState(pos.offset(face)).getBlock() == target && RealisticFiniteFluidFunctions.getVolume(null, null, world.getBlockState(pos.offset(face))) > References.MAXIMUM_LEVEL) {
+    	        if (RealisticFiniteFluidFunctions.getBlock(world, pos.offset(face), world.getBlockState(pos.offset(face))) == target && RealisticFiniteFluidFunctions.getVolume(world, pos.offset(face), world.getBlockState(pos.offset(face))) > References.MAXIMUM_LEVEL) {
     	            return true;
     	        }
     	    }
@@ -1059,7 +1112,7 @@ public class FiniteFluidLogic {
     	 */
     	public static boolean hasAdjacentTarjetBlocksHorizontal(World world, BlockPos pos, Block target) {
     	    for (EnumFacing face : EnumFacing.HORIZONTALS) {
-    	        if (world.getBlockState(pos.offset(face)).getBlock() == target) {
+    	        if (RealisticFiniteFluidFunctions.getBlock(world, pos.offset(face), world.getBlockState(pos.offset(face))) == target) {
     	            return true;
     	        }
     	    }
@@ -1069,12 +1122,24 @@ public class FiniteFluidLogic {
     	public static boolean hasAdjacentOceanBlocksHorizontal(World world, BlockPos pos, Block target) {
     	    for (EnumFacing face : EnumFacing.HORIZONTALS) {
                 IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)liquids.get(onFiniteFluidIndex).flowingBlock);
-    	        if (world.getBlockState(pos.offset(face)).getBlock() == target && realisticFluid.getVolume(null, null, world.getBlockState(pos.offset(face))) > References.MAXIMUM_LEVEL) {
+    	        if (RealisticFiniteFluidFunctions.getBlock(world, pos.offset(face), world.getBlockState(pos.offset(face))) == target && realisticFluid.getVolume(world, pos.offset(face), world.getBlockState(pos.offset(face))) > References.MAXIMUM_LEVEL) {
     	            return true;
     	        }
     	    }
     	    return false;
     	}
+    	
+    	
+    	public static boolean hasAnyFluidAround(World world, BlockPos pos) {
+    	    for (EnumFacing face : EnumFacing.values()) {
+    	    	Block block = RealisticFiniteFluidFunctions.getBlock(world, pos.offset(face), world.getBlockState(pos.offset(face)));
+    	        if (block instanceof IRealisticFiniteFluid && GeneralPurposeLogic.getFluidIndex(block) == onFiniteFluidIndex) {
+    	            return true;
+    	        }
+    	    }
+    	    return false;
+    	}
+    	
     	
     	/**
     	 * Cuenta cuantos bloques adyacentes son agua valida 
@@ -1159,14 +1224,14 @@ public class FiniteFluidLogic {
 
         public static int getFluidLevelRender(IBlockAccess world, BlockPos pos, int fluidIndex) {
         	IBlockState state = world.getBlockState(pos);
-        	if (state.getBlock() instanceof IRealisticFiniteFluid) {
-        		IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)state.getBlock());
+        	if (RealisticFiniteFluidFunctions.getBlock(world, pos, state) instanceof IRealisticFiniteFluid) {
+        		IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)RealisticFiniteFluidFunctions.getBlock(world, pos, state));
         		if (fluidIndex > -1) {
         			int level = realisticFluid.getVolume(world, pos, state) * 2;
 
         			if (level >= References.MAXIMUM_LEVEL) level = References.MAXIMUM_LEVEL-1;
 
-        			Block block = state.getBlock();
+        			Block block = RealisticFiniteFluidFunctions.getBlock(world, pos, state);
         			if (realisticFluid.isOceanBlock(world, pos, state, getFluidIndex(block))) {
         				return level;
         			}
@@ -1182,22 +1247,22 @@ public class FiniteFluidLogic {
          * Gives the current Fluid Height value on the given corner.
          */
         public static float getHeight(IBlockAccess access, BlockPos pos, int dx, int dz) {
-            int fluidIndex = getFluidIndex(access.getBlockState(pos).getBlock());
+            int fluidIndex = getFluidIndex(RealisticFiniteFluidFunctions.getBlock(access, pos, access.getBlockState(pos)));
             if (fluidIndex == -1) return 0f;
             float total = getFluidLevelRender(access, pos, fluidIndex) + 1.0f;
             int samples = 1;
     		IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)liquids.get(fluidIndex).flowingBlock);
 
             BlockPos above = pos.up(-getFluidGravity(fluidIndex));
-            if (isSameIndexFluid(access.getBlockState(above).getBlock(), fluidIndex)) return 1.0f;
+            if (isSameIndexFluid(RealisticFiniteFluidFunctions.getBlock(access, above, access.getBlockState(above)), fluidIndex)) return 1.0f;
             if (realisticFluid.isOceanBlock(access, pos, null, fluidIndex)) return 1.0f;
 
             
             
-            boolean hasNeighbors = !(access.isAirBlock(pos.east()) &&
-            		access.isAirBlock(pos.west()) &&
-            		access.isAirBlock(pos.north()) &&
-            		access.isAirBlock(pos.south()));
+            boolean hasNeighbors = !(RealisticFiniteFluidFunctions.isAirBlock(access, pos.east(), false) &&
+            		RealisticFiniteFluidFunctions.isAirBlock(access, pos.west(), false) &&
+            		RealisticFiniteFluidFunctions.isAirBlock(access, pos.north(), false) &&
+            		RealisticFiniteFluidFunctions.isAirBlock(access, pos.south(), false));
 
             if (!hasNeighbors) return total / (float) References.MAXIMUM_CONCEPTUAL_LEVEL;
 
@@ -1244,8 +1309,8 @@ public class FiniteFluidLogic {
         public static void flipLiquids(World world, BlockPos pos1, BlockPos pos2) {
             IBlockState state1 = world.getBlockState(pos1);
             IBlockState state2 = world.getBlockState(pos2);
-            Block block1 = state1.getBlock();
-            Block block2 = state2.getBlock();
+            Block block1 = RealisticFiniteFluidFunctions.getBlock(world, pos1, state1);
+            Block block2 = RealisticFiniteFluidFunctions.getBlock(world, pos2, state2);
 
             int type1 = FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(block1);
             int type2 = FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(block2);
@@ -1263,9 +1328,9 @@ public class FiniteFluidLogic {
                 int meta2 = realisticFluid2.getVolume(world, pos2, state2);
 
                 //world.setBlockState(pos1, newBlock1.getStateFromMeta(meta2), 3);
-                realisticFluid1.setBlockState(world, pos1, realisticFluid1.setVolume(null, null, state1, meta2)); // newBlock1.getStateFromMeta(meta2));
+                realisticFluid1.setBlockState(world, pos2, pos1, realisticFluid1.setVolume(null, null, state1, meta2)); // newBlock1.getStateFromMeta(meta2));
                 //world.setBlockState(pos2, newBlock2.getStateFromMeta(meta1), 3);
-                realisticFluid2.setBlockState(world, pos2, realisticFluid2.setVolume(null, null, state2, meta1)); // newBlock2.getStateFromMeta(meta1));
+                realisticFluid2.setBlockState(world, pos1, pos2, realisticFluid2.setVolume(null, null, state2, meta1)); // newBlock2.getStateFromMeta(meta1));
             }
         }
         
@@ -1276,29 +1341,43 @@ public class FiniteFluidLogic {
     	 * @return true if the Block at the current Pos is a Realistic Finite Fluid OF THE SAME INDEX
     	 */
         public static boolean isFiniteFluid(IBlockAccess world, BlockPos pos) {
-            return isFiniteFluid(world.getBlockState(pos).getBlock());
+            //return isFiniteFluid(world.getBlockState(pos));
+            NewFluidType type = (NewFluidType) liquids.get(onFiniteFluidIndex);
+            Block block = RealisticFiniteFluidFunctions.getBlock(world, pos, world.getBlockState(pos));
+            return block == type.flowingBlock || block == type.stillBlock;
         }
+        
 
     	/**
     	 * If the current Block is a RealisticFiniteFluid OF THE SAME INDEX OF onFiniteFluidIndex
     	 * @return true if the current Block is a Realistic Finite Fluid OF THE SAME INDEX
     	 */
-        public static boolean isFiniteFluid(Block block) {
+        /*public static boolean isFiniteFluid(IBlockState state) {
+            return isFiniteFluid(RealisticFiniteFluidFunctions.getBlock(state));
+        }*/
+
+    	/**
+    	 * If the current Block is a RealisticFiniteFluid OF THE SAME INDEX OF onFiniteFluidIndex
+    	 * @return true if the current Block is a Realistic Finite Fluid OF THE SAME INDEX
+    	 */
+        /*public static boolean isFiniteFluid(Block block) {
             NewFluidType type = (NewFluidType) liquids.get(onFiniteFluidIndex);
+            //System.out.println("[RFF]");
+            //System.out.println("[RFF] type.name: "+type.name);
+            //System.out.println("[RFF] block: "+block.toString());
             return block == type.flowingBlock || block == type.stillBlock;
-        }
+        }*/
 
     	/**
     	 * If the current Block is a RealisticFiniteFluid OF THE SAME INDEX OF onFiniteFluidIndex, counting the Ocean Blocks too.
     	 * @return true if the current Block is a Realistic Finite Fluid OF THE SAME INDEX
     	 */
         public static boolean isAnyFiniteFluid(World world, BlockPos pos) {
-            Block block = world.getBlockState(pos).getBlock();
+            //Block block = RealisticFiniteFluidFunctions.getBlock(world, pos, world.getBlockState(pos));
             //NewFluidType type = (NewFluidType) liquids.get(onFiniteFluidIndex);
             //THIS SHIT MIGHT CRASH --> 
     		IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)liquids.get(onFiniteFluidIndex).flowingBlock);
-
-            return realisticFluid.isOceanBlock(world, pos, null, onFiniteFluidIndex) || isFiniteFluid(block);
+            return realisticFluid.isOceanBlock(world, pos, null, onFiniteFluidIndex) || isFiniteFluid(world, pos);
         }
 
 
@@ -1311,7 +1390,7 @@ public class FiniteFluidLogic {
     		IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)liquids.get(onFiniteFluidIndex).flowingBlock);
 
             return (!realisticFluid.isOceanBlock(world, pos, null, onFiniteFluidIndex)) 
-            		&& isFiniteFluid(world.getBlockState(pos).getBlock());
+            		&& isFiniteFluid(world, pos);
         }
 
 
@@ -1320,7 +1399,7 @@ public class FiniteFluidLogic {
          * @return True of the block is from the same index
          */
         public static boolean isSameIndexFluid(IBlockAccess world, BlockPos pos, int indexToCompare) {
-            return isSameIndexFluid(world.getBlockState(pos).getBlock(), indexToCompare);
+            return isSameIndexFluid(RealisticFiniteFluidFunctions.getBlock(world, pos, world.getBlockState(pos)), indexToCompare);
         }
         
 
@@ -1343,7 +1422,7 @@ public class FiniteFluidLogic {
          * Checks if the Block at the current Pos is from the same given fluidIndex AND if it is Flowing or Ocean Block
          */
         public static boolean isFullWaterRender(IBlockAccess world, BlockPos pos, int fluidIndex) {
-            Block block = world.getBlockState(pos).getBlock();
+            Block block = RealisticFiniteFluidFunctions.getBlock(world, pos, world.getBlockState(pos));
     		IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)liquids.get(onFiniteFluidIndex).flowingBlock);
             return block == ((NewFluidType)liquids.get(fluidIndex)).flowingBlock ? true : realisticFluid.isOceanBlock(world, pos, null, fluidIndex);
         }
@@ -1351,10 +1430,11 @@ public class FiniteFluidLogic {
 
         /**
          * Calculates if the fluid should flow into the second BlockPos using an algorithm of Effective Adyacent LEVELs average (promedio del valor LEVELs de los 8 bloques aledaños)
+         * Check {@link RealisticFiniteFluidFunctions#shouldFlowToNeighbor(IBlockAccess, BlockPos, BlockPos)} for more info.
          */
         public static boolean shouldFlowToNeighbor(IBlockAccess world, BlockPos center, BlockPos exclude) {
             //Block block = ((NewFluidType)liquids.get(onFiniteFluidIndex)).flowingBlock;
-            Block block = liquids.get(getFluidIndex(world.getBlockState(center).getBlock()) ).flowingBlock;
+            Block block = liquids.get(getFluidIndex(RealisticFiniteFluidFunctions.getBlock(world, center, world.getBlockState(center))) ).flowingBlock;
 
             if (block instanceof IRealisticFiniteFluid) {
             	IRealisticFiniteFluid fluid = (IRealisticFiniteFluid) block;
@@ -1368,7 +1448,7 @@ public class FiniteFluidLogic {
          * Calculates the *average* of Fluid LEVELs in the 8 adyacent positions
          */
         public static float calculateNeighborWaterLevel(IBlockAccess world, BlockPos center, BlockPos exclude) { //getAvg
-    		IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)world.getBlockState(center).getBlock());
+    		IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)RealisticFiniteFluidFunctions.getBlock(world, center, world.getBlockState(center)));
             int totalLevel = realisticFluid.getConceptualVolume(world, center, world.getBlockState(center)); //world.getBlockState(center).getValue(BlockFiniteFluid.LEVEL) + 1;
             int count = 1;
 
@@ -1379,24 +1459,32 @@ public class FiniteFluidLogic {
 
             // Cardinales
             if (!center.west().equals(exclude) && isFiniteFluid(world, center.west())) {
-                totalLevel += realisticFluid.getConceptualVolume(world, center.west(), world.getBlockState(center.west())); //world.getBlockState(center.west()).getValue(BlockFiniteFluid.LEVEL) + 1;
+                //System.out.println("hasWest");
+
+            	totalLevel += realisticFluid.getConceptualVolume(world, center.west(), world.getBlockState(center.west())); //world.getBlockState(center.west()).getValue(BlockFiniteFluid.LEVEL) + 1;
                 count++;
                 hasWest = true;
             }
 
             if (!center.east().equals(exclude) && isFiniteFluid(world, center.east())) {
+                //System.out.println("hasEast");
+                
                 totalLevel += realisticFluid.getConceptualVolume(world, center.east(), world.getBlockState(center.east())); //world.getBlockState(center.east()).getValue(BlockFiniteFluid.LEVEL) + 1;
                 count++;
                 hasEast = true;
             }
 
             if (!center.north().equals(exclude) && isFiniteFluid(world, center.north())) {
-                totalLevel += realisticFluid.getConceptualVolume(world, center.north(), world.getBlockState(center.north())); //world.getBlockState(center.north()).getValue(BlockFiniteFluid.LEVEL) + 1;
+                //System.out.println("hasNorth");
+
+            	totalLevel += realisticFluid.getConceptualVolume(world, center.north(), world.getBlockState(center.north())); //world.getBlockState(center.north()).getValue(BlockFiniteFluid.LEVEL) + 1;
                 count++;
                 hasNorth = true;
             }
 
             if (!center.south().equals(exclude) && isFiniteFluid(world, center.south())) {
+                //System.out.println("hasSouth");
+
                 totalLevel += realisticFluid.getConceptualVolume(world, center.south(), world.getBlockState(center.south())); //world.getBlockState(center.south()).getValue(BlockFiniteFluid.LEVEL) + 1;
                 count++;
                 hasSouth = true;
@@ -1404,6 +1492,8 @@ public class FiniteFluidLogic {
 
             // Diagonales (solo si al menos uno de los lados existe)
             if ((hasEast || hasSouth)) {
+                //System.out.println("hasSurEste");
+                
                 BlockPos diag = center.east().south();
                 if (!diag.equals(exclude) && isFiniteFluid(world, diag)) {
                     totalLevel += realisticFluid.getConceptualVolume(world, diag, world.getBlockState(diag)); //world.getBlockState(diag).getValue(BlockFiniteFluid.LEVEL) + 1;
@@ -1412,6 +1502,7 @@ public class FiniteFluidLogic {
             }
 
             if ((hasWest || hasNorth)) {
+                //System.out.println("hasNorOeste");
                 BlockPos diag = center.west().north();
                 if (!diag.equals(exclude) && isFiniteFluid(world, diag)) {
                     totalLevel += realisticFluid.getConceptualVolume(world, diag, world.getBlockState(diag)); //world.getBlockState(diag).getValue(BlockFiniteFluid.LEVEL) + 1;
@@ -1420,6 +1511,7 @@ public class FiniteFluidLogic {
             }
 
             if ((hasWest || hasSouth)) {
+                //System.out.println("hasSurOeste");
                 BlockPos diag = center.west().south();
                 if (!diag.equals(exclude) && isFiniteFluid(world, diag)) {
                     totalLevel += realisticFluid.getConceptualVolume(world, diag, world.getBlockState(diag)); //world.getBlockState(diag).getValue(BlockFiniteFluid.LEVEL) + 1;
@@ -1428,14 +1520,16 @@ public class FiniteFluidLogic {
             }
 
             if ((hasEast || hasNorth)) {
+                //System.out.println("hasNorEste");
                 BlockPos diag = center.east().north();
                 if (!diag.equals(exclude) && isFiniteFluid(world, diag)) {
                     totalLevel += realisticFluid.getConceptualVolume(world, diag, world.getBlockState(diag)); //world.getBlockState(diag).getValue(BlockFiniteFluid.LEVEL) + 1;
                     count++;
                 }
-            }
+            } // 35:4:-121 --> 10/4 = 2.5 //// 35:4:-122 --> 10/6 = 1.66
             //System.out.println("totalLevel: "+totalLevel);
             //System.out.println("count: "+count);
+            //System.out.println("totalLevel / count: "+((float)totalLevel / count));
             //System.out.println("");
 
             return (float) totalLevel / count;
@@ -1449,7 +1543,7 @@ public class FiniteFluidLogic {
          */
 		public static boolean canMoveInto(World world, BlockPos destPos, @Nullable BlockPos sourcePos,  @Nullable int currentLevel, @Nullable NewFluidType fluidType) {
             IBlockState state = world.getBlockState(destPos);
-            Block block = state.getBlock();
+            Block block = RealisticFiniteFluidFunctions.getBlock(world, destPos, state);
             if (world.isRemote) return false;
             //if (!world.isRemote) return false;
             
@@ -1458,25 +1552,33 @@ public class FiniteFluidLogic {
             if (isFiniteFluid(world, destPos) && state.getMaterial() == Material.WATER && world.getBlockState(sourcePos).getMaterial() == Material.LAVA && currentLevel > 5) {
             	//System.out.println("canMoveInto"+block);
             	return true;
-            } else if (isFiniteFluid(world, destPos)) {
+            } 
+            
+            /*if (isFiniteFluid(world, destPos)) {
             	//System.out.println("canMoveInto"+block);
             	return false;
-            }
+            }*/
             
             // Si es aire
-            if (world.isAirBlock(destPos)) return true;
+            if (RealisticFiniteFluidFunctions.isAirBlock(world, destPos, false)) return true;
 
             // Si no hay tipo de liquido actual (seguro nunca pasa, pero por si acaso)
             if (fluidType == null) return true;
+            
+            //Check para evitar romper otros fluidos
+            if (block instanceof IRealisticFiniteFluid) return false;
 
+			if (RealisticFiniteFluids.FluidLoggedAPI) {
+            	// Para fluir en bloques FluidLoggeables
+            	boolean canEnter = FluidloggedUtils.canFluidFlow(world, destPos, state, getFacingBetween(sourcePos, destPos));
+            	if (canEnter) return true;
+            }
+            
             // Si no fluye sobre medios bloques, entonces no podemos movernos
             if (!fluidType.flowsOverHalfBlocks) return false;
-
-            //Check para evitar romper liquidos de otros mods
-            if (block instanceof IRealisticFiniteFluid) return false;
             
             //Check para evitar romper otros bloques de fluido realistico
-        	if (isDifferentIndexFluid(block, getFluidIndex(world.getBlockState(sourcePos).getBlock()))) {
+        	if (isDifferentIndexFluid(block, getFluidIndex(RealisticFiniteFluidFunctions.getBlock(world, sourcePos, world.getBlockState(sourcePos))))) {
         		return false;
         	}
         	
@@ -1487,18 +1589,23 @@ public class FiniteFluidLogic {
         	
             // Si es reemplazable (fuego, flores, nieve, etc.)
             //POR ALGUN MOTIVO ESTA MADRE ROMPE DE TO-DO, espero que el !instanceof ayude
+            /*
             if (block.isReplaceable(world, destPos) && !(block instanceof IRealisticFiniteFluid)) {
                 world.destroyBlock(destPos, true);
             	//System.out.println("REPLACE"+block);
 
                 return true;
             }
+            */
 
             // Si el nivel de agua es mayor a 7 y el bloque no es completo (ej: flores, placas, etc.)
-            if (currentLevel > 7 && !state.isFullBlock() && !state.getBlock().hasTileEntity() && !(state.getBlock() instanceof IRealisticFiniteFluid)) {
+            /*
+            if (currentLevel > 7 && !state.isFullBlock() && !RealisticFiniteFluidFunctions.getBlock(state).hasTileEntity() 
+            		&& !(RealisticFiniteFluidFunctions.getBlock(state) instanceof IRealisticFiniteFluid)) {
                 world.destroyBlock(destPos, true);
                 return true;
             }
+            */
             
 
             return false;
@@ -1506,7 +1613,7 @@ public class FiniteFluidLogic {
         
         public static boolean canMoveIntoForRender(IBlockAccess world, BlockPos toPos, @Nullable BlockPos fromPos,  @Nullable int currentLevel, @Nullable NewFluidType fluidType) {
             IBlockState state = world.getBlockState(toPos);
-            Block block = state.getBlock();
+            Block block = RealisticFiniteFluidFunctions.getBlock(world, toPos, state);
 
             //CORRECCION MIA
             //Si es agua:
@@ -1520,7 +1627,7 @@ public class FiniteFluidLogic {
             }
             
             // Si es aire
-            if (world.isAirBlock(toPos)) return true;
+            if (RealisticFiniteFluidFunctions.isAirBlock(world, toPos, false)) return true;
 
             // Si no hay tipo de liquido actual (seguro nunca pasa, pero por si acaso)
             if (fluidType == null) return true;
@@ -1532,7 +1639,7 @@ public class FiniteFluidLogic {
             if (block instanceof BlockFluidClassic) return false;
             
             //Check para evitar romper otros bloques de fluido realistico
-        	if (isDifferentIndexFluid(block, getFluidIndex(world.getBlockState(fromPos).getBlock()))) {
+        	if (isDifferentIndexFluid(block, getFluidIndex(RealisticFiniteFluidFunctions.getBlock(world, fromPos, world.getBlockState(fromPos))))) {
         		return false;
         	}
         	
@@ -1549,7 +1656,7 @@ public class FiniteFluidLogic {
             }
 
             // Si el nivel de agua es mayor a 7 y el bloque no es completo (ej: flores, placas, etc.)
-            if (currentLevel > 7 && !state.isFullBlock() && !state.getBlock().hasTileEntity()) {
+            if (currentLevel > 7 && !state.isFullBlock() && !RealisticFiniteFluidFunctions.getBlock(world, toPos, state).hasTileEntity()) {
                 return true;
             }
             
@@ -1560,13 +1667,13 @@ public class FiniteFluidLogic {
         
         public static boolean liquidMoveForRender(IBlockAccess world, BlockPos sourcePos, BlockPos destPos, boolean doMove, int recursionDepth) { 
             IBlockState sourceState = world.getBlockState(sourcePos);
-            Block sourceBlock = sourceState.getBlock();
+            Block sourceBlock = RealisticFiniteFluidFunctions.getBlock(world, sourcePos, sourceState);
             if (!(sourceBlock instanceof IRealisticFiniteFluid)) return false; //CHECAR QUE ESTO NO ROMPA EL FUNCIONAMIENTO DEL AGUA
     		IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)sourceBlock);
     		int sourceLevel = realisticFluid.getVolume(world, sourcePos, sourceState);
 
             IBlockState destState = world.getBlockState(destPos);
-            Block destBlock = destState.getBlock();
+            Block destBlock = RealisticFiniteFluidFunctions.getBlock(world, destPos, destState);
             int destLevel = destBlock instanceof IRealisticFiniteFluid ? realisticFluid.getVolume(world, destPos, destState) : -1;
 
             setCurrentFluidIndex(sourceBlock);
@@ -1590,7 +1697,7 @@ public class FiniteFluidLogic {
                     }
                 }
 
-            } else if (!isFiniteFluid(destBlock)) {
+            } else if (!isFiniteFluid(world, destPos)) {
                 destLevel = -1;
             }
             
@@ -1611,14 +1718,14 @@ public class FiniteFluidLogic {
                 
                 //Si el destino tiene agua y tiene espacio para niveles de agua
                 //Ecualizacion Vertical
-                if (isFiniteFluid(destBlock) && destLevel < References.MAXIMUM_LEVEL) {
+                if (isFiniteFluid(world, destPos) && destLevel < References.MAXIMUM_LEVEL) {
                     return true;
                 }
                 return false;
             }
         	
             //Ecualizacion horizontal
-            if (isFiniteFluid(destBlock)) {
+            if (isFiniteFluid(world, destPos)) {
                 // Ecualizacion normal si son del mismo material
                 if (shouldFlowToNeighbor(world, sourcePos, destPos) && destLevel < References.MAXIMUM_LEVEL && sourceLevel > References.MINIMUM_LEVEL) {
                     return true;
@@ -1649,6 +1756,7 @@ public class FiniteFluidLogic {
                 pos.add(0, 0, -1),
                 pos.add(0, 0, 1)
             };
+	    	//System.out.println("[RFF] Pos: "+pos); 
 
             for (BlockPos target : targets) {
                 if (FiniteFluidsLogic.liquidMove(world, pos, target, false, 0)) return true;
@@ -1726,13 +1834,24 @@ public class FiniteFluidLogic {
         //isLDWater --> isLinearDropWater?
         public static boolean isOnlyVerticallyFallingFluid(IBlockAccess world, BlockPos pos, int fluidIndex) {
             BlockPos below = pos.down(-getFluidGravity());
-            return world.isAirBlock(pos)
+            return RealisticFiniteFluidFunctions.isAirBlock(world, pos, true)
                 && isSameIndexFluid(world, below, fluidIndex)
                 && !isSameIndexFluid(world, pos.west(), fluidIndex)
                 && !isSameIndexFluid(world, pos.east(), fluidIndex)
                 && !isSameIndexFluid(world, pos.north(), fluidIndex)
                 && !isSameIndexFluid(world, pos.south(), fluidIndex);
         }
+        
+        public static EnumFacing getFacingBetween(BlockPos source, BlockPos dest) {
+            BlockPos delta = dest.subtract(source);
+            return EnumFacing.getFacingFromVector(
+                delta.getX(),
+                delta.getY(),
+                delta.getZ()
+            );
+        }
+        
+        
         
         
         
@@ -1786,7 +1905,7 @@ public class FiniteFluidLogic {
 		        return false;
 		    }
 		    IBlockState s = world.getBlockState(pos);
-			IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)s.getBlock());
+			IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)RealisticFiniteFluidFunctions.getBlock(world, pos, s));
 		    int level = realisticFluid.getVolume(world, pos, s);
 		    boolean result = level > References.Q3_HIGH && GeneralPurposeLogic.isAnyFiniteFluid(world, pos.down(-GeneralPurposeLogic.getFluidGravity()));
 		    //System.out.println("[DEBUG] shouldPressure pos=" + pos + " level=" + level + " grav=" + grav() + " -> " + result);
@@ -1796,7 +1915,7 @@ public class FiniteFluidLogic {
 		// shouldPressureReverse: (solo si es aire en pos, hay agua en pos.down(grav()) y meta(pos.down()) > 7)
 		// OJO: la version antigua usa (y - 1) para el meta, sin multiplicar por grav(). Lo dejamos igual.
 		public static boolean shouldPressureReverse(World world, BlockPos pos) {
-		    boolean isAir = world.isAirBlock(pos);
+		    boolean isAir = RealisticFiniteFluidFunctions.isAirBlock(world, pos, true);
 		    if (!isAir) {
 		        //System.out.println("[DEBUG] shouldPressureReverse FALSE (no es aire) pos=" + pos);
 		        return false;
@@ -1805,8 +1924,8 @@ public class FiniteFluidLogic {
 		    int metaAtOneBelow = -1;
 		    BlockPos oneBelow = pos.down(); // EXACTO como el original (y - 1), NO usa grav() aquí
 		    IBlockState st = world.getBlockState(oneBelow);
-		    if (st.getBlock() instanceof IRealisticFiniteFluid) {
-				IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)st.getBlock());
+		    if (RealisticFiniteFluidFunctions.getBlock(world, oneBelow, st) instanceof IRealisticFiniteFluid) {
+				IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)RealisticFiniteFluidFunctions.getBlock(world, oneBelow, st));
 		        metaAtOneBelow = realisticFluid.getVolume(world, oneBelow, st);
 		    }
 		    boolean result = waterUnderByGrav & (metaAtOneBelow > 7);
@@ -1849,10 +1968,10 @@ public class FiniteFluidLogic {
 		    }
 		
 		    //Block blockAtCurrent = world.getBlockState(current).getBlock();
-		    Block blockAtSource  = world.getBlockState(source).getBlock();
+		    Block blockAtSource  = RealisticFiniteFluidFunctions.getBlock(world, source, world.getBlockState(source));
 		
 		    // if (!isAWater(var9) & var9 != 0) -> si no es fluido y no es aire, aborta
-		    if (!GeneralPurposeLogic.isAnyFiniteFluid(world, current) & !world.isAirBlock(current)) {
+		    if (!GeneralPurposeLogic.isAnyFiniteFluid(world, current) & !RealisticFiniteFluidFunctions.isAirBlock(world, current, true)) {
 		        //System.out.println("[DEBUG] checkPressure current no es agua ni aire. current=" + current + " block=" + blockAtCurrent.getLocalizedName());
 		        return false;
 		    }
@@ -1873,14 +1992,14 @@ public class FiniteFluidLogic {
 		
 		    int metaCurrent = References.MINIMUM_LEVEL;
 		    IBlockState curState = world.getBlockState(current);
-		    if (curState.getBlock() instanceof IRealisticFiniteFluid) {
-				IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)curState.getBlock());
+		    if (RealisticFiniteFluidFunctions.getBlock(world, current, curState) instanceof IRealisticFiniteFluid) {
+				IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)RealisticFiniteFluidFunctions.getBlock(world, current, curState));
 		        metaCurrent = realisticFluid.getVolume(world, current, curState);
 		    }
 		
 		    if (metaCurrent <= References.Q2_HIGH) {
 		        byte defaultMeta = References.Q2_HIGH;
-		        boolean isAir = world.isAirBlock(current);
+		        boolean isAir = RealisticFiniteFluidFunctions.isAirBlock(world, current, true);
 		        if (isAir) defaultMeta = References.Q2_LOW;
 		
 		        int newMetaAtCurrent = metaCurrent + References.Q2_LOW;
@@ -1893,12 +2012,12 @@ public class FiniteFluidLogic {
 		        IBlockState oldCur = world.getBlockState(current);
 		
 				IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)liquids.get(onFiniteFluidIndex).flowingBlock);//world.setBlockState(current, fluid.flowingBlock.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, newMetaAtCurrent), 3);
-				realisticFluid.setBlockState(world, current, realisticFluid.setVolume(null, null, fluid.flowingBlock.getDefaultState(), newMetaAtCurrent));
+				realisticFluid.setBlockState(world, current, current, realisticFluid.setVolume(null, null, fluid.flowingBlock.getDefaultState(), newMetaAtCurrent));
 		        world.notifyBlockUpdate(current, oldCur, world.getBlockState(current), 3);
 		
 		        IBlockState oldSrc = world.getBlockState(source);
 		        //world.setBlockState(source, fluid.flowingBlock.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, (int)var18), 3);
-		        realisticFluid.setBlockState(world, source, realisticFluid.setVolume(null, null, fluid.flowingBlock.getDefaultState(), (int)defaultMeta));
+		        realisticFluid.setBlockState(world, source, source, realisticFluid.setVolume(null, null, fluid.flowingBlock.getDefaultState(), (int)defaultMeta));
 		        world.notifyBlockUpdate(source, oldSrc, world.getBlockState(source), 3);
 		
 		        stopPCheck = true;
@@ -1980,7 +2099,7 @@ public class FiniteFluidLogic {
 		    }
 		
 		    //Block blockAtCurrent = world.getBlockState(current).getBlock();
-		    Block blockAtSource  = world.getBlockState(source).getBlock();
+		    Block blockAtSource = RealisticFiniteFluidFunctions.getBlock(world, source, world.getBlockState(source));
 		
 		    // if (!isWater(var9) & var7 != 0) -> si current no es agua y depth>0, corta
 		    if (!GeneralPurposeLogic.isAnyFiniteFluid(world, current) & depth != 0) {
@@ -1998,8 +2117,8 @@ public class FiniteFluidLogic {
 		    //		? BlockFiniteFluid.getVolume(world, current, curState) : -1;
 		
 		    int metaCurrent = -1;
-		    if (curState.getBlock() instanceof IRealisticFiniteFluid) {
-		        IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)curState.getBlock());
+		    if (RealisticFiniteFluidFunctions.getBlock(world, current, curState) instanceof IRealisticFiniteFluid) {
+		        IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)RealisticFiniteFluidFunctions.getBlock(world, current, curState));
 		        metaCurrent = realisticFluid.getVolume(world, current, curState);
 		    }
 		                      
@@ -2017,12 +2136,12 @@ public class FiniteFluidLogic {
 		
 		        IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)liquids.get(onFiniteFluidIndex).flowingBlock);//world.setBlockState(current, fluid.flowingBlock.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, newMetaAtCurrent), 3);
 		        //world.setBlockState(current, fluid.flowingBlock.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, newMetaAtCurrent), 3);
-		        realisticFluid.setBlockState(world, current, realisticFluid.setVolume(null, null, fluid.flowingBlock.getDefaultState(), newMetaAtCurrent));
+		        realisticFluid.setBlockState(world, current, current, realisticFluid.setVolume(null, null, fluid.flowingBlock.getDefaultState(), newMetaAtCurrent));
 		        world.notifyBlockUpdate(current, oldCur, world.getBlockState(current), 3);
 		
 		        IBlockState oldSrc = world.getBlockState(source);
 		        //world.setBlockState(source, fluid.flowingBlock.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, 7), 3);
-		        realisticFluid.setBlockState(world, source, realisticFluid.setVolume(null, null, fluid.flowingBlock.getDefaultState(), 7));
+		        realisticFluid.setBlockState(world, source, source, realisticFluid.setVolume(null, null, fluid.flowingBlock.getDefaultState(), 7));
 		        world.notifyBlockUpdate(source, oldSrc, world.getBlockState(source), 3);
 		
 		        stopPCheck = true;
@@ -2168,7 +2287,7 @@ public class FiniteFluidLogic {
 		    for (BlockPos pos : adjacentPositions) {
 		        IBlockState state = world.getBlockState(pos);
 		        if (state.getMaterial().getCanBurn()) {
-		            world.setBlockState(pos, Blocks.FIRE.getDefaultState());
+		            world.setBlockState(pos, ForgeEventFactory.fireFluidPlaceBlockEvent(world, pos, centerPos, Blocks.FIRE.getDefaultState())); //Blocks.FIRE.getDefaultState());
 		        }
 		    }
 		}
@@ -2209,16 +2328,17 @@ public class FiniteFluidLogic {
 		 */
 		public static boolean interactWithNeighborLiquid(World world, BlockPos pos) {
 		    IBlockState blockState = world.getBlockState(pos);
-		    Block block = blockState.getBlock();
+		    Block block = RealisticFiniteFluidFunctions.getBlock(world, pos, blockState);
 		    int type = GeneralPurposeLogic.getFluidIndex(block);
 		    
 		    
 		    BlockPos above = pos.up();
-		    Block blockAbove = world.getBlockState(above).getBlock();
+		    Block blockAbove = RealisticFiniteFluidFunctions.getBlock(world, above, world.getBlockState(above));
 		
 		    BlockPos below = pos.down();
-		    Block blockBelow = world.getBlockState(below).getBlock();
+		    Block blockBelow = RealisticFiniteFluidFunctions.getBlock(world, below, world.getBlockState(below));
 		    int typeBelow = GeneralPurposeLogic.getFluidIndex(blockBelow);
+		    if (block instanceof IRealisticFiniteFluid && ((IRealisticFiniteFluid)block).getFluid().isGaseous()) return false;
 		
 			//System.out.println("block"+block+world.getBlockState(pos).getMaterial().toString());
 		
@@ -2231,7 +2351,7 @@ public class FiniteFluidLogic {
 			//}
 			
 		    //Interaccion con agua vanilla --> PARA DARLE OBSIDDIANA A LAS RAVINES
-		    if ((blockAbove == Blocks.WATER || blockAbove == Blocks.FLOWING_WATER) && blockState.getMaterial() == Material.LAVA) {
+		    /*if ((blockAbove == Blocks.WATER || blockAbove == Blocks.FLOWING_WATER) && blockState.getMaterial() == Material.LAVA) {
 		    	//System.out.println("typeBelow > -1"+(typeBelow));        		
 		        if (type > -1) {
 		            NewFluidType lavaType = liquids.get(type);
@@ -2254,7 +2374,7 @@ public class FiniteFluidLogic {
 		            	
 		            }
 		        }
-		    }
+		    }*/
 		    
 		    if (type == -1) return false;
 		
@@ -2289,7 +2409,7 @@ public class FiniteFluidLogic {
 		            if (i == 3) dz += 1;
 		
 		            BlockPos neighborPos = new BlockPos(dx, dy, dz);
-		            Block neighborBlock = world.getBlockState(neighborPos).getBlock();
+		            Block neighborBlock = RealisticFiniteFluidFunctions.getBlock(world, neighborPos, world.getBlockState(neighborPos));
 		            int typeNeighbor = GeneralPurposeLogic.getFluidIndex(neighborBlock);
 		
 		            if (typeNeighbor > -1) {
@@ -2315,7 +2435,7 @@ public class FiniteFluidLogic {
 		        // Es un bloque flowing: revisa solo interacciones ligeras
 		        for (int i = 0; i < 4; ++i) {
 		            BlockPos neighborPos = pos.offset(EnumFacing.byHorizontalIndex(i));
-		            Block neighborBlock = world.getBlockState(neighborPos).getBlock();
+		            Block neighborBlock = RealisticFiniteFluidFunctions.getBlock(world, neighborPos, world.getBlockState(neighborPos));
 		
 		            int typeNeighbor = GeneralPurposeLogic.getFluidIndex(neighborBlock);
 		            if (typeNeighbor > -1) {
@@ -2337,13 +2457,14 @@ public class FiniteFluidLogic {
 		
 		public static boolean bucketRemoveFluidEvenLowNEW(World world, BlockPos pos, int level) {
 		    IBlockState centerState = world.getBlockState(pos);
-		    if (!(centerState.getBlock() instanceof IRealisticFiniteFluid)) return false;
+		    if (!(RealisticFiniteFluidFunctions.getBlock(world, pos, centerState) instanceof IRealisticFiniteFluid)) return false;
 
-		    IRealisticFiniteFluid centerBlock = (IRealisticFiniteFluid) centerState.getBlock();
+		    IRealisticFiniteFluid centerBlock = (IRealisticFiniteFluid) RealisticFiniteFluidFunctions.getBlock(world, pos, centerState);
 		    Fluid targetFluid = centerBlock.getFluid(); // fluido del bloque central
 
 		    int collected = level; // Nivel inicial del bloque central
-		    world.setBlockToAir(pos); // Removemos el bloque principal
+		    RealisticFiniteFluidFunctions.setBlockToAir(world, pos);
+			//world.setBlockToAir(pos); // Removemos el bloque principal
 
 		    if (collected >= References.MAXIMUM_CONCEPTUAL_LEVEL) return true; // Ya lleno, terminamos
 
@@ -2353,19 +2474,36 @@ public class FiniteFluidLogic {
 		        pos.north().east(), pos.north().west(),
 		        pos.south().east(), pos.south().west()
 		    };
+		    
+		    // 9x9 --> GASES
+		    if (collected < References.MAXIMUM_CONCEPTUAL_LEVEL && targetFluid.isGaseous()) {
+		    	int radius = 2;
+
+		    	List<BlockPos> around = getPositionsInCube(pos, radius);
+		    	sortByHorizontalThenDistance(pos, around);
+
+		    	collected = collectEqually(
+		    	    world,
+		    	    around.toArray(new BlockPos[0]),
+		    	    collected,
+		    	    References.MAXIMUM_CONCEPTUAL_LEVEL,
+		    	    targetFluid
+		    	);
+		    }
 
 		    // Recolectar suavemente
 		    collected = collectEqually(world, laterals, collected, References.MAXIMUM_CONCEPTUAL_LEVEL, targetFluid);
-		    if (collected < References.MAXIMUM_CONCEPTUAL_LEVEL) collected = collectEqually(world, diagonals, collected, References.MAXIMUM_CONCEPTUAL_LEVEL, targetFluid);
+		    if (collected < References.MAXIMUM_CONCEPTUAL_LEVEL) 
+		    	collected = collectEqually(world, diagonals, collected, References.MAXIMUM_CONCEPTUAL_LEVEL, targetFluid);
 
 		    // Última oportunidad: abajo
 		    if (collected < References.MAXIMUM_CONCEPTUAL_LEVEL) {
 		        BlockPos below = pos.down();
 		        IBlockState belowState = world.getBlockState(below);
-		        if (belowState.getBlock() instanceof IRealisticFiniteFluid) {
-		        	IRealisticFiniteFluid fluidBlock = (IRealisticFiniteFluid) belowState.getBlock();
+		        if (RealisticFiniteFluidFunctions.getBlock(world, below, belowState) instanceof IRealisticFiniteFluid) {
+		        	IRealisticFiniteFluid fluidBlock = (IRealisticFiniteFluid) RealisticFiniteFluidFunctions.getBlock(world, below, belowState);
 		            if (fluidBlock.getFluid() == targetFluid) {
-	                    IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)belowState.getBlock());
+	                    IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)RealisticFiniteFluidFunctions.getBlock(world, below, belowState));
 		                int neighborLevel = realisticFluid.getConceptualVolume(world, below, belowState);
 		                int take = Math.min(neighborLevel, References.MAXIMUM_CONCEPTUAL_LEVEL - collected);
 		                int newLevel = neighborLevel - take;
@@ -2373,12 +2511,13 @@ public class FiniteFluidLogic {
 		                if (newLevel <= References.MINIMUM_LEVEL) {
 		                    if (newLevel == References.MINIMUM_LEVEL) {
 		                        //world.setBlockState(below, belowState.withProperty(BlockFiniteFluid.LEVEL, 0)); // nivel mínimo
-		                    	realisticFluid.setBlockState(world, below, realisticFluid.setVolume(world, below, belowState, References.MINIMUM_LEVEL));
+		                    	realisticFluid.setBlockState(world, pos, below, realisticFluid.setVolume(world, below, belowState, References.MINIMUM_LEVEL));
 		                    } else {
-		                        world.setBlockToAir(below); // newLevel < 0
+		                    	RealisticFiniteFluidFunctions.setBlockToAir(world, pos);
+		        				//world.setBlockToAir(below); // newLevel < 0
 		                    }
 		                } else {
-		                	realisticFluid.setBlockState(world, below, realisticFluid.setConceptualVolume(world, below, belowState, newLevel));
+		                	realisticFluid.setBlockState(world, pos, below, realisticFluid.setConceptualVolume(world, below, belowState, newLevel));
 		                }
 		                collected += take;
 		            }
@@ -2391,9 +2530,9 @@ public class FiniteFluidLogic {
 		
 		public static boolean bucketRemoveFluidOnlyFullNEW(World world, BlockPos pos, int level) {
 		    IBlockState centerState = world.getBlockState(pos);
-		    if (!(centerState.getBlock() instanceof IRealisticFiniteFluid)) return false;
+		    if (!(RealisticFiniteFluidFunctions.getBlock(world, pos, centerState) instanceof IRealisticFiniteFluid)) return false;
 
-		    IRealisticFiniteFluid centerBlock = (IRealisticFiniteFluid) centerState.getBlock();
+		    IRealisticFiniteFluid centerBlock = (IRealisticFiniteFluid) RealisticFiniteFluidFunctions.getBlock(world, pos, centerState);
 		    Fluid targetFluid = centerBlock.getFluid(); // fluido del bloque central
 
 		    int collected = level;
@@ -2412,10 +2551,10 @@ public class FiniteFluidLogic {
 
 		    for (BlockPos p : laterals) {
 		        IBlockState state = world.getBlockState(p);
-		        if (state.getBlock() instanceof IRealisticFiniteFluid) {
-		        	IRealisticFiniteFluid fluidBlock = (IRealisticFiniteFluid) state.getBlock();
+		        if (RealisticFiniteFluidFunctions.getBlock(world, p, state) instanceof IRealisticFiniteFluid) {
+		        	IRealisticFiniteFluid fluidBlock = (IRealisticFiniteFluid) RealisticFiniteFluidFunctions.getBlock(world, p, state);
 		            if (fluidBlock.getFluid() == targetFluid) {
-	                    IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)state.getBlock());
+	                    IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)RealisticFiniteFluidFunctions.getBlock(world, p, state));
 		                totalAvailable += realisticFluid.getConceptualVolume(world, p, state);
 		            }
 		        }
@@ -2423,19 +2562,19 @@ public class FiniteFluidLogic {
 
 		    for (BlockPos p : diagonals) {
 		        IBlockState state = world.getBlockState(p);
-		        if (state.getBlock() instanceof IRealisticFiniteFluid) {
-		        	IRealisticFiniteFluid fluidBlock = (IRealisticFiniteFluid) state.getBlock();
+		        if (RealisticFiniteFluidFunctions.getBlock(world, p, state) instanceof IRealisticFiniteFluid) {
+		        	IRealisticFiniteFluid fluidBlock = (IRealisticFiniteFluid) RealisticFiniteFluidFunctions.getBlock(world, p, state);
 		            if (fluidBlock.getFluid() == targetFluid) {
-	                    IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)state.getBlock());
+	                    IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)RealisticFiniteFluidFunctions.getBlock(world, p, state));
 		                totalAvailable += realisticFluid.getConceptualVolume(world, p, state);
 		            }
 		        }
 		    }
 
-		    if (belowState.getBlock() instanceof IRealisticFiniteFluid) {
-		    	IRealisticFiniteFluid fluidBlock = (IRealisticFiniteFluid) belowState.getBlock();
+		    if (RealisticFiniteFluidFunctions.getBlock(world, below, belowState) instanceof IRealisticFiniteFluid) {
+		    	IRealisticFiniteFluid fluidBlock = (IRealisticFiniteFluid) RealisticFiniteFluidFunctions.getBlock(world, below, belowState);
 		        if (fluidBlock.getFluid() == targetFluid) {
-                    IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)belowState.getBlock());
+                    IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)RealisticFiniteFluidFunctions.getBlock(world, below, belowState));
 		            totalAvailable += realisticFluid.getConceptualVolume(world, below, belowState);
 		        }
 		    }
@@ -2443,19 +2582,20 @@ public class FiniteFluidLogic {
 		    if (totalAvailable < References.MAXIMUM_CONCEPTUAL_LEVEL) return false;
 
 		    // --- Recolectar ---
-		    world.setBlockToAir(pos);
+		    RealisticFiniteFluidFunctions.setBlockToAir(world, pos);
+			//world.setBlockToAir(pos);
 
 		    collected = collectEqually(world, laterals, collected, References.MAXIMUM_CONCEPTUAL_LEVEL, targetFluid);
 		    if (collected < References.MAXIMUM_CONCEPTUAL_LEVEL) collected = collectEqually(world, diagonals, collected, References.MAXIMUM_CONCEPTUAL_LEVEL, targetFluid);
-		    if (collected < References.MAXIMUM_CONCEPTUAL_LEVEL && belowState.getBlock() instanceof IRealisticFiniteFluid) {
-		    	IRealisticFiniteFluid fluidBlock = (IRealisticFiniteFluid) belowState.getBlock();
+		    if (collected < References.MAXIMUM_CONCEPTUAL_LEVEL && RealisticFiniteFluidFunctions.getBlock(world, below, belowState) instanceof IRealisticFiniteFluid) {
+		    	IRealisticFiniteFluid fluidBlock = (IRealisticFiniteFluid) RealisticFiniteFluidFunctions.getBlock(world, below, belowState);
 		        if (fluidBlock.getFluid() == targetFluid) {
-                    IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)belowState.getBlock());
+                    IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)RealisticFiniteFluidFunctions.getBlock(world, below, belowState));
 		            int neighborLevel = realisticFluid.getConceptualVolume(world, below, belowState);
 		            int take = Math.min(neighborLevel, References.MAXIMUM_CONCEPTUAL_LEVEL - collected);
 		            int newLevel = neighborLevel - take;
-		            if (newLevel <= References.MINIMUM_LEVEL) world.setBlockToAir(below);
-		            else world.setBlockState(below, realisticFluid.setConceptualVolume(world, below, belowState, newLevel));
+		            if (newLevel <= References.MINIMUM_LEVEL) RealisticFiniteFluidFunctions.setBlockToAir(world, pos); //world.setBlockToAir(below);
+		            else RealisticFiniteFluidFunctions.setBlockState(world, pos, below, realisticFluid.setConceptualVolume(world, below, belowState, newLevel));
 		            collected += take;
 		        }
 		    }
@@ -2466,7 +2606,7 @@ public class FiniteFluidLogic {
 		public static int collectEqually(World world, BlockPos[] positions, int collected, int spaceLeft, Fluid targetFluid) {
 		    for (BlockPos pos : positions) {
 		        IBlockState state = world.getBlockState(pos);
-		        Block block = state.getBlock();
+		        Block block = RealisticFiniteFluidFunctions.getBlock(world, pos, state);
 		        if (block instanceof IRealisticFiniteFluid) {
 		            Fluid fluid = ((IRealisticFiniteFluid) block).getFluid();
 		            if (fluid != targetFluid) continue; // skip distinto tipo
@@ -2475,8 +2615,8 @@ public class FiniteFluidLogic {
 		            int neighborLevel = realisticFluid.getConceptualVolume(world, pos, state); //state.getValue(BlockFiniteFluid.LEVEL) + 1;
 		            int take = Math.min(neighborLevel, spaceLeft - collected);
 		            int newLevel = neighborLevel - take;
-		            if (newLevel <= References.MINIMUM_LEVEL) world.setBlockToAir(pos);
-		            else realisticFluid.setBlockState(world, pos, realisticFluid.setConceptualVolume(world, pos, state, newLevel)); //world.setBlockState(pos, state.withProperty(BlockFiniteFluid.LEVEL, newLevel - 1));
+		            if (newLevel <= References.MINIMUM_LEVEL) RealisticFiniteFluidFunctions.setBlockToAir(world, pos); //world.setBlockToAir(pos);
+		            else realisticFluid.setBlockState(world, pos, pos, realisticFluid.setConceptualVolume(world, pos, state, newLevel)); //world.setBlockState(pos, state.withProperty(BlockFiniteFluid.LEVEL, newLevel - 1));
 		            collected += take;
 		            activateOcean(world, pos);
 		            
@@ -2494,15 +2634,15 @@ public class FiniteFluidLogic {
 				BlockPos neighbor = pos.offset(dir);
 				IBlockState neighborState = world.getBlockState(neighbor);
 				////System.out.println("Bloque a explorar " + neighborState.getBlock());
-				if (!(neighborState.getBlock() instanceof IRealisticFiniteFluid)) return;
-				IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)neighborState.getBlock());
+				if (!(RealisticFiniteFluidFunctions.getBlock(world, neighbor, neighborState) instanceof IRealisticFiniteFluid)) return;
+				IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)RealisticFiniteFluidFunctions.getBlock(world, neighbor, neighborState));
 
-				if (realisticFluid.isOceanBlock(world, neighbor, neighborState, GeneralPurposeLogic.getFluidIndex(neighborState.getBlock()))) {
+				if (realisticFluid.isOceanBlock(world, neighbor, neighborState, GeneralPurposeLogic.getFluidIndex(RealisticFiniteFluidFunctions.getBlock(world, neighbor, neighborState)))) {
 					exposedToOceanWater = true;
 
 					if (exposedToOceanWater
-							&& !(world.getBlockState(pos.down()).getBlock() instanceof IRealisticFiniteFluid)
-							&& !(world.getBlockState(pos).getBlock() instanceof IRealisticFiniteFluid)) {
+							&& !(RealisticFiniteFluidFunctions.getBlock(world, pos.down(), world.getBlockState(pos.down())) instanceof IRealisticFiniteFluid)
+							&& !(RealisticFiniteFluidFunctions.getBlock(world, pos, world.getBlockState(pos)) instanceof IRealisticFiniteFluid)) {
 						FiniteFluidLogic.OceanFluidsLogic.borderOceanCheck(world, pos, false);
 					}
 					break;
@@ -2533,15 +2673,15 @@ public class FiniteFluidLogic {
                     if (remaining <= References.MINIMUM_LEVEL) break; //original: <=0, ahora es <0, para aceptar al 0 entre los valores
 
                     IBlockState s = world.getBlockState(p);
-                    if (!(s.getBlock() instanceof IRealisticFiniteFluid) || FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(s.getBlock()) != fluidType) continue; //Para que no crashee la IC2 FluidCell en el CASO 1) xd
+                    if (!(RealisticFiniteFluidFunctions.getBlock(world, p, s) instanceof IRealisticFiniteFluid) || FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(RealisticFiniteFluidFunctions.getBlock(world, p, s)) != fluidType) continue; //Para que no crashee la IC2 FluidCell en el CASO 1) xd
                     IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)liquids.get(onFiniteFluidIndex).flowingBlock);
                     int level = realisticFluid.getVolume(world, p, s);
                     if (level < References.MAXIMUM_LEVEL) {
-                    	int temporalFluidType = FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(s.getBlock()); 
+                    	int temporalFluidType = FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(RealisticFiniteFluidFunctions.getBlock(world, p, s)); 
                     	Block newBlock1 = ((NewFluidType)liquids.get(temporalFluidType)).flowingBlock;
                     	
                         //world.setBlockState(p, newBlock1.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, level + 1)); //s.withProperty(RFFBlock.LEVEL, level + 1));
-                    	realisticFluid.setBlockState(world, p, realisticFluid.setVolume(null, null, newBlock1.getDefaultState(), level+1));	
+                    	realisticFluid.setBlockState(world, p, p, realisticFluid.setVolume(null, null, newBlock1.getDefaultState(), level+1));	
                         remaining--;
                         
                         didSomething = true;
@@ -2566,10 +2706,10 @@ public class FiniteFluidLogic {
                     IBlockState s = world.getBlockState(p);
                     //THIS SHIT MIGHT CRASH
                     IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)liquids.get(onFiniteFluidIndex).flowingBlock);
-                    if (world.isAirBlock(p) && !(s.getBlock() instanceof IRealisticFiniteFluid)) { //Para que no crashee la IC2 FluidCell en el CASO 1) xd
+                    if (RealisticFiniteFluidFunctions.isAirBlock(world, p, true) && !(RealisticFiniteFluidFunctions.getBlock(world, p, s) instanceof IRealisticFiniteFluid)) { //Para que no crashee la IC2 FluidCell en el CASO 1) xd
                         //if (!(remaining > 16)) { //16 porque estamos en LEVELs conceptuales
                         	//world.setBlockState(p, finiteFluidBlock.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, remaining-1)); //ModBlocks.FINITE_WATER_FLOWING.getDefaultState().withProperty(RFFBlock.LEVEL, remaining-1));
-                    	realisticFluid.setBlockState(world, p, realisticFluid.setConceptualVolume(null, null, finiteFluidBlock.getDefaultState(), remaining));	
+                    	realisticFluid.setBlockState(world, p, p, realisticFluid.setConceptualVolume(null, null, finiteFluidBlock.getDefaultState(), remaining));	
                     	return References.MINIMUM_LEVEL;	
                         /*} else {
                         	world.setBlockState(p, finiteFluidBlock.getDefaultState().withProperty(RFFBlock.LEVEL, 15)); //15 porque esta en LEVELs directos
@@ -2580,7 +2720,7 @@ public class FiniteFluidLogic {
                     int level = realisticFluid.getVolume(world, p, s);
                     if (level < References.MAXIMUM_LEVEL) {
                         //world.setBlockState(p, s.withProperty(BlockFiniteFluid.LEVEL, level + 1));
-                    	realisticFluid.setBlockState(world, p, realisticFluid.setVolume(world, p, s, level + 1));	
+                    	realisticFluid.setBlockState(world, p, p, realisticFluid.setVolume(world, p, s, level + 1));	
                         remaining--;
                         
                         didSomething = true;
@@ -2605,20 +2745,20 @@ public class FiniteFluidLogic {
 			IBlockState centerState = world.getBlockState(pos);
 			IRealisticFiniteFluid realisticFluid;
 
-			if (centerState.getBlock() instanceof IRealisticFiniteFluid && FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(centerState.getBlock()) == fluidIndex) {
-                realisticFluid = ((IRealisticFiniteFluid)centerState.getBlock());
+			if (RealisticFiniteFluidFunctions.getBlock(world, pos, centerState) instanceof IRealisticFiniteFluid && FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(RealisticFiniteFluidFunctions.getBlock(world, pos, centerState)) == fluidIndex) {
+                realisticFluid = ((IRealisticFiniteFluid)RealisticFiniteFluidFunctions.getBlock(world, pos, centerState));
                 int currentLevel = realisticFluid.getConceptualVolume(world, pos, centerState); //centerState.getValue(BlockFiniteFluid.LEVEL)+1;
 				int toAdd = Math.min(References.MAXIMUM_CONCEPTUAL_LEVEL - currentLevel, remaining); //remaining es el maximo, 16 LEVELs conceptuales
 				if (toAdd > References.MINIMUM_LEVEL) {
 					//world.setBlockState(pos, centerState.withProperty(BlockFiniteFluid.LEVEL, currentLevel + toAdd-1));
-					realisticFluid.setBlockState(world, pos, realisticFluid.setConceptualVolume(world, pos, centerState, currentLevel + toAdd));
+					realisticFluid.setBlockState(world, pos, pos, realisticFluid.setConceptualVolume(world, pos, centerState, currentLevel + toAdd));
 					remaining -= toAdd;
 				}
 
 			} else {
                 realisticFluid = ((IRealisticFiniteFluid)liquids.get(onFiniteFluidIndex).flowingBlock);
 				//world.setBlockState(pos, ModBlocks.FINITE_LAVA_FLOWING.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, remaining-1)); //COMO LA ENTRADA SON 16, PUES REGRESAMOS A LITERALES
-				realisticFluid.setBlockState(world, pos, realisticFluid.setConceptualVolume(null, null, flowingBlock, remaining));
+				realisticFluid.setBlockState(world, pos, pos, realisticFluid.setConceptualVolume(null, null, flowingBlock, remaining));
 			}
 
 			// Coordenadas para laterales y diagonales
@@ -2633,9 +2773,9 @@ public class FiniteFluidLogic {
 			// 2. Recolecta objetivos laterales válidos
 			for (BlockPos p : laterals) {
 				IBlockState s = world.getBlockState(p);
-				if (s.getBlock() instanceof IRealisticFiniteFluid) {
+				if (RealisticFiniteFluidFunctions.getBlock(world, p, s) instanceof IRealisticFiniteFluid) {
 	                //IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)s.getBlock());
-					if (FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(s.getBlock()) == fluidIndex 
+					if (FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(RealisticFiniteFluidFunctions.getBlock(world, p, s)) == fluidIndex 
 						&& realisticFluid.getConceptualVolume(world, p, s) < References.MAXIMUM_CONCEPTUAL_LEVEL) {
 						lateralTargets.add(p);
 					}
@@ -2645,9 +2785,9 @@ public class FiniteFluidLogic {
 			// 3. Recolecta objetivos diagonales válidos
 			for (BlockPos p : diagonals) {
 				IBlockState s = world.getBlockState(p);
-				if (s.getBlock() instanceof IRealisticFiniteFluid) {
+				if (RealisticFiniteFluidFunctions.getBlock(world, p, s) instanceof IRealisticFiniteFluid) {
 	                //IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)s.getBlock());
-					if (FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(s.getBlock()) == fluidIndex 
+					if (FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(RealisticFiniteFluidFunctions.getBlock(world, p, s)) == fluidIndex 
 						&& realisticFluid.getConceptualVolume(world, p, s) < References.MAXIMUM_CONCEPTUAL_LEVEL) {
 						diagonalTargets.add(p);
 					}
@@ -2665,9 +2805,9 @@ public class FiniteFluidLogic {
 			// 6. Si todavía sobra, intenta poner un nuevo bloque arriba
 			if (remaining > References.MINIMUM_LEVEL && remaining <= References.MAXIMUM_CONCEPTUAL_LEVEL) { //ChatGPT dijo que <16 --> <=16
 				BlockPos above = pos.up();
-				if (world.isAirBlock(above) && !world.getBlockState(above).getBlock().hasTileEntity()) {
+				if (RealisticFiniteFluidFunctions.isAirBlock(world, above, true) && !RealisticFiniteFluidFunctions.getBlock(world, above, world.getBlockState(above)).hasTileEntity()) {
 					//world.setBlockState(above, ModBlocks.FINITE_LAVA_FLOWING.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, remaining-1)); //COMO LA ENTRADA SON 16, PUES REGRESAMOS A LITERALES
-					realisticFluid.setBlockState(world, above, realisticFluid.setConceptualVolume(null, null, flowingBlock, remaining));
+					realisticFluid.setBlockState(world, pos, above, realisticFluid.setConceptualVolume(null, null, flowingBlock, remaining));
 					remaining = References.MINIMUM_LEVEL;
 				}
 			}
@@ -2684,7 +2824,7 @@ public class FiniteFluidLogic {
 		    int collected = 0;
 
 		    IBlockState state = world.getBlockState(pos);
-		    Block block = state.getBlock();
+		    Block block = RealisticFiniteFluidFunctions.getBlock(world, pos, state);
 
 		    // Aseguramos que el bloque inicial corresponda al fluid target
 		    if (!(block instanceof IRealisticFiniteFluid)) return 0;
@@ -2699,17 +2839,34 @@ public class FiniteFluidLogic {
 		        collected += takeFromCenter;
 		        int newLevelCenter = original - takeFromCenter;
 		        if (newLevelCenter <= References.MINIMUM_LEVEL) {
-		            world.setBlockToAir(pos);
+		        	RealisticFiniteFluidFunctions.setBlockToAir(world, pos);
+					//world.setBlockToAir(pos);
 		            activateOcean(world, pos);
 		        } else {
 		            //world.setBlockState(pos, state.withProperty(BlockFiniteFluid.LEVEL, newLevelCenter - 1));
-		        	realisticFluid.setBlockState(world, pos, realisticFluid.setConceptualVolume(world, pos, state, newLevelCenter));
+		        	realisticFluid.setBlockState(world, pos, pos, realisticFluid.setConceptualVolume(world, pos, state, newLevelCenter));
 		        }
 		    }
 
 		    // si ya está lleno, salimos
 		    if (collected >= spaceLeft) {
 		        return collected;
+		    }
+		    
+		    // 9x9 --> GASES
+		    if (collected < spaceLeft && targetFluid.isGaseous()) {
+		    	int radius = 2;
+
+		    	List<BlockPos> around = getPositionsInCube(pos, radius);
+		    	sortByHorizontalThenDistance(pos, around);
+
+		    	collected = collectEqually(
+		    	    world,
+		    	    around.toArray(new BlockPos[0]),
+		    	    collected,
+		    	    spaceLeft,
+		    	    targetFluid
+		    	);
 		    }
 
 		    // Laterales
@@ -2724,26 +2881,59 @@ public class FiniteFluidLogic {
 		        };
 		        collected = collectEqually(world, diagonals, collected, spaceLeft, targetFluid);
 		    }
+		    
 
+		    
 		    // Abajo
 		    if (collected < spaceLeft) {
 		        BlockPos below = pos.down();
 		        IBlockState belowState = world.getBlockState(below);
-		        Block belowBlock = belowState.getBlock();
+		        Block belowBlock = RealisticFiniteFluidFunctions.getBlock(world, below, belowState);
 		        if (belowBlock instanceof IRealisticFiniteFluid) {
 		            Fluid belowFluid = ((IRealisticFiniteFluid) belowBlock).getFluid();
 		            if (belowFluid == targetFluid) {
 		                int neighborLevel = realisticFluid.getConceptualVolume(world, below, belowState); //belowState.getValue(BlockFiniteFluid.LEVEL) + 1; // conceptual
 		                int take = Math.min(neighborLevel, spaceLeft - collected);
 		                int newLevel = neighborLevel - take;
-		                if (newLevel <= References.MINIMUM_LEVEL) {world.setBlockToAir(below);  activateOcean(world, below);}
-		                else realisticFluid.setBlockState(world, below, realisticFluid.setConceptualVolume(world, below, belowState, newLevel)); //world.setBlockState(below, belowState.withProperty(BlockFiniteFluid.LEVEL, newLevel - 1));
+		                if (newLevel <= References.MINIMUM_LEVEL) {
+		                	RealisticFiniteFluidFunctions.setBlockToAir(world, pos);
+		    				//world.setBlockToAir(below);  
+		                	activateOcean(world, below);
+		                }
+		                else realisticFluid.setBlockState(world, pos, below, realisticFluid.setConceptualVolume(world, below, belowState, newLevel)); //world.setBlockState(below, belowState.withProperty(BlockFiniteFluid.LEVEL, newLevel - 1));
 		                collected += take;
 		            }
 		        }
 		    }
 
 		    return collected;
+		}
+		
+		public static List<BlockPos> getPositionsInCube(BlockPos center, int radius) {
+		    List<BlockPos> result = new ArrayList<>();
+
+		    for (int dx = -radius; dx <= radius; dx++) {
+		        for (int dy = -radius; dy <= radius; dy++) {
+		            for (int dz = -radius; dz <= radius; dz++) {
+		                if (dx == 0 && dy == 0 && dz == 0) continue; // no incluir centro
+		                result.add(center.add(dx, dy, dz));
+		            }
+		        }
+		    }
+
+		    return result;
+		}
+		
+		public static void sortByHorizontalThenDistance(BlockPos center, List<BlockPos> list) {
+		    list.sort((a, b) -> {
+		        int dyA = Math.abs(a.getY() - center.getY());
+		        int dyB = Math.abs(b.getY() - center.getY());
+
+		        if (dyA != dyB)
+		            return Integer.compare(dyA, dyB);
+
+		        return Double.compare(a.distanceSq(center), b.distanceSq(center));
+		    });
 		}
 
 
@@ -2762,22 +2952,22 @@ public class FiniteFluidLogic {
 		    };
 		    for (BlockPos p : laterals) {
 		        IBlockState s = world.getBlockState(p);
-		        if (s.getBlock() instanceof IRealisticFiniteFluid) {
-		            realisticFluid = ((IRealisticFiniteFluid)s.getBlock());
+		        if (RealisticFiniteFluidFunctions.getBlock(world, p, s) instanceof IRealisticFiniteFluid) {
+		            realisticFluid = ((IRealisticFiniteFluid)RealisticFiniteFluidFunctions.getBlock(world, p, s));
 		        	total += realisticFluid.getConceptualVolume(world, p, s); //s.getValue(BlockFiniteFluid.LEVEL) + 1;
 		        }
 		    }
 		    for (BlockPos p : diagonals) {
 		        IBlockState s = world.getBlockState(p);
-		        if (s.getBlock() instanceof IRealisticFiniteFluid) {
-		            realisticFluid = ((IRealisticFiniteFluid)s.getBlock());
+		        if (RealisticFiniteFluidFunctions.getBlock(world, p, s) instanceof IRealisticFiniteFluid) {
+		            realisticFluid = ((IRealisticFiniteFluid)RealisticFiniteFluidFunctions.getBlock(world, p, s));
 		            total += realisticFluid.getConceptualVolume(world, p, s); //s.getValue(BlockFiniteFluid.LEVEL) + 1;
 		        }
 		    }
 		    BlockPos below = pos.down();
 		    IBlockState belowState = world.getBlockState(below);
-		    if (belowState.getBlock() instanceof IRealisticFiniteFluid) {
-	            realisticFluid = ((IRealisticFiniteFluid)belowState.getBlock());
+		    if (RealisticFiniteFluidFunctions.getBlock(world, below, belowState) instanceof IRealisticFiniteFluid) {
+	            realisticFluid = ((IRealisticFiniteFluid)RealisticFiniteFluidFunctions.getBlock(world, below, belowState));
 	            total += realisticFluid.getConceptualVolume(world, below, belowState); //belowState.getValue(BlockFiniteFluid.LEVEL) + 1;
 		    }
 
@@ -2787,17 +2977,18 @@ public class FiniteFluidLogic {
 		    // Si hay suficientes, borramos/extraemos suavemente igual que en EvenLow
 		    int original = levelConceptual;
 		    int collected = original;
-		    world.setBlockToAir(pos);
+		    RealisticFiniteFluidFunctions.setBlockToAir(world, pos);
+			//world.setBlockToAir(pos);
 
 		    collected = collectEqually(world, laterals, collected, References.MAXIMUM_CONCEPTUAL_LEVEL, targetFluid);
 		    if (collected < References.MAXIMUM_CONCEPTUAL_LEVEL) collected = collectEqually(world, diagonals, collected, References.MAXIMUM_CONCEPTUAL_LEVEL, targetFluid);
-		    if (collected < References.MAXIMUM_CONCEPTUAL_LEVEL && belowState.getBlock() instanceof IRealisticFiniteFluid) {
-		    	realisticFluid = ((IRealisticFiniteFluid)belowState.getBlock());
+		    if (collected < References.MAXIMUM_CONCEPTUAL_LEVEL && RealisticFiniteFluidFunctions.getBlock(world, below, belowState) instanceof IRealisticFiniteFluid) {
+		    	realisticFluid = ((IRealisticFiniteFluid)RealisticFiniteFluidFunctions.getBlock(world, below, belowState));
 		        int neighborLevel = realisticFluid.getConceptualVolume(world, below, belowState); //belowState.getValue(BlockFiniteFluid.LEVEL) + 1;
 		        int take = Math.min(neighborLevel, References.MAXIMUM_CONCEPTUAL_LEVEL - collected);
 		        int newLevel = neighborLevel - take;
-		        if (newLevel <= References.MINIMUM_LEVEL) world.setBlockToAir(below);
-		        else realisticFluid.setBlockState(world, below, realisticFluid.setConceptualVolume(world, below, belowState, newLevel)); //world.setBlockState(below, belowState.withProperty(BlockFiniteFluid.LEVEL, newLevel - 1));
+		        if (newLevel <= References.MINIMUM_LEVEL) RealisticFiniteFluidFunctions.setBlockToAir(world, pos); //world.setBlockToAir(below);
+		        else realisticFluid.setBlockState(world, null, below, realisticFluid.setConceptualVolume(world, below, belowState, newLevel)); //world.setBlockState(below, belowState.withProperty(BlockFiniteFluid.LEVEL, newLevel - 1));
 		        collected += take;
 		    }
 
@@ -2805,10 +2996,421 @@ public class FiniteFluidLogic {
 		}
 
 
+	}
+	
+	
+	
+	public static class FiniteGassesLogic {
+
+		/** TODO
+		 * CUARTO INTENTO --> INTENTO MIO
+		 */
+		public static boolean tryGasMove(World world, BlockPos pos) {
+		    if (world.isRemote) return false;
+		
+		    Random rand = new Random();
+		    
+		    List<BlockPos> targets = new ArrayList<>();
+
+		    int g = GeneralPurposeLogic.getFluidGravity();
+
+		    // UP (más probable)
+		    for (int i = 0; i < 5; i++)
+		        targets.add(pos.down(-g));
+
+		    // LATERALS
+		    for (int i = 0; i < 4; i++) {
+		        targets.add(pos.east());
+		        targets.add(pos.west());
+		        targets.add(pos.north());
+		        targets.add(pos.south());
+		    }
+
+		    // DOWN (raro)
+		    targets.add(pos.down(g));
+
+		    // Mezclar
+		    Collections.shuffle(targets, rand);
+
+		    // Probar en orden
+		    for (BlockPos dest : targets) {
+		        if (gasMove(world, pos, dest, true)) {
+		            return true;
+		        }
+		    }
+		
+		    return false;
+		}
 		
 		
+		
+		
+		
+		
+		
+		
+		public static boolean gasMove(World world, BlockPos sourcePos, BlockPos destPos, boolean doMove) {
+			//world.setBlockState(sourcePos, Blocks.WATER.getDefaultState().withProperty(References.LEVEL, 0));
+		    return gasMove(world, sourcePos, destPos, doMove, 0);
+		}
 
+		/**
+		 * DETERMINACION DE MOVIMIENTO
+		 * 1.- Los gases, al ser puestos en un ambiente al aire libre, se expanderan hasta LEVEL 0, 
+		 * y formaran una nube por consecuencia.
+		 * YA
+		 * 
+		 * 2.- Los gases, al encontrarse en su estado en equilibrio (totalmente expandidos), se moveran de forma aleatoria,
+		 * YA
+		 * 
+		 * 2.1.- Los gases, al moverse de forma aleatoria, tendran cierta preferencia para ir hacia arriba que hacia abajo,
+		 * excepto cuando se estan expandiendo
+		 * 
+		 * GASES AL EXPANDIRSE --> NO IMPORTA LA DIRECCION
+		 * GASES AL MOVERSE ALEATORIAMENTE --> PREFERENCIA ARRIBA>LATERALES>>>ABAJO
+		 * 
+		 * 
+		 * 
+		 * 3.- Los gases, al encontrarse rodeados en sus 6 caras por gas del mismo LEVEL, 
+		 * absorberan LEVELs adyacentes por el incremento de la presion (similar a tryGrab?)
+		 * 
+		 * 
+		 * 
+		 * 
+		 */
+		private static boolean gasMove(World world, BlockPos sourcePos, BlockPos destPos, boolean doMove, int recursionDepth) { 
+		    if (world.isRemote) {
+		    	//System.out.println("[RFF] Return 1"); 
+		    return false;
+		    }
+		    //int shouldMove = new Random().nextInt(10);
+		    
+		    // 1) OBTENEMOS BLOQUES Y STATES TANTO DEL SOURCE COMO DEL DESTINY
+		    IBlockState sourceState = world.getBlockState(sourcePos);
+		    Block sourceBlock = RealisticFiniteFluidFunctions.getBlock(world, sourcePos, sourceState);
+		    if (!(sourceBlock instanceof IRealisticFiniteFluid)) { 
+		    	//System.out.println("[RFF] Return 2 FALSE");  
+		    	return false; 
+		    	}//CHECAR QUE ESTO NO ROMPA EL FUNCIONAMIENTO DEL AGUA //??
+			IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)sourceBlock);
+		    int sourceLevel = realisticFluid.getVolume(world, sourcePos, sourceState);
+		
+		    IBlockState destState = world.getBlockState(destPos);
+		    Block destBlock = RealisticFiniteFluidFunctions.getBlock(world, destPos, destState);
+		    int destLevel = destBlock instanceof IRealisticFiniteFluid ? realisticFluid.getVolume(world, destPos, destState) : -1;
+		
+		    // 2) SETEAMOS EL FLUID INDEX 
+		    GeneralPurposeLogic.setCurrentFluidIndex(sourceBlock);
+		    NewFluidType fluid = (NewFluidType) liquids.get(onFiniteFluidIndex);
+		
+		    
+		    
+		    
+		    // #######################
+		    //        RECURSION
+		    // #######################
+		    // 3) MANEJAMOS RECURSION PARA BUSCAR EN LIQUIDOS ADYANCETES, DEPENDE DEL MATERIAL DEL SOURCE BLOCK
+		    boolean shouldSearchOutward = false;
+		    if (fluid.flowingBlock instanceof IRealisticFiniteFluid) {
+		        shouldSearchOutward = ((IRealisticFiniteFluid) fluid.flowingBlock).shouldSearchOutward(fluid.flowingBlock.getDefaultState().getMaterial());
+		    }
+		
+		    //SI PODEMOS HACER BUSQUEDAS ADYACENTES ADICIONALES, Y LA PROFUNDIDAD DE RECURSION ES MENOR A 32 -->
+		    if (shouldSearchOutward && recursionDepth < 32) {
+		    	//CHECAMOS EN LOS ENUMFACING HORIZONTALES DEL BLOQUE DE DEST BLOCK
+		        for (EnumFacing dir : EnumFacing.HORIZONTALS) {
+		            BlockPos neighbor = destPos.offset(dir);
+		            //CHECAMOS LOS VECINOS SIEMPRE Y CUANDO SEAN FLUIDO FINITO DEL MISMO TIPO PERO NO SEAN EL SOURCE BLOCK
+		            if (!neighbor.equals(sourcePos) && GeneralPurposeLogic.isFiniteFluid(world, neighbor)) {
+		            	//LE SACAMOS EL VOLUMEN
+		                int neighborLevel = realisticFluid.getVolume(world, neighbor, world.getBlockState(neighbor));
+		                //Y SI EL BLOQUE DESTINO TIENE MAS LIQUIDO QUE UNO DE ESTOS BLOQUES ADDYACENTES --> 
+		                //REINICIAMOS LA FUNCION, TOMANDO COMO DESTINO ESTE BLOQUE VECINO
+		                if (destLevel > neighborLevel) {
+		                	//System.out.println("[RFF] Return 3 "+recursionDepth);
+		                    return gasMove(world, sourcePos, neighbor, doMove, recursionDepth++);
+		                }
+		            }
+		        }
+		
+		    // SI NO PODEMOS HACER RECURSION --> CHECAMOS QUE EL BLOQUE DESTINO SEA BLOQUE FINITO
+		    } else if (!GeneralPurposeLogic.isFiniteFluid(world, destPos)) {
+		        destLevel = -1;
+		    }
+		    
+		   
+		    
+		    // REDUCIR DEUDA DE CALCULOS
+		    //Es la diferencia entre la altura de nuestro bloque contra el que estamos comparando
+		    //Idealmente tendria que salir un resultado positivo
+		    int dy = sourcePos.getY() - destPos.getY(); 
+		    if (doMove && dy == 0 && Math.abs(destLevel - sourceLevel) < 3 && GeneralPurposeLogic.getCalc() > maxCalc * 0.6f) {
+		        --calcAmt;
+		    	//System.out.println("[RFF] Return 4 TRUE");
+		        return true;
+		    }
+		    
+		    
+		    
+		    // #######################
+		    //   DIFUSION HACIA AIRE
+		    // #######################
+		    if (GeneralPurposeLogic.canMoveInto(world, destPos, sourcePos, sourceLevel, fluid)) {
+	    		//TODO --> AÑADIR DETERMINACION DE MOVIMIENTO POR PROBABILIDADES
+		    	if (doMove) {
+		    		
+		    		/*
+		    		//0 1 2 /// 3 4 5 6 7 /// 8 9 
 
+		    		//UP
+		    		if (dy == -GeneralPurposeLogic.getFluidGravity() && shouldMove > 7) {
+		    			return false;
+		    		}
+		    		//DOWN
+		    		else if (dy == GeneralPurposeLogic.getFluidGravity() && shouldMove > 3) {
+		    			return false;
+		    		}
+		    		//LATERALS
+		    		//else if (shouldMove >= 8) {
+		    			
+		    		//}
+		    		*/
+		    		
+		    		if (sourceLevel > References.MINIMUM_LEVEL) {
+		    			int realSource = sourceLevel + 1; //--> CONVERTIMOS LITERAL LEVELS (0-7) A CONCEPTUAL LEVELS (1-8)
+		    			int realDest   = 0;
+		    			int transfer = (int) Math.floor(realSource/2);
+
+		    			realSource -= transfer;
+		    			realDest   += transfer;
+
+		    			sourceLevel = realSource - 1;
+		    			destLevel   = realDest   - 1;
+
+		    			realisticFluid.setBlockState(world, sourcePos, sourcePos, realisticFluid.setVolume(null, null, fluid.flowingBlock.getDefaultState(), sourceLevel));
+		    			realisticFluid.setBlockState(world, sourcePos, destPos, realisticFluid.setVolume(null, null, fluid.flowingBlock.getDefaultState(), destLevel));
+		    		} else {
+		    			//System.out.println("[RFF] Michirrines");
+		    			if (GeneralPurposeLogic.hasAnyFluidAround(world, sourcePos)) { //, fluid)) {
+		    				realisticFluid.setBlockState(world, sourcePos, destPos, realisticFluid.setVolume(null, null, fluid.flowingBlock.getDefaultState(), sourceLevel));
+		    				FiniteFluidsLogic.tryGrab(world, sourcePos, destPos, recursionDepth, fluid);	
+		    			} else {
+		    				realisticFluid.setBlockState(world, sourcePos, destPos, realisticFluid.setVolume(null, null, fluid.flowingBlock.getDefaultState(), sourceLevel));
+		    				RealisticFiniteFluidFunctions.setBlockToAir(world, sourcePos);
+		    				//world.setBlockToAir(sourcePos);
+		    			}
+		    		}
+		    	}
+		    	
+		    	return true;
+		    }
+		    
+
+		    
+			//System.out.println("[RFF] Michirrines");
+
+		    
+		    
+		    // ########################
+		    //   DIFUSION HACIA GASES
+		    // ########################
+		    else if (GeneralPurposeLogic.isFiniteFluid(world, destPos)) {
+		    	/*BlockPos posBelow = sourcePos.down();
+		    	IBlockState stateBelow = world.getBlockState(posBelow);
+		    	Block blockBelow = stateBelow.getBlock();
+		    	
+		    	if (blockBelow instanceof IRealisticFiniteFluid 
+		    			&& GeneralPurposeLogic.getFluidIndex(blockBelow) == onFiniteFluidIndex) {
+		    		
+		    		int levelBelow = realisticFluid.getVolume(world, posBelow, stateBelow);
+			    	if (sourceLevel > levelBelow) {
+						//System.out.println("[RFF] Michirrines:"+sourcePos);
+			    		//GeneralPurposeLogic.flipLiquids(world, sourcePos, destPos);
+			    		realisticFluid.setBlockState(world, sourcePos, stateBelow);
+			    		realisticFluid.setBlockState(world, posBelow, sourceState);
+			    		//realisticFluid.setBlockState(world, sourcePos, Blocks.WATER.getDefaultState());
+			    		return true;
+			    	}
+		    	}*/
+
+		    	
+		    	  //shouldFlowToNeighbor(world, sourcePos, destPos) 
+		    	if (GeneralPurposeLogic.shouldFlowToNeighbor(world, sourcePos, destPos) //sourceLevel > neighborhoodGasPressure(world, sourcePos)+1 
+		    			&& destLevel < References.MAXIMUM_LEVEL 
+		    			&& sourceLevel > References.MINIMUM_LEVEL) {
+		    		
+		    		//COPYPASTEADO DE liquidMove()
+		            if (doMove) {
+						// ################
+						//   ECUALIZACION
+						// ################
+		            	int total = sourceLevel + destLevel + 2; //Convertido a LEVELs conceptuales
+		                sourceLevel = total / 2;
+		                destLevel = total - sourceLevel - 1;
+		                --sourceLevel;
+		                
+			            //SI EL LEVEL RESTANTE ES MAYOR O IGUAL AL MINIMUM_LEVEL
+	                	//Esto significa, si el LEVEL del origen todavia da para que exista el bloque, seteamos este LEVEL en el bloque
+		                if (sourceLevel >= References.MINIMUM_LEVEL)
+		                	realisticFluid.setBlockState(world, sourcePos, sourcePos, realisticFluid.setVolume(null, null, fluid.flowingBlock.getDefaultState(), sourceLevel));
+		                 else //SI NO ALCANZO EL LEVEL DE ORIGEN PARA QUE EXISTA EL SOURCE BLOCK --> tryGrab???
+		                	FiniteFluidsLogic.tryGrab(world, sourcePos, destPos, 0, fluid);
+		
+		                //SETEAMOS UN BLOQUE DE FLUIDO EN EL DEST POSITION
+		                realisticFluid.setBlockState(world, sourcePos, destPos, realisticFluid.setVolume(null, null, fluid.flowingBlock.getDefaultState(), destLevel));
+		
+		                //AÑADIMOS EL BLOQUE AL SISTEMA DE PRESION DIRECTA ASI TIENE EL LEVEL MAXIMO
+		                //if (doPressure && destLevel == References.MAXIMUM_LEVEL)
+		                //    PressureSystemLogic.addToPressure(world, destPos, false); // 0 = false
+		            }
+		            return true;
+		    	}
+		    	
+		    	
+		    	
+		    	
+		    	
+		    	
+		    	/*
+			    // ---------- Gradiente ----------
+			    float delta = sourceLevel - destLevel;
+			    if (delta < References.GAS_MIN_DIFF) //Basicame
+			        return false;
+
+			    // ---------- Flotabilidad ----------
+			    float density = ((sourceLevel)); // density < 0 --> gas
+			    float buoyancy = MathHelper.clamp(-density, 0.2f, 2.0f);
+
+			    float directionBias = 0.0f;
+
+			    //UP
+			    if (dy == -GeneralPurposeLogic.getFluidGravity()) {
+			        directionBias = 1.0f * buoyancy;
+			    }
+			    //BOTTOM
+			    else if (dy == GeneralPurposeLogic.getFluidGravity()) {
+			        float overpressureBonus = 0.0f;
+			        if (sourceLevel >= References.GAS_OVERPRESSURE_LEVEL) {
+			            overpressureBonus = (sourceLevel - References.GAS_OVERPRESSURE_LEVEL) * 0.3f;
+			        }
+			        directionBias = -0.6f + overpressureBonus;
+			    }
+			    //LATERALS
+			    else {
+			        directionBias = 0.2f; // laterales
+			    }
+			    */
+		    	
+		    	
+		    	
+		    }
+
+		    
+		    
+		    
+		    
+			//System.out.println("[RFF] Return 10 FALSE");
+		    return false;
+		}
+		
+		
+		public static int countGasNeighbors(World world, BlockPos pos, NewFluidType gasType) {
+		    int count = 0;
+
+		    for (EnumFacing face : EnumFacing.values()) {
+		        BlockPos neighborPos = pos.offset(face);
+		        IBlockState neighborState = world.getBlockState(neighborPos);
+		        Block neighborBlock = RealisticFiniteFluidFunctions.getBlock(world, neighborPos, neighborState);
+
+		        // Debe ser un bloque fluido clásico
+		        if (!(neighborBlock instanceof IRealisticFiniteFluid)) {
+		            continue;
+		        }
+
+		        IRealisticFiniteFluid neighborFluid = (IRealisticFiniteFluid) neighborBlock;
+
+		        // Debe ser gaseoso
+		        Fluid neighborGas = neighborFluid.getFluid();
+		        if (neighborGas == null || !neighborGas.isGaseous()) {
+		            continue;
+		        }
+
+		        // Debe ser el mismo tipo de gas
+		        if (neighborGas != gasType.getFluid()) {
+		            continue;
+		        }
+
+		        // Opcional pero recomendable: no contar niveles 0 (gas residual)
+		        /*if (neighborFluid.getVolume(world, neighborPos, neighborState) <= References.MINIMUM_LEVEL) {
+		            continue;
+		        }*/
+
+		        count++;
+		    }
+
+		    return count;
+		}
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		public static float neighborhoodGasPressure(World world, BlockPos pos) {
+		    int pressure = 0;
+		    int count = 0;
+
+		    for (EnumFacing face : EnumFacing.VALUES) {
+		        BlockPos neighborPos = pos.offset(face);
+		        IBlockState neigborState = world.getBlockState(neighborPos);
+		        Block neigborBlock = RealisticFiniteFluidFunctions.getBlock(world, neighborPos, neigborState);
+		        int currentIndex = GeneralPurposeLogic.getFluidIndex(neigborBlock);
+
+		        if (GeneralPurposeLogic.isFiniteFluid(world, neighborPos) && currentIndex == onFiniteFluidIndex) {
+		        	
+		        	if (neigborBlock instanceof IRealisticFiniteFluid) {
+		        	IRealisticFiniteFluid gasBlock = (IRealisticFiniteFluid)neigborBlock;
+
+		            int level = gasBlock.getVolume(world, neighborPos, neigborState);
+
+		            // vecinos más densos aportan más presión
+		            //pressure += (level / 7.0f);
+		            pressure += level;
+		        	count++;
+		        	}
+		        }
+		    }
+
+		    return (float)pressure/(float)count;
+		}
+		
+		
+		
+        public static boolean canGasMove(World world, BlockPos pos, int level) {
+            if (world.isRemote) return false;
+            
+        	EnumFacing[] facings = EnumFacing.VALUES;
+            BlockPos[] targets = new BlockPos[facings.length];
+        	for (int i = 0; i < facings.length; i++) {
+        	    EnumFacing face = facings[i];
+        		targets[i] = pos.offset(face);
+        	}
+
+            for (BlockPos target : targets) {
+                if (FiniteGassesLogic.gasMove(world, pos, target, false, 0)) return true;
+            }
+
+            return false;
+        }
+		
+		
+		
+	
+		
+		
 		
 		
 		
@@ -2817,6 +3419,5 @@ public class FiniteFluidLogic {
 		
 		
 	}
-
 
 }

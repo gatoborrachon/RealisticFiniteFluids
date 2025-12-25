@@ -10,7 +10,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.material.Material;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
@@ -37,6 +36,7 @@ import com.gatoborrachon.realisticfinitefluids.References;
 import com.gatoborrachon.realisticfinitefluids.interfaces.IRealisticFiniteFluid;
 import com.gatoborrachon.realisticfinitefluids.logic.FiniteFluidLogic;
 import com.gatoborrachon.realisticfinitefluids.logic.NewFluidType;
+import com.gatoborrachon.realisticfinitefluids.logic.RealisticFiniteFluidFunctions;
 import com.tiviacz.travelersbackpack.capability.CapabilityUtils;
 import com.tiviacz.travelersbackpack.fluids.FluidEffectRegistry;
 
@@ -234,7 +234,7 @@ public abstract class MixinItemHose extends Item /*extends MixinItem*/ {
 	            if (fluidRT != null && fluidRT.typeOfHit == RayTraceResult.Type.BLOCK && playerIn.canPlayerEdit(fluidRT.getBlockPos(), fluidRT.sideHit, stack)) {
 	                BlockPos pos = fluidRT.getBlockPos();
 	                IBlockState state = worldIn.getBlockState(pos);
-	                Block block = state.getBlock();
+	                Block block = RealisticFiniteFluidFunctions.getBlock(worldIn, pos, state);
 
 	                // ---- Caso 1 & 3: apuntando a finito -> recoger suavemente ----
 	                if (block instanceof IRealisticFiniteFluid) {
@@ -243,7 +243,7 @@ public abstract class MixinItemHose extends Item /*extends MixinItem*/ {
 	                    int spaceLeft = Math.max(0, MAX_LEVELS_TANK - currentLevels);
 	                    if (spaceLeft > 0) {
 	                        int blockConcept = finiteBlock.getConceptualVolume(worldIn, pos, state); //state.getValue(BlockFiniteFluid.LEVEL) + 1;
-	                        int delta = FiniteFluidLogic.FluidWorldInteraction.bucketRemoveFluidEvenLowCollect(worldIn, pos, blockConcept, spaceLeft, ((IFluidBlock)state.getBlock()).getFluid());
+	                        int delta = FiniteFluidLogic.FluidWorldInteraction.bucketRemoveFluidEvenLowCollect(worldIn, pos, blockConcept, spaceLeft, ((IFluidBlock)RealisticFiniteFluidFunctions.getBlock(worldIn, pos, state)).getFluid());
 	                        if (delta > 0) {
 	                            currentLevels += delta;
 	                            if (currentLevels > MAX_LEVELS_TANK) currentLevels = MAX_LEVELS_TANK;
@@ -259,13 +259,14 @@ public abstract class MixinItemHose extends Item /*extends MixinItem*/ {
 
 	                // ---- Compat vanilla/Forge: IFluidBlock / BlockLiquid (recoger bucket) ----
 	                // Mantiene la lógica original, pero al llenar, actualizamos NBT (levels + fluid)
-	                if (block instanceof IFluidBlock) {
+	                /*if (block instanceof IFluidBlock) {
 	                    Fluid fluid = ((IFluidBlock) block).getFluid();
 	                    FluidStack fs = new FluidStack(fluid, Reference.BUCKET);
 	                    if (tank.getFluidAmount() == 0 || tank.getFluid().isFluidEqual(fs)) {
 	                        int amount = tank.fill(fs, false);
 	                        if (amount > 0 && tank.getFluidAmount() + amount <= tank.getCapacity()) {
-	                            worldIn.setBlockToAir(pos);
+	                		    RealisticFiniteFluidFunctions.setBlockToAir(worldIn, pos);
+	                            //worldIn.setBlockToAir(pos);
 	                            tank.fill(fs, true);
 	                            inv.markTankDirty();
 	                            // NBT ++ 1000mb => +16 levels
@@ -294,7 +295,7 @@ public abstract class MixinItemHose extends Item /*extends MixinItem*/ {
 	                            return new ActionResult<>(EnumActionResult.SUCCESS, stack);
 	                        }
 	                    }
-	                }
+	                }*/
 	            }
 
 	            // Importante: en modo SUCK nunca colocamos, así que terminamos aquí
@@ -308,7 +309,7 @@ public abstract class MixinItemHose extends Item /*extends MixinItem*/ {
 	                int x = solidRT.getBlockPos().getX();
 	                int y = solidRT.getBlockPos().getY();
 	                int z = solidRT.getBlockPos().getZ();
-	                if (!worldIn.getBlockState(solidRT.getBlockPos()).getBlock().isReplaceable(worldIn, solidRT.getBlockPos())) {
+	                if (!RealisticFiniteFluidFunctions.getBlock(worldIn, solidRT.getBlockPos(), worldIn.getBlockState(solidRT.getBlockPos())) .isReplaceable(worldIn, solidRT.getBlockPos())) {
 	                    switch (solidRT.sideHit) {
 	                        case WEST:  --x; break;
 	                        case EAST:  ++x; break;
@@ -321,7 +322,7 @@ public abstract class MixinItemHose extends Item /*extends MixinItem*/ {
 	                }
 	                BlockPos placePos = new BlockPos(x, y, z);
 	                IBlockState at = worldIn.getBlockState(placePos);
-	                Block atBlock = at.getBlock();
+	                Block atBlock = RealisticFiniteFluidFunctions.getBlock(worldIn, placePos, at);
 
 	                // Si tenemos levels en NBT, intentamos colocar "finito" primero
 	                if (currentLevels > 0) {
@@ -409,7 +410,7 @@ public abstract class MixinItemHose extends Item /*extends MixinItem*/ {
 	                            if (!worldIn.isRemote && replaceable && !material.isLiquid()) {
 	                                worldIn.destroyBlock(placePos, true);
 	                            }
-	                            if (worldIn.setBlockState(placePos, fluidStack.getFluid().getBlock().getDefaultState())) {
+	                            if (RealisticFiniteFluidFunctions.setBlockState(worldIn, playerIn.getPosition(), placePos, fluidStack.getFluid().getBlock().getDefaultState())) {
 	                                tank.drain(Reference.BUCKET, true);
 	                                worldIn.getBlockState(placePos).neighborChanged(worldIn, placePos, fluidStack.getFluid().getBlock(), placePos);
 	                            }

@@ -1,14 +1,25 @@
-v2.0.0
--Removed: BlockFiniteFluid's
--Removed: Universal Compat Coremod
--Added: Mixins to BlockFluidClassic, BlockDynamicLiquid, and BlockStaticLiquid
--Added: Compat for the vanilla'n'forge renderers (BlockFluidRenderer, ModelFluid)
+v.2.1.1
+-Fixed: Crash with Aqua Acrobatics.
 
+v2.1.0
+-Added: Fluidlogged API Compat.
+-Added: ForgeEventFactory.fireFluidPlaceBlockEvent() integration.
+-Added: Compat for waterwheels that use getFlowVector() or getFlow().
+-Fixed: Render issue with blocks that are not fluids (i still don't fix the issue with FluidBlocks Item Render).
+
+v2.0.0
+-Removed: BlockFiniteFluid fluid blocks.
+-Removed: Universal Compat Coremod.
+-Added: Mixins to BlockFluidClassic, BlockDynamicLiquid, and BlockStaticLiquid.
+-Added: Compat for the vanilla'n'forge renderers (BlockFluidRenderer, ModelFluid).
+-Added: New fluid movement for gasses.
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 v1.7.1
 -Added: New fluid barrier method: Vanilla (the best and default to use).
 -Added: DataFixer to 1) automatically turn vanilla fluids into realistic finite fluids (replaceVanillaFluids is no longer required), 2) convert old oceanic fluids into still fluids and 3) convert the old 0-15 LEVEL of already existing fluids into the new 0-7 LEVEL interval.
--Note: I STILL RECOMMEND TO DO A BACKUP
+-Note: I STILL RECOMMEND TO DO A BACKUP.
 
 v1.7.0
 -Added: Config option to let you decide whether mig masses of fluids (water/lava) should be infinite. (shouldFluidsBeInfinite).

@@ -24,13 +24,17 @@ public interface IRealisticFiniteFluid {
 	IUnlistedProperty<Map<EnumFacing, IBlockState>> getNeighborStates();
 	IUnlistedProperty<Integer> getFluidColor();
 	UnlistedPropertyBoolean getIsStill();
+	UnlistedPropertyBoolean getIsGaseous();
 	PropertyFloat getCornerLevel(int index);
+	//IUnlistedProperty<Float> getCornerLevel(int index);
+
 	
 	int getVolume(IBlockAccess world, BlockPos pos, IBlockState state);
 	int getConceptualVolume(IBlockAccess world, BlockPos pos, IBlockState state);
 	IBlockState setVolume(World world, BlockPos pos, IBlockState state, int level);
 	IBlockState setConceptualVolume(World world, BlockPos pos, IBlockState state, int level);
-	void setBlockState(World world, BlockPos pos, IBlockState state);
+	void setBlockState(World world, @Nullable BlockPos sourcePos, BlockPos destPos, IBlockState state);
+	void setBlockToAir(World world, BlockPos destPos);
 	Boolean isEntityInsideMaterialForOverlay(IBlockAccess world, BlockPos pos, IBlockState state, Entity entity, double eyeY, Material material);
 	boolean tryFreezeWater(World world, BlockPos pos, IBlockState state, Random rand);
 	boolean isNearHotBlock(World world, BlockPos pos);
@@ -38,7 +42,7 @@ public interface IRealisticFiniteFluid {
 	boolean interactWithLiquid(World world, BlockPos currentPos, BlockPos targetPos);
 	boolean shouldSearchOutward(Material material);
 	boolean shouldFlowToNeighbor(IBlockAccess world, BlockPos posFrom, BlockPos posTo);
-	Vec3d calculateFlowVector(IBlockAccess world, BlockPos pos);	
+	Vec3d calculateFlowVector(IBlockAccess world, BlockPos pos, boolean fluidRequest);	
 	BlockPos getPositionOnGravityDirection(BlockPos originalPos);
 	boolean isOceanBlock(@Nullable IBlockAccess world, @Nullable BlockPos pos, @Nullable IBlockState state, int fluidType);
 	

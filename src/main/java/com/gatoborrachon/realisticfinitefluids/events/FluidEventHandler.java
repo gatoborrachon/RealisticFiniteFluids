@@ -3,6 +3,7 @@ package com.gatoborrachon.realisticfinitefluids.events;
 import com.gatoborrachon.realisticfinitefluids.compat.FluidCompat;
 import com.gatoborrachon.realisticfinitefluids.interfaces.IRealisticFiniteFluid;
 import com.gatoborrachon.realisticfinitefluids.logic.FiniteFluidLogic;
+import com.gatoborrachon.realisticfinitefluids.logic.RealisticFiniteFluidFunctions;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
@@ -71,13 +72,13 @@ public class FluidEventHandler {
             IBlockState neighborState = world.getBlockState(neighbor);
 
             IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)FiniteFluidLogic.liquids.get(FiniteFluidLogic.onFiniteFluidIndex).flowingBlock);
-            if (realisticFluid.isOceanBlock(world, neighbor, neighborState, FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(neighborState.getBlock()))) {
+            if (realisticFluid.isOceanBlock(world, neighbor, neighborState, FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(RealisticFiniteFluidFunctions.getBlock(world, neighbor, neighborState)))) {
             	exposedToOceanWater = true;
                 break;
             }
         }
         
-        if (!world.isRemote && exposedToOceanWater && !(world.getBlockState(pos.down()).getBlock() instanceof IRealisticFiniteFluid) && !(world.getBlockState(pos).getBlock() instanceof IRealisticFiniteFluid)) {
+        if (!world.isRemote && exposedToOceanWater && !(RealisticFiniteFluidFunctions.getBlock(world, pos.down(), world.getBlockState(pos.down())) instanceof IRealisticFiniteFluid) && !(RealisticFiniteFluidFunctions.getBlock(world, pos, world.getBlockState(pos)) instanceof IRealisticFiniteFluid)) {
             FiniteFluidLogic.OceanFluidsLogic.borderOceanCheck(world, pos, false);
         }
     }
@@ -96,7 +97,7 @@ public class FluidEventHandler {
             IBlockState neighborState = world.getBlockState(neighbor);
 
             IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)FiniteFluidLogic.liquids.get(FiniteFluidLogic.onFiniteFluidIndex).flowingBlock);
-            if (realisticFluid.isOceanBlock(world, neighbor, neighborState, FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(neighborState.getBlock())) && dir != EnumFacing.DOWN) {
+            if (realisticFluid.isOceanBlock(world, neighbor, neighborState, FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(RealisticFiniteFluidFunctions.getBlock(world, neighbor, neighborState))) && dir != EnumFacing.DOWN) {
             	exposedToOceanWater = true;
                 break;
             }

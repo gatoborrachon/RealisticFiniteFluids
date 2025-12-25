@@ -1,6 +1,7 @@
 package com.gatoborrachon.realisticfinitefluids.mixin.earlymixins;
 
 import java.lang.reflect.Method;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.Random;
 
@@ -26,10 +27,10 @@ import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.BlockStaticLiquid;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
-import net.minecraft.block.properties.PropertyInteger;
 import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
@@ -44,6 +45,7 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.property.IUnlistedProperty;
 import net.minecraftforge.common.property.ExtendedBlockState;
+import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.property.PropertyFloat;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
@@ -105,6 +107,7 @@ public abstract class MixinBlockStaticLiquid extends BlockLiquid implements IRea
 			//System.out.println("ModConfig.shouldTickRandomly: "+ModConfig.shouldTickRandomly);
 			//TODO --> Bueno, yo se que la solucion es volver a usar EarlyConfig, pero pues, 
 		    this.setTickRandomly(true);
+		    //this.setDefaultFluidState(FluidState.of(this.getFluid()).withLevel(MAXIMUM_CONCEPTUAL_LEVEL));
 		}
 
 	
@@ -187,19 +190,24 @@ public abstract class MixinBlockStaticLiquid extends BlockLiquid implements IRea
 	//@Unique private static final PropertyInteger LEVEL = References.LEVEL; //MEJOR NO TOCAMOS ESTO, SE VA ALV EL REGISTRO DE BLOQUES
     @Unique private static final IUnlistedProperty<Map<EnumFacing, IBlockState>> NEIGHBOR_STATES = References.NEIGHBOR_STATES;
     @Unique private static final IUnlistedProperty<Float>[] LEVEL_CORNERS = References.LEVEL_CORNERS;
+    ////@Unique private static final PropertyFloat[] LEVEL_CORNERS_EXP = References.LEVEL_CORNERS_EXP;
 	@Unique private static final IUnlistedProperty<Integer> FLUID_COLOR = References.FLUID_COLOR;
 	@Unique private static final IUnlistedProperty<Vec3d> FLOW_DIRECTION = References.FLOW_DIRECTION;
 	@Unique private static final UnlistedPropertyBoolean IS_STILL = References.IS_STILL;
+	@Unique private static final UnlistedPropertyBoolean IS_GASEOUS = References.IS_GASEOUS;
 
 	@Unique
+	@Override
     public IUnlistedProperty<Vec3d> getFlowDirectionProperty() {
     	return FLOW_DIRECTION;
     }
 	@Unique
+	@Override
 	public IUnlistedProperty<Map<EnumFacing, IBlockState>> getNeighborStates() {
 		return NEIGHBOR_STATES;
 	}
 	@Unique
+	@Override
 	public IUnlistedProperty<Integer> getFluidColor() {
 		return FLUID_COLOR;
 	}
@@ -208,90 +216,15 @@ public abstract class MixinBlockStaticLiquid extends BlockLiquid implements IRea
 		return IS_STILL;
 	}
 	@Unique
+	@Override
 	public PropertyFloat getCornerLevel(int index) {
 		return (PropertyFloat) LEVEL_CORNERS[index];
 	}
-
-
-	// Constructor inyectado
-	//@Inject(method = "<init>", at = @At("RETURN"))
-	/*private void initFiniteFluid(Fluid fluid, Material material, CallbackInfo ci) {
-            this.fluid = fluid;
-            this.fluidMaterial = material;
-            this.fluidName = fluid.getName();
-            this.density = fluid.getDensity();
-            this.temperature = fluid.getTemperature();
-            this.densityDir = fluid.getDensity() > 0 ? -1 : 1;
-
-            // Inicialización extra
-            this.setDefaultState(this.blockState.getBaseState().withProperty(LEVEL, MINIMUM_LEVEL));
-            if (this.material == Material.LAVA) this.setLightLevel(1.0F);
-            this.setTickRandomly(FiniteFluidLogic.shouldTickRandomly);
-            // Esto reemplaza setQuantaPerBlock
-            try {
-                Method m = this.getClass().getMethod("setQuantaPerBlock", int.class);
-                m.invoke(this, MAXIMUM_LEVEL);
-            } catch(Exception ignored) {}
-        }*/
-
-	
-	
-	
-	
-	
-
-	/*@Overwrite
-	public void <init>(Fluid fluid, Material fluidMaterial) {
-		this(fluid, fluidMaterial, fluidMaterial.getMaterialMapColor());
-		this.fluid = fluid;
-		this.fluidMaterial = fluidMaterial;
-
-		this.fluidName = fluid.getName();
-		this.density = fluid.getDensity();
-		this.temperature = fluid.getTemperature();
-		//this.maxScaledLight = fluid.luminosity;
-		this.densityDir = fluid.getDensity() > 0 ? -1 : 1;
-
-		this.setDefaultState(this.blockState.getBaseState().withProperty(LEVEL, Integer.valueOf(MINIMUM_LEVEL)));
-		if (this.material == Material.LAVA) this.setLightLevel(1.0F);
-		this.setTickRandomly(FiniteFluidLogic.shouldTickRandomly);
-		this.setQuantaPerBlock(MAXIMUM_LEVEL);
+	@Unique
+	@Override
+	public UnlistedPropertyBoolean getIsGaseous() {
+		return IS_GASEOUS;
 	}
-
-
-	@Overwrite
-	public void <init>(Fluid fluid, Material material, MapColor mapColor) {
-		super(fluid, material, mapColor);
-		this.fluid = fluid;
-		this.fluidMaterial = material;
-
-		this.fluidName = fluid.getName();
-		this.density = fluid.getDensity();
-		this.temperature = fluid.getTemperature();
-		//this.maxScaledLight = fluid.luminosity;
-		this.densityDir = fluid.getDensity() > 0 ? -1 : 1;
-
-		this.setDefaultState(this.blockState.getBaseState().withProperty(LEVEL, Integer.valueOf(MINIMUM_LEVEL)));
-		if (this.material == Material.LAVA) this.setLightLevel(1.0F);
-		this.setTickRandomly(FiniteFluidLogic.shouldTickRandomly);
-		this.setQuantaPerBlock(MAXIMUM_LEVEL);
-
-
-	}*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 	@Unique
 	@Override
@@ -299,19 +232,22 @@ public abstract class MixinBlockStaticLiquid extends BlockLiquid implements IRea
 		return new ExtendedBlockState(this,
 				new IProperty[] { LEVEL }, //Listed Properties
 				new IUnlistedProperty<?>[] { //Unlisted Properties
-					/*NEIGHBOR_STATES,
+					//ACTIVAR PARA FLUIDLOGGED API
+					NEIGHBOR_STATES,
 					LEVEL_CORNERS[0],
 					LEVEL_CORNERS[1],
 					LEVEL_CORNERS[2],
 					LEVEL_CORNERS[3],
 					FLUID_COLOR,
 					FLOW_DIRECTION,
-					IS_STILL*/
+					IS_STILL,
+					IS_GASEOUS
 				}
 			   );
 	}
 
-	/*@Unique
+	//ACTIVAR PARA FLUIDLOGGED API
+	@Unique
 	@Override
 	public IBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos) {
 		if (state instanceof IExtendedBlockState) {
@@ -331,11 +267,13 @@ public abstract class MixinBlockStaticLiquid extends BlockLiquid implements IRea
 
 			int color = Minecraft.getMinecraft().getBlockColors().colorMultiplier(state, world, pos, 0);
 
-			Vec3d flowDirection = (state.getBlock() instanceof IRealisticFiniteFluid) ? calculateFlowVector(world, pos) : new Vec3d(0,0,0);
+			Vec3d flowDirection = (RealisticFiniteFluidFunctions.getBlock(world, pos, state) instanceof IRealisticFiniteFluid) ? calculateFlowVector(world, pos, true) : new Vec3d(0,0,0);
 			//Vec3d flowDirection = (state.getBlock() instanceof BlockNewWater_Flow) ? getFlowVector(world, pos) : null;
 			//Vec3d flowDirection = new Vec3d(0,0,0);
 
-			boolean isStill = FiniteFluidLogic.GeneralPurposeLogic.canMoveForRender(world, pos, this.getVolume(world, pos, state));
+			boolean isStill = true;//FiniteFluidLogic.GeneralPurposeLogic.canMoveForRender(world, pos, this.getVolume(world, pos, state));
+
+			boolean isGaseous = false;
 
 			extendedState = extendedState
 					.withProperty(NEIGHBOR_STATES, neighborStates)
@@ -345,11 +283,12 @@ public abstract class MixinBlockStaticLiquid extends BlockLiquid implements IRea
 					.withProperty(LEVEL_CORNERS[3], h11)
 					.withProperty(FLUID_COLOR, color)
 					.withProperty(FLOW_DIRECTION, flowDirection)
-					.withProperty(IS_STILL, isStill);
+					.withProperty(IS_STILL, isStill)
+					.withProperty(IS_GASEOUS, isGaseous);
 			return extendedState; 
 		}
 		return state;
-	}*/
+	}
 
 
 	@Unique
@@ -419,8 +358,17 @@ public abstract class MixinBlockStaticLiquid extends BlockLiquid implements IRea
 	 */
 	@Unique
 	@Override
-	public void setBlockState(World world, BlockPos pos, IBlockState state) {
-		RealisticFiniteFluidFunctions.setBlockState(world, pos, state);
+	public void setBlockState(World world, BlockPos sourcePos, BlockPos destPos, IBlockState state) {
+		RealisticFiniteFluidFunctions.setBlockState(world, sourcePos, destPos, state);
+	}
+	
+	/**
+	 * Unified function to setBlockToAir. Intented for compat with Fluidlogged API
+	 */
+	@Unique
+	@Override
+	public void setBlockToAir(World world, BlockPos destPos) {
+		RealisticFiniteFluidFunctions.setBlockToAir(world, destPos);
 	}
 
 	/**
@@ -530,8 +478,8 @@ public abstract class MixinBlockStaticLiquid extends BlockLiquid implements IRea
 	 */
 	@Unique
 	@Override
-	public Vec3d calculateFlowVector(IBlockAccess world, BlockPos pos) {
-		return RealisticFiniteFluidFunctions.calculateFlowVector(world, pos);
+	public Vec3d calculateFlowVector(IBlockAccess world, BlockPos pos, boolean fluidRequest) {
+		return RealisticFiniteFluidFunctions.calculateFlowVector(world, pos, fluidRequest);
 	}
 
 
@@ -580,7 +528,7 @@ public abstract class MixinBlockStaticLiquid extends BlockLiquid implements IRea
 	public void randomTick(World worldIn, BlockPos pos, IBlockState state, Random random) {
 		//Freeze blocks, if the block freezes, stop all the logic
 		//System.out.println("[RFF] BlockStaticLiquid "+state.getBlock()+" at: '"+pos+"' random ticked");
-		Block blockToCheck = state.getBlock(); //worldIn.getBlockState(pos).getBlock();
+		Block blockToCheck = RealisticFiniteFluidFunctions.getBlock(worldIn, pos, state); //worldIn.getBlockState(pos).getBlock();
 		if (!(blockToCheck instanceof IRealisticFiniteFluid) || isOceanBlock(worldIn, pos, state, FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(blockToCheck))) return;
 		
 		//Evaporate blocks, if the block freezes, stop all the logic
@@ -702,7 +650,7 @@ public abstract class MixinBlockStaticLiquid extends BlockLiquid implements IRea
 		double d2 = (double)pos.getZ();
 
 		if (this.fluidMaterial == Material.WATER) {
-			boolean isStill = stateIn.getBlock() instanceof BlockStaticLiquid; // || stateIn.getBlock() instanceof BlockNewInfiniteSource;
+			boolean isStill = RealisticFiniteFluidFunctions.getBlock(worldIn, pos, stateIn) instanceof BlockStaticLiquid; // || stateIn.getBlock() instanceof BlockNewInfiniteSource;
 			boolean isFlowing = !isStill; //stateIn.getBlock() instanceof BlockFiniteFluid_Flow; // tu clase para agua en movimiento
 			////System.out.println("[RFF - Vanilla Still] isStill: "+isStill);
 			////System.out.println("[RFF - Vanilla Still] IExtendedBlockState: "+(stateIn instanceof IExtendedBlockState));
@@ -831,7 +779,7 @@ public abstract class MixinBlockStaticLiquid extends BlockLiquid implements IRea
 	//@Override
 	@Overwrite(remap = References.onDev) //neighborChanged
 	public void func_189540_a(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos) {
-		if (isOceanBlock(worldIn, pos, null, FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(worldIn.getBlockState(pos).getBlock()))) 
+		if (isOceanBlock(worldIn, pos, null, FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(RealisticFiniteFluidFunctions.getBlock(worldIn, pos, worldIn.getBlockState(pos))))) 
 			return;
 
 		if (worldIn.getBlockState(pos).getMaterial() == Material.LAVA) {
@@ -844,7 +792,11 @@ public abstract class MixinBlockStaticLiquid extends BlockLiquid implements IRea
 				}
 			}
 		}
+		
+		//updateTick(worldIn, pos, state, new Random());
 		worldIn.scheduleUpdate(pos, ((Block)(Object)this), this.tickRate(worldIn));
+		//worldIn.scheduleUpdate(pos, RealisticFiniteFluidFunctions.returnCorrectBlock(worldIn, pos), this.tickRate(worldIn));
+		//worldIn.scheduleUpdate(pos, this, this.tickRate(worldIn));
 	}
 
 
@@ -868,7 +820,9 @@ public abstract class MixinBlockStaticLiquid extends BlockLiquid implements IRea
 	@Override
 	public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state) {
 		if (this.fluidMaterial == Material.LAVA) FiniteFluidLogic.lavaFunctions.burnArea(worldIn, pos);
+		//worldIn.scheduleUpdate(pos, RealisticFiniteFluidFunctions.returnCorrectBlock(worldIn, pos), this.tickRate(worldIn));
 		worldIn.scheduleUpdate(pos, ((Block)(Object)this), this.tickRate(worldIn));
+		//worldIn.scheduleUpdate(pos, this, this.tickRate(worldIn));
 	}
 
 	/**
@@ -915,32 +869,39 @@ public abstract class MixinBlockStaticLiquid extends BlockLiquid implements IRea
 	@Overwrite(remap = References.onDev) //updateTick
 	public void func_180650_b(World world, BlockPos pos, IBlockState state, Random rand) {
 		if (!world.isRemote)
+			//System.out.println("VERGA 1: "+pos);
 		{
 			int newLevel = this.getVolume(world, pos, world.getBlockState(pos)); //world.getBlockState(pos).getValue(LEVEL);
 
 
 
 
-			if (isOceanBlock(world, pos, state, FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(state.getBlock()) )) { //getVolume(world, pos, state) > MAXIMUM_LEVEL) { //WE ARE OCEAN
+			if (isOceanBlock(world, pos, state, FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(RealisticFiniteFluidFunctions.getBlock(world, pos, state)) )) { //getVolume(world, pos, state) > MAXIMUM_LEVEL) { //WE ARE OCEAN
+				//System.out.println("VERGA OCEAN");
+
 				//CONTROLA SI LOS BLOQUES OCEANICOS DEBERIAN ACTUAR DE FORMA INFINITA O CONVERTIRSE EN BLOQUES DE AGUA STILL
 				if (!FiniteFluidLogic.shouldFluidsBeInfinite) {
-					Block stillBlock = ((NewFluidType) FiniteFluidLogic.liquids.get(FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(state.getBlock()))).stillBlock;
-					setBlockState(world, pos, setVolume(null, null, stillBlock.getDefaultState().withProperty(References.LEVEL, MAXIMUM_LEVEL), MAXIMUM_LEVEL));
+					Block stillBlock = ((NewFluidType) FiniteFluidLogic.liquids.get(FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(RealisticFiniteFluidFunctions.getBlock(world, pos, state)))).stillBlock;
+					setBlockState(world, pos, pos, setVolume(null, null, stillBlock.getDefaultState().withProperty(References.LEVEL, MAXIMUM_LEVEL), MAXIMUM_LEVEL));
 				}
 
 				if (FiniteFluidLogic.GeneralPurposeLogic.getCalc() > FiniteFluidLogic.GeneralPurposeLogic.getMaxCalc())
 				{
-					world.scheduleUpdate(pos, this, this.tickRate(world));
+					//world.scheduleUpdate(pos, RealisticFiniteFluidFunctions.returnCorrectBlock(world, pos), this.tickRate(world));
+					world.scheduleUpdate(pos, ((Block)(Object)this), this.tickRate(world));
+					//world.scheduleUpdate(pos, this, this.tickRate(world));
 				}
 				else
 				{
-					if (!world.isAirBlock(pos.down()) && (float)FiniteFluidLogic.GeneralPurposeLogic.getCalc() > (float)FiniteFluidLogic.GeneralPurposeLogic.getMaxCalc() * 0.55F)
+					if (!RealisticFiniteFluidFunctions.isAirBlock(world, pos.down(), true) && (float)FiniteFluidLogic.GeneralPurposeLogic.getCalc() > (float)FiniteFluidLogic.GeneralPurposeLogic.getMaxCalc() * 0.55F)
 					{
 						EntityPlayer player = world.getClosestPlayer(pos.getX(), pos.getY(), pos.getZ(), 16.0D, true); //16 --> Maxima distancia del jugador para calcular el movimiento del agua
 
 						if (player == null)
 						{
-							world.scheduleUpdate(pos, this, this.tickRate(world));
+							//world.scheduleUpdate(pos, RealisticFiniteFluidFunctions.returnCorrectBlock(world, pos), this.tickRate(world));
+							world.scheduleUpdate(pos, ((Block)(Object)this), this.tickRate(world));
+							//world.scheduleUpdate(pos, this, this.tickRate(world));
 							return;
 						}
 					}
@@ -950,7 +911,9 @@ public abstract class MixinBlockStaticLiquid extends BlockLiquid implements IRea
 
 					if (FiniteFluidLogic.OceanFluidsLogic.tryOceanMove(world, pos))
 					{
-						world.scheduleUpdate(pos, this, this.tickRate(world));
+						//world.scheduleUpdate(pos, RealisticFiniteFluidFunctions.returnCorrectBlock(world, pos), this.tickRate(world));
+						world.scheduleUpdate(pos, ((Block)(Object)this), this.tickRate(world));
+						//world.scheduleUpdate(pos, this, this.tickRate(world));
 					}
 				}
 			} 
@@ -971,11 +934,14 @@ public abstract class MixinBlockStaticLiquid extends BlockLiquid implements IRea
 				
 				if (FiniteFluidLogic.GeneralPurposeLogic.canMove(world, pos, newLevel))
 				{
-					int currentFluidIndex = FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(state.getBlock());
+					//System.out.println("VERGA FLOWING");
+					int currentFluidIndex = FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(RealisticFiniteFluidFunctions.getBlock(world, pos, state));
+					//System.out.println("currentFluidIndex: "+currentFluidIndex);
 					Block flowingBlock = ((NewFluidType) FiniteFluidLogic.liquids.get(currentFluidIndex)).flowingBlock;
+					//System.out.println("flowingBlock: "+flowingBlock.toString());
 					//////System.out.println("STILL VA A FLOWING: "+pos+" CON LEVEL "+newLevel);
 
-					setBlockState(world, pos, setVolume(null, null, flowingBlock.getDefaultState(), newLevel));
+					setBlockState(world, pos, pos, setVolume(null, null, flowingBlock.getDefaultState(), newLevel));
 					//IBlockState newState = flowingBlock.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, newLevel);
 					//world.setBlockState(pos, newState, 3);
 
@@ -983,6 +949,8 @@ public abstract class MixinBlockStaticLiquid extends BlockLiquid implements IRea
 				}
 				else
 				{
+					//System.out.println("VERGA STILL");
+
 					/*
 					//Evaporate blocks, if the block freezes, stop all the logic
 					if (shouldEvap(world, pos, rand))
@@ -1005,7 +973,8 @@ public abstract class MixinBlockStaticLiquid extends BlockLiquid implements IRea
 					}  else if (isOceanBlock(world, below, stateBelow, FiniteFluidLogic.onFiniteFluidIndex) /*stateBelow.getBlock() == ModBlocks.INFINITE_WATER_SOURCE*/ 
 							&& getVolume(world, pos, world.getBlockState(pos)) < Q1_LOW) {
 						// Este bloque es "absorbido" por el océano
-						world.setBlockToAir(pos);  // O reemplaza por aire
+		            	RealisticFiniteFluidFunctions.setBlockToAir(world, pos);
+						//world.setBlockToAir(pos);  // O reemplaza por aire
 					}
 					
 					/*if (world.getBlockState(pos).getBlock() instanceof IRealisticFiniteFluid) {
@@ -1138,11 +1107,12 @@ public abstract class MixinBlockStaticLiquid extends BlockLiquid implements IRea
 
 		if (doPlace) {
 			if (newTotalConceptual < MINIMUM_CONCEPTUAL_LEVEL) {
-				world.setBlockToAir(pos);
+            	RealisticFiniteFluidFunctions.setBlockToAir(world, pos);
+				//world.setBlockToAir(pos);
 			} else {
 				// Guardamos LEVEL como propiedad 0..15 (conceptual-1)
 				int levelProp = newTotalConceptual - 1;
-				world.setBlockState(pos, ((Block)(Object)this).getDefaultState().withProperty(LEVEL, levelProp));
+				RealisticFiniteFluidFunctions.setBlockState(world, pos, pos, ((Block)(Object)this).getDefaultState().withProperty(LEVEL, levelProp));
 			}
 			// Notificar vecinos si lo consideras necesario:
 			world.neighborChanged(pos, ((Block)(Object)this), pos);
@@ -1161,9 +1131,9 @@ public abstract class MixinBlockStaticLiquid extends BlockLiquid implements IRea
 	@Override
 	public FluidStack drain(World world, BlockPos pos, boolean doDrain) {
 		IBlockState state = world.getBlockState(pos);
-		if (!(state.getBlock() instanceof IRealisticFiniteFluid)) return null;
+		if (!(RealisticFiniteFluidFunctions.getBlock(world, pos, state) instanceof IRealisticFiniteFluid)) return null;
 
-		IRealisticFiniteFluid bf = (IRealisticFiniteFluid) state.getBlock();
+		IRealisticFiniteFluid bf = (IRealisticFiniteFluid) RealisticFiniteFluidFunctions.getBlock(world, pos, state);
 		Fluid blockFluid = bf.getFluid();
 		if (blockFluid == null) return null;
 
@@ -1173,9 +1143,10 @@ public abstract class MixinBlockStaticLiquid extends BlockLiquid implements IRea
 		// 1) Si el bloque central ya está full (16) -> bucket completo
 		if (centerConcept >= MAXIMUM_CONCEPTUAL_LEVEL) {
 			if (doDrain) {
-				world.setBlockToAir(pos);
+            	RealisticFiniteFluidFunctions.setBlockToAir(world, pos);
+				//world.setBlockToAir(pos);
 				FiniteFluidLogic.FluidWorldInteraction.activateOcean(world, pos);
-				world.neighborChanged(pos, state.getBlock(), pos);
+				world.neighborChanged(pos, RealisticFiniteFluidFunctions.getBlock(world, pos, state), pos);
 			}
 			return new FluidStack(blockFluid, 1000);
 		}
@@ -1191,22 +1162,22 @@ public abstract class MixinBlockStaticLiquid extends BlockLiquid implements IRea
 
 		for (BlockPos p : laterals) {
 			IBlockState s = world.getBlockState(p);
-			if (s.getBlock() instanceof IRealisticFiniteFluid) {
-				IRealisticFiniteFluid nb = (IRealisticFiniteFluid) s.getBlock();
+			if (RealisticFiniteFluidFunctions.getBlock(world, p, s) instanceof IRealisticFiniteFluid) {
+				IRealisticFiniteFluid nb = (IRealisticFiniteFluid) RealisticFiniteFluidFunctions.getBlock(world, p, s);
 				if (nb.getFluid() == blockFluid) total += getConceptualVolume(world, p, null);
 			}
 		}
 		for (BlockPos p : diagonals) {
 			IBlockState s = world.getBlockState(p);
-			if (s.getBlock() instanceof IRealisticFiniteFluid) {
-				IRealisticFiniteFluid nb = (IRealisticFiniteFluid) s.getBlock();
+			if (RealisticFiniteFluidFunctions.getBlock(world, p, s) instanceof IRealisticFiniteFluid) {
+				IRealisticFiniteFluid nb = (IRealisticFiniteFluid) RealisticFiniteFluidFunctions.getBlock(world, p, s);
 				if (nb.getFluid() == blockFluid) total += getConceptualVolume(world, p, null);
 			}
 		}
 		{
 			IBlockState s = world.getBlockState(below);
-			if (s.getBlock() instanceof IRealisticFiniteFluid) {
-				IRealisticFiniteFluid nb = (IRealisticFiniteFluid) s.getBlock();
+			if (RealisticFiniteFluidFunctions.getBlock(world, below, s) instanceof IRealisticFiniteFluid) {
+				IRealisticFiniteFluid nb = (IRealisticFiniteFluid) RealisticFiniteFluidFunctions.getBlock(world, below, s);
 				if (nb.getFluid() == blockFluid) total += getConceptualVolume(world, below, null);
 			}
 		}
@@ -1244,9 +1215,9 @@ public abstract class MixinBlockStaticLiquid extends BlockLiquid implements IRea
 	@Override
 	public boolean canDrain(World world, BlockPos pos) {
 		IBlockState s = world.getBlockState(pos);
-		if (!(s.getBlock() instanceof IRealisticFiniteFluid)) return false;
+		if (!(RealisticFiniteFluidFunctions.getBlock(world, pos, s) instanceof IRealisticFiniteFluid)) return false;
 
-		IRealisticFiniteFluid bf = (IRealisticFiniteFluid) s.getBlock();
+		IRealisticFiniteFluid bf = (IRealisticFiniteFluid) RealisticFiniteFluidFunctions.getBlock(world, pos, s);
 		Fluid f = bf.getFluid();
 		if (f == null) return false;
 
@@ -1261,8 +1232,8 @@ public abstract class MixinBlockStaticLiquid extends BlockLiquid implements IRea
 		};
 		for (BlockPos p : checks) {
 			IBlockState n = world.getBlockState(p);
-			if (n.getBlock() instanceof IRealisticFiniteFluid) {
-				IRealisticFiniteFluid nb = (IRealisticFiniteFluid) n.getBlock();
+			if (RealisticFiniteFluidFunctions.getBlock(world, pos, n) instanceof IRealisticFiniteFluid) {
+				IRealisticFiniteFluid nb = (IRealisticFiniteFluid) RealisticFiniteFluidFunctions.getBlock(world, pos, n);
 				if (nb.getFluid() == f && getConceptualVolume(world, p, null) > MINIMUM_LEVEL) return true;
 			}
 		}
@@ -1278,7 +1249,7 @@ public abstract class MixinBlockStaticLiquid extends BlockLiquid implements IRea
 	@Override
 	public float getFilledPercentage(World world, BlockPos pos) {
 		IBlockState state = world.getBlockState(pos);
-		if (!(state.getBlock() instanceof IRealisticFiniteFluid)) return (float)MINIMUM_LEVEL;
+		if (!(RealisticFiniteFluidFunctions.getBlock(world, pos, state) instanceof IRealisticFiniteFluid)) return (float)MINIMUM_LEVEL;
 		int conceptual = getConceptualVolume(world, pos, null); // 0..16
 		if (conceptual < MINIMUM_CONCEPTUAL_LEVEL) return (float)MINIMUM_LEVEL;
 		return conceptual / (float)MAXIMUM_CONCEPTUAL_LEVEL; // 1/16 == 0.0625 ... 16/16 == 1.0
