@@ -1,5 +1,18 @@
+v2.1.4
+-Fixed: Missing item model texture in JEI/Creative search.
+
+v2.1.3
+-Added: Glass bottles consume water too.
+-Added: Config options to change aesthetic features of fluids (using dynamic or static textures only, and if fluids should render a full blocks or not).
+-Fixed: Not using the patched renderer (not using the SRG name in the injected mixin. Why nobody told me about this render issue??).
+
+v.2.1.2
+-Added: Config option to decide which modded fluids should spawn as infinite fluids (can break easely).
+-Fixed: Dupe bug on TileEntities that use FluidUtil#TryPlaceFluid() to place fluids in world.
+
 v.2.1.1
 -Fixed: Crash with Aqua Acrobatics.
+-Fixed: Tweaked the compat for getFlowVector()/getFlow() to make still fluids to always give power (it is hard to make the right slope for some waterwheels).
 
 v2.1.0
 -Added: Fluidlogged API Compat.
@@ -14,7 +27,7 @@ v2.0.0
 -Added: Compat for the vanilla'n'forge renderers (BlockFluidRenderer, ModelFluid).
 -Added: New fluid movement for gasses.
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 v1.7.1
 -Added: New fluid barrier method: Vanilla (the best and default to use).

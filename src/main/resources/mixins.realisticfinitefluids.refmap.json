@@ -64,6 +64,9 @@
 	},
 	"net.minecraft.block.BlockLiquid": {
 		"getFlow": "func_189543_a"
+	},
+	"net.minecraft.item.ItemGlassBottle": {
+		"onItemRightClick": "func_77659_a"
 	}
   }
 }

@@ -39,7 +39,6 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraftforge.fluids.BlockFluidClassic;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -84,13 +83,15 @@ public class FiniteFluidLogic {
     public static boolean shouldFluidsBeInfinite;
     
     public static boolean createBlocksForBlocklessFluids;
+    public static Set<String> infiniteModdedFluids;
+    
+    public static boolean maxOrNormalFluidHeight;
+    public static boolean dynamicOrStaticTexture;
     
     
     private static boolean smallOceanSearch;
     private static boolean stopPCheck;
     
-    public static BlockPos actualFlowPos;
-
     
     public static ArrayList<BlockPos> pressure = new ArrayList<BlockPos>();
     public static ArrayList<BlockPos> rpressure = new ArrayList<BlockPos>();
@@ -128,9 +129,13 @@ public class FiniteFluidLogic {
         shouldFluidsBeInfinite = ModConfig.shouldFluidsBeInfinite;
         
         createBlocksForBlocklessFluids = ModConfig.createBlocksForBlocklessFluids;
+        //infiniteModdedFluids = ModConfig.infiniteModdedFluids; //Obtenemos esta lista desde el EarlyConfig
         
 		//System.out.println("FiniteFluidLogic.shouldTickRandomly: "+FiniteFluidLogic.shouldTickRandomly);
 		//System.out.println("ModConfig.shouldTickRandomly: "+ModConfig.shouldTickRandomly);
+        
+        maxOrNormalFluidHeight = ModConfig.maxOrNormalFluidHeight;
+        dynamicOrStaticTexture = ModConfig.dynamicOrStaticTexture;
         
     }
     
@@ -1222,24 +1227,46 @@ public class FiniteFluidLogic {
         	return 1;
         }
 
+        /**
+         * sepa la verga que haga esto
+         * 
+         * @param world
+         * @param pos
+         * @param fluidIndex
+         * @return
+         */
         public static int getFluidLevelRender(IBlockAccess world, BlockPos pos, int fluidIndex) {
         	IBlockState state = world.getBlockState(pos);
         	if (RealisticFiniteFluidFunctions.getBlock(world, pos, state) instanceof IRealisticFiniteFluid) {
         		IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)RealisticFiniteFluidFunctions.getBlock(world, pos, state));
         		if (fluidIndex > -1) {
-        			int level = realisticFluid.getVolume(world, pos, state) * 2;
+            		//System.out.println("Pos: "+pos);
+        			int level = realisticFluid.getVolume(world, pos, state); // * 2;
+            		//System.out.println(" ");
+            		//System.out.println("level 1: "+level);
 
-        			if (level >= References.MAXIMUM_LEVEL) level = References.MAXIMUM_LEVEL-1;
+        			if (level > References.MAXIMUM_LEVEL) level = References.MAXIMUM_LEVEL;
+        			
+            		//System.out.println("level 2: "+level);
 
-        			Block block = RealisticFiniteFluidFunctions.getBlock(world, pos, state);
-        			if (realisticFluid.isOceanBlock(world, pos, state, getFluidIndex(block))) {
+        			if (!FiniteFluidLogic.maxOrNormalFluidHeight && level >= References.MAXIMUM_LEVEL) level -= 1;
+
+            		//System.out.println("level 3: "+level);
+
+        			
+        			//Block block = RealisticFiniteFluidFunctions.getBlock(world, pos, state);
+        			//if (realisticFluid.isOceanBlock(world, pos, state, getFluidIndex(block))) {
         				return level;
-        			}
+        			//}
+        				
         		}
+
+        		//System.out.println("VERGA 1");
 
         		//IBlockState state = world.getBlockState(pos);
         		return realisticFluid.getVolume(world, pos, state);
         	}
+    		//System.out.println("VERGA 2");
         	return References.MAXIMUM_LEVEL;
         }
         
@@ -1255,7 +1282,7 @@ public class FiniteFluidLogic {
 
             BlockPos above = pos.up(-getFluidGravity(fluidIndex));
             if (isSameIndexFluid(RealisticFiniteFluidFunctions.getBlock(access, above, access.getBlockState(above)), fluidIndex)) return 1.0f;
-            if (realisticFluid.isOceanBlock(access, pos, null, fluidIndex)) return 1.0f;
+            if (realisticFluid.isOceanBlock(access, pos, null, fluidIndex)) return FiniteFluidLogic.maxOrNormalFluidHeight ? 1.0f : 7f/8f;
 
             
             
@@ -1271,7 +1298,7 @@ public class FiniteFluidLogic {
             BlockPos p3 = pos.add(dx, 0, dz);
 
             // === Primer vecino (p1) ===
-            if (realisticFluid.isOceanBlock(access, p1, null, fluidIndex)) return 1.0f;
+            if (realisticFluid.isOceanBlock(access, p1, null, fluidIndex)) return FiniteFluidLogic.maxOrNormalFluidHeight ? 1.0f : 7f/8f;
             if (isSameIndexFluid(access, p1, fluidIndex)) {
                 if (isOnlyVerticallyFallingFluid(access, p3, fluidIndex)) return 0.0f;
                 total += getFluidLevelRender(access, p1, fluidIndex) + 1.0f;
@@ -1281,7 +1308,7 @@ public class FiniteFluidLogic {
             if (isOnlyVerticallyFallingFluid(access, p1, fluidIndex)) return 0.0f;
 
             // === Segundo vecino (p3) ===
-            if (realisticFluid.isOceanBlock(access, p3, null, fluidIndex)) return 1.0f;
+            if (realisticFluid.isOceanBlock(access, p3, null, fluidIndex)) return FiniteFluidLogic.maxOrNormalFluidHeight ? 1.0f : 7f/8f;
             if (isSameIndexFluid(access, p3, fluidIndex)) {
                 total += getFluidLevelRender(access, p3, fluidIndex) + 1.0f;
                 samples++;
@@ -1289,7 +1316,7 @@ public class FiniteFluidLogic {
             if (isFullWaterRender(access, p3.up(-getFluidGravity(fluidIndex)), fluidIndex)) return 1.0f;
 
             // === Tercer vecino (p2) ===
-            if (realisticFluid.isOceanBlock(access, p2, null, fluidIndex)) return 1.0f;
+            if (realisticFluid.isOceanBlock(access, p2, null, fluidIndex)) return FiniteFluidLogic.maxOrNormalFluidHeight ? 1.0f : 7f/8f;
             if (isSameIndexFluid(access, p2, fluidIndex)) {
                 if (isOnlyVerticallyFallingFluid(access, p3, fluidIndex)) return 0.0f;
                 total += getFluidLevelRender(access, p2, fluidIndex) + 1.0f;
@@ -1424,7 +1451,9 @@ public class FiniteFluidLogic {
         public static boolean isFullWaterRender(IBlockAccess world, BlockPos pos, int fluidIndex) {
             Block block = RealisticFiniteFluidFunctions.getBlock(world, pos, world.getBlockState(pos));
     		IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)liquids.get(onFiniteFluidIndex).flowingBlock);
-            return block == ((NewFluidType)liquids.get(fluidIndex)).flowingBlock ? true : realisticFluid.isOceanBlock(world, pos, null, fluidIndex);
+            return block == ((NewFluidType)liquids.get(fluidIndex)).flowingBlock ? true 
+            		: realisticFluid.isOceanBlock(world, pos, null, fluidIndex) ? true 
+            		: !FiniteFluidLogic.maxOrNormalFluidHeight ? block == ((NewFluidType)liquids.get(fluidIndex)).stillBlock : false;
         }
 
 
@@ -1544,10 +1573,96 @@ public class FiniteFluidLogic {
 		public static boolean canMoveInto(World world, BlockPos destPos, @Nullable BlockPos sourcePos,  @Nullable int currentLevel, @Nullable NewFluidType fluidType) {
             IBlockState state = world.getBlockState(destPos);
             Block block = RealisticFiniteFluidFunctions.getBlock(world, destPos, state);
+            // 1)
             if (world.isRemote) return false;
             //if (!world.isRemote) return false;
             
             //CORRECCION MIA
+            //Si es agua:
+            if (isFiniteFluid(world, destPos) && state.getMaterial() == Material.WATER && world.getBlockState(sourcePos).getMaterial() == Material.LAVA && currentLevel > 5) {
+            	//System.out.println("canMoveInto"+block);
+            	return true;
+            } 
+            
+            /*if (isFiniteFluid(world, destPos)) {
+            	//System.out.println("canMoveInto"+block);
+            	return false;
+            }*/
+            
+            // 2)
+            // Si es aire
+            if (RealisticFiniteFluidFunctions.isAirBlock(world, destPos, false)) return true;
+
+            // 3)
+            // Si no hay tipo de liquido actual (seguro nunca pasa, pero por si acaso)
+            if (fluidType == null) return true;
+            
+            // 4)
+            //Check para evitar romper otros fluidos
+            if (block instanceof IRealisticFiniteFluid) return false;
+            
+            
+            
+        	// 8)
+        	//checks para bloques vanilla que no deberian ser rotos, por ser Replaceable
+            if (block instanceof BlockPistonBase || block instanceof BlockPistonExtension || block instanceof BlockFarmland || block instanceof BlockGrassPath || block instanceof BlockIce) {
+                return false;
+            }
+            
+            
+            // 5)
+			if (RealisticFiniteFluids.FluidLoggedAPI) {
+            	// Para fluir en bloques FluidLoggeables
+            	boolean canEnter = FluidloggedUtils.canFluidFlow(world, destPos, state, getFacingBetween(sourcePos, destPos));
+            	if (canEnter) return true;
+            }
+            
+			// 6)
+            // Si no fluye sobre medios bloques, entonces no podemos movernos
+            if (!fluidType.flowsOverHalfBlocks) return false;
+
+            
+            // 7)
+            //Check para evitar romper otros bloques de fluido realistico
+        	if (isDifferentIndexFluid(block, getFluidIndex(RealisticFiniteFluidFunctions.getBlock(world, sourcePos, world.getBlockState(sourcePos))))) {
+        		return false;
+        	}
+        	
+
+        	
+            // 9)
+            // Si es reemplazable (fuego, flores, nieve, etc.)
+            //POR ALGUN MOTIVO ESTA MADRE ROMPE DE TO-DO, espero que el !instanceof ayude
+        	//ELIMINADO EN SON DE FLUIDLOGGED API
+            /*
+            if (block.isReplaceable(world, destPos) && !(block instanceof IRealisticFiniteFluid)) {
+                world.destroyBlock(destPos, true);
+            	//System.out.println("REPLACE"+block);
+
+                return true;
+            }
+            */
+
+            // 10)
+            // Si el nivel de agua es mayor a 7 y el bloque no es completo (ej: flores, placas, etc.)
+        	//ELIMINADO EN SON DE FLUIDLOGGED API
+            /*
+            if (currentLevel > 7 && !state.isFullBlock() && !RealisticFiniteFluidFunctions.getBlock(state).hasTileEntity() 
+            		&& !(RealisticFiniteFluidFunctions.getBlock(state) instanceof IRealisticFiniteFluid)) {
+                world.destroyBlock(destPos, true);
+                return true;
+            }
+            */
+            
+
+            return false;
+        }
+        
+        public static boolean canMoveIntoForRender(IBlockAccess world, BlockPos destPos, @Nullable BlockPos sourcePos,  @Nullable int currentLevel, @Nullable NewFluidType fluidType) {
+            IBlockState state = world.getBlockState(destPos);
+            Block block = RealisticFiniteFluidFunctions.getBlock(world, destPos, state);
+
+          //CORRECCION MIA
             //Si es agua:
             if (isFiniteFluid(world, destPos) && state.getMaterial() == Material.WATER && world.getBlockState(sourcePos).getMaterial() == Material.LAVA && currentLevel > 5) {
             	//System.out.println("canMoveInto"+block);
@@ -1568,6 +1683,11 @@ public class FiniteFluidLogic {
             //Check para evitar romper otros fluidos
             if (block instanceof IRealisticFiniteFluid) return false;
 
+        	//checks para bloques vanilla que no deberian ser rotos, por ser Replaceable
+            if (block instanceof BlockPistonBase || block instanceof BlockPistonExtension || block instanceof BlockFarmland || block instanceof BlockGrassPath || block instanceof BlockIce) {
+                return false;
+            }
+            
 			if (RealisticFiniteFluids.FluidLoggedAPI) {
             	// Para fluir en bloques FluidLoggeables
             	boolean canEnter = FluidloggedUtils.canFluidFlow(world, destPos, state, getFacingBetween(sourcePos, destPos));
@@ -1582,10 +1702,7 @@ public class FiniteFluidLogic {
         		return false;
         	}
         	
-        	//checks para bloques vanilla que no deberian ser rotos, por ser Replaceable
-            if (block instanceof BlockPistonBase || block instanceof BlockPistonExtension || block instanceof BlockFarmland || block instanceof BlockGrassPath || block instanceof BlockIce) {
-                return false;
-            }
+
         	
             // Si es reemplazable (fuego, flores, nieve, etc.)
             //POR ALGUN MOTIVO ESTA MADRE ROMPE DE TO-DO, espero que el !instanceof ayude
@@ -1606,59 +1723,6 @@ public class FiniteFluidLogic {
                 return true;
             }
             */
-            
-
-            return false;
-        }
-        
-        public static boolean canMoveIntoForRender(IBlockAccess world, BlockPos toPos, @Nullable BlockPos fromPos,  @Nullable int currentLevel, @Nullable NewFluidType fluidType) {
-            IBlockState state = world.getBlockState(toPos);
-            Block block = RealisticFiniteFluidFunctions.getBlock(world, toPos, state);
-
-            //CORRECCION MIA
-            //Si es agua:
-            if (isFiniteFluid(world, toPos) && state.getMaterial() == Material.WATER && world.getBlockState(fromPos).getMaterial() == Material.LAVA && currentLevel > 5) {
-            	//System.out.println("canMoveInto"+block);
-            	return true;
-            } else if (isFiniteFluid(world, toPos)) {
-            	//System.out.println("canMoveInto"+block);
-
-            	return false;
-            }
-            
-            // Si es aire
-            if (RealisticFiniteFluidFunctions.isAirBlock(world, toPos, false)) return true;
-
-            // Si no hay tipo de liquido actual (seguro nunca pasa, pero por si acaso)
-            if (fluidType == null) return true;
-
-            // Si no fluye sobre medios bloques, entonces no podemos movernos
-            if (!fluidType.flowsOverHalfBlocks) return false;
-
-            //Check para evitar romper liquidos de otros mods
-            if (block instanceof BlockFluidClassic) return false;
-            
-            //Check para evitar romper otros bloques de fluido realistico
-        	if (isDifferentIndexFluid(block, getFluidIndex(RealisticFiniteFluidFunctions.getBlock(world, fromPos, world.getBlockState(fromPos))))) {
-        		return false;
-        	}
-        	
-        	//checks para bloques vanilla que no deberian ser rotos, por ser Replaceable
-            if (block instanceof BlockPistonBase || block instanceof BlockPistonExtension || block instanceof BlockFarmland || block instanceof BlockGrassPath || block instanceof BlockIce) {
-                return false;
-            }
-        	
-            // Si es reemplazable (fuego, flores, nieve, etc.)
-            if (block.isReplaceable(world, toPos)) {
-            	//System.out.println("REPLACE"+block);
-
-                return true;
-            }
-
-            // Si el nivel de agua es mayor a 7 y el bloque no es completo (ej: flores, placas, etc.)
-            if (currentLevel > 7 && !state.isFullBlock() && !RealisticFiniteFluidFunctions.getBlock(world, toPos, state).hasTileEntity()) {
-                return true;
-            }
             
 
             return false;

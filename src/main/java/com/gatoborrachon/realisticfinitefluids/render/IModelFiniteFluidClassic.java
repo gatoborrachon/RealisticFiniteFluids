@@ -1,11 +1,10 @@
 package com.gatoborrachon.realisticfinitefluids.render;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.function.Function;
 
-import javax.annotation.Nullable;
 
-import com.gatoborrachon.realisticfinitefluids.logic.FiniteFluidLogic;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.JsonElement;
@@ -18,13 +17,11 @@ import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.model.IModel;
-import net.minecraftforge.client.model.ModelFluid;
 import net.minecraftforge.common.model.IModelState;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fml.common.FMLLog;
 
-@SuppressWarnings("unused")
 public class IModelFiniteFluidClassic implements IModel {
     TextureMap atlas = Minecraft.getMinecraft().getTextureMapBlocks();
     private Fluid fluid;
@@ -46,7 +43,7 @@ public class IModelFiniteFluidClassic implements IModel {
     		TextureAtlasSprite spriteStillCompat = bakedTextureGetter.apply(fluid.getStill()); //atlas.getAtlasSprite(fluid.getStill().toString());
     		//int index = FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(this.fluid.getName());
     		
-    		return new BakedModelFiniteFluidClassic(state, spriteFlowCompat, spriteStillCompat, this.fluid);
+    		return new BakedModelFiniteFluidClassic(/*state.apply(Optional.empty()),*/ format, state, spriteFlowCompat, spriteStillCompat, this.fluid);
     }
 
     @Override

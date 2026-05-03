@@ -16,6 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.gatoborrachon.realisticfinitefluids.References;
 import com.gatoborrachon.realisticfinitefluids.blocks.properties.UnlistedPropertyBoolean;
+import com.gatoborrachon.realisticfinitefluids.init.EarlyConfig;
 import com.gatoborrachon.realisticfinitefluids.interfaces.IRealisticFiniteFluid;
 import com.gatoborrachon.realisticfinitefluids.logic.FiniteFluidLogic;
 import com.gatoborrachon.realisticfinitefluids.logic.FiniteFluidLogic.FluidWorldInteraction;
@@ -105,8 +106,7 @@ public abstract class MixinBlockStaticLiquid extends BlockLiquid implements IRea
 			this.fluidMaterial = material;
 			//System.out.println("FiniteFluidLogic.shouldTickRandomly: "+FiniteFluidLogic.shouldTickRandomly);
 			//System.out.println("ModConfig.shouldTickRandomly: "+ModConfig.shouldTickRandomly);
-			//TODO --> Bueno, yo se que la solucion es volver a usar EarlyConfig, pero pues, 
-		    this.setTickRandomly(true);
+			this.setTickRandomly(EarlyConfig.readTickRandomly());
 		    //this.setDefaultFluidState(FluidState.of(this.getFluid()).withLevel(MAXIMUM_CONCEPTUAL_LEVEL));
 		}
 
@@ -166,7 +166,7 @@ public abstract class MixinBlockStaticLiquid extends BlockLiquid implements IRea
 	@Unique private static final int MINIMUM_CONCEPTUAL_LEVEL = References.MINIMUM_CONCEPTUAL_LEVEL;
     
     /**
-     * Maximum literal level for the finite fluid blocks (15). The maximum conceptual level is 16.
+     * Maximum literal level for the finite fluid blocks (7). The maximum conceptual level is 8.
      */
 	@Unique private static final int MAXIMUM_LEVEL = References.MAXIMUM_LEVEL; //ESTE ES EL MAESTRO ALV
 	@Unique private static final int MAXIMUM_CONCEPTUAL_LEVEL = References.MAXIMUM_CONCEPTUAL_LEVEL;
@@ -267,7 +267,7 @@ public abstract class MixinBlockStaticLiquid extends BlockLiquid implements IRea
 
 			int color = Minecraft.getMinecraft().getBlockColors().colorMultiplier(state, world, pos, 0);
 
-			Vec3d flowDirection = (RealisticFiniteFluidFunctions.getBlock(world, pos, state) instanceof IRealisticFiniteFluid) ? calculateFlowVector(world, pos, true) : new Vec3d(0,0,0);
+			Vec3d flowDirection =  new Vec3d(0,0,0); //(RealisticFiniteFluidFunctions.getBlock(world, pos, state) instanceof IRealisticFiniteFluid) ? calculateFlowVector(world, pos, true) : new Vec3d(0,0,0);
 			//Vec3d flowDirection = (state.getBlock() instanceof BlockNewWater_Flow) ? getFlowVector(world, pos) : null;
 			//Vec3d flowDirection = new Vec3d(0,0,0);
 
@@ -876,7 +876,8 @@ public abstract class MixinBlockStaticLiquid extends BlockLiquid implements IRea
 
 
 
-			if (isOceanBlock(world, pos, state, FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(RealisticFiniteFluidFunctions.getBlock(world, pos, state)) )) { //getVolume(world, pos, state) > MAXIMUM_LEVEL) { //WE ARE OCEAN
+			if (isOceanBlock(world, pos, state, FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(RealisticFiniteFluidFunctions.getBlock(world, pos, state)) )
+					) { //getVolume(world, pos, state) > MAXIMUM_LEVEL) { //WE ARE OCEAN
 				//System.out.println("VERGA OCEAN");
 
 				//CONTROLA SI LOS BLOQUES OCEANICOS DEBERIAN ACTUAR DE FORMA INFINITA O CONVERTIRSE EN BLOQUES DE AGUA STILL

@@ -9,7 +9,8 @@
 	"MixinEntity",
 	"MixinActiveRenderInfo",
 	"MixinWorldGenMinable",
-	"MixinItemBucket"
+	"MixinItemBucket",
+	"MixinItemGlassBottle"
 	],
   "client": [],
   "server": []
