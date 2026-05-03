@@ -20,7 +20,7 @@ public class References {
 	
     public static final String MODID = "realisticfinitefluids";
     public static final String NAME = "Realistic Finite Fluids";
-    public static final String VERSION = "2.1.1";
+    public static final String VERSION = "2.1.4";
 	public static final String CLIENT_PROXY_CLASS = "com.gatoborrachon.realisticfinitefluids.proxy.ClientProxy";
 	public static final String COMMON_PROXY_CLASS = "com.gatoborrachon.realisticfinitefluids.proxy.CommonProxy";
 	
@@ -57,7 +57,7 @@ public class References {
     public static final int MINIMUM_CONCEPTUAL_LEVEL = MINIMUM_LEVEL+1;
     
     /**
-     * Maximum literal level for the finite fluid blocks (15). The maximum conceptual level is 16.
+     * Maximum literal level for the finite fluid blocks (7). The maximum conceptual level is 8.
      */
     public static final int MAXIMUM_LEVEL = 7; //ESTE ES EL MAESTRO ALV
     private static final int MAXIMUM_REAL_LEVEL = 15; //ESTE SOLO SIRVE COMO TOPE VERDADER

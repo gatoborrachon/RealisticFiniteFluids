@@ -30,7 +30,12 @@ public class ModConfig {
     
     public static boolean createBlocksForBlocklessFluids;
     public static int pressureLimit;
-
+    
+    public static String[] infiniteModdedFluids;
+    
+    public static boolean maxOrNormalFluidHeight;
+    public static boolean dynamicOrStaticTexture;
+    
 
     private static final String CATEGORY_GENERAL = "general";
     static Configuration config;
@@ -44,7 +49,7 @@ public class ModConfig {
         waterTickRate = config.getInt("waterTickRate", CATEGORY_GENERAL, 8, 0, Integer.MAX_VALUE,
                 "Water tick rate. 4 = Original, 8 = Default.");
 
-        lavaTickRate = config.getInt("lavaTickRate", CATEGORY_GENERAL, 30, 1, Integer.MAX_VALUE,
+        lavaTickRate = config.getInt("lavaTickRate", CATEGORY_GENERAL, 30, 0, Integer.MAX_VALUE,
                 "Lava tick rate. 24 = Original, 30 = Default.");
         
         
@@ -107,11 +112,23 @@ public class ModConfig {
         		"Whether fluids should have random ticks.");
         
         shouldFluidsBeInfinite = config.getBoolean("shouldFluidsBeInfinite", CATEGORY_GENERAL, true, 
-        		"Whether big fluid masses (lakes, oceans) should act as infinite fluid sources.");
+        		"Whether big fluid masses (lakes, oceans) should act as infinite fluid sources. It also works as a security switch to deactivate Ocean Blocks (set to false just in case you find a finite fluid eating your world [HOPE YOU NEVER HAVE TO DO THIS]).");
         
         createBlocksForBlocklessFluids = config.getBoolean("createBlocksForBlocklessFluids", CATEGORY_GENERAL, true, 
         		"Create finite fluid Blocks for Fluids that have no default Block assigned.");
-
+        
+        infiniteModdedFluids = config.getStringList("infiniteModdedFluids", CATEGORY_GENERAL, new String[] {}, 
+        		"List of modded fluids' names that should spawn as infinite fluids. You can find the list of fluids inside your world inside: ´/.minecraft/saves/YOUR_WORLD_NAME/data´ ");
+        
+        maxOrNormalFluidHeight = config.getBoolean("maxOrNormalFluidHeight", CATEGORY_GENERAL, true, 
+        		"If fluids should have the full block height or not. Only has aesthetic effect.");
+        
+        dynamicOrStaticTexture = config.getBoolean("dynamicOrStaticTexture", CATEGORY_GENERAL, true, 
+        		"If fluids should use the dynamic fluid texture or not. Only has aesthetic effect.");
+        
+        
+        
+        
         //Debug
         visualDebug = config.getBoolean("visualDebug", CATEGORY_GENERAL, false, 
         		"Allow visualDebug content. Only for testing purposes.");

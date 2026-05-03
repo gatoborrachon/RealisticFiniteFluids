@@ -1,5 +1,6 @@
 package com.gatoborrachon.realisticfinitefluids.mixin.earlymixins;
 
+import java.util.Optional;
 import java.util.function.Function;
 
 import org.spongepowered.asm.mixin.Final;
@@ -43,6 +44,8 @@ public abstract class MixinModelFluid  {
 
 		cir.setReturnValue(
 				new BakedModelFiniteFluidClassic(
+						//state.apply(Optional.empty()),
+						format, 
 						state,
 						spriteFlow,
 						spriteStill,

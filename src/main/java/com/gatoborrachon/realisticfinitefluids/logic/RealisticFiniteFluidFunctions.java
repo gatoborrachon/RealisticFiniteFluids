@@ -2,6 +2,7 @@ package com.gatoborrachon.realisticfinitefluids.logic;
 
 import java.util.Random;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.gatoborrachon.realisticfinitefluids.RealisticFiniteFluids;
@@ -153,7 +154,6 @@ public class RealisticFiniteFluidFunctions {
 	 * @param state the IBlockState with the right LEVEL value
 	 */
 	public static IBlockState setConceptualVolume(World world, BlockPos pos, IBlockState state, int level) {
-
 		if (world != null && pos != null) {
 			state = world.getBlockState(pos);
 			if (RealisticFiniteFluids.FluidLoggedAPI) {
@@ -163,7 +163,6 @@ public class RealisticFiniteFluidFunctions {
 			} else {
 				if (state.getBlock() instanceof IRealisticFiniteFluid) return state.withProperty(References.LEVEL, level-1);
 			}
-
 		} else if (state != null) {
 			if (RealisticFiniteFluidFunctions.getBlock(null, null, state) instanceof IRealisticFiniteFluid) {
 				return state.withProperty(References.LEVEL, level-1);
@@ -171,16 +170,12 @@ public class RealisticFiniteFluidFunctions {
 		}
 		return state;
 
-
-
-
 	}
 
 	/**
 	 * Unified function to setBlockToAir. Intented for compat with Fluidlogged API
 	 */
 	public static void setBlockToAir(World world, BlockPos destPos) {
-
 		IBlockState state = world.getBlockState(destPos);
 		Block block = state.getBlock();
 		//FluidState fluidState = FluidState.get(world, destPos);
@@ -193,7 +188,7 @@ public class RealisticFiniteFluidFunctions {
 
 	}
 
-	
+
 	/**
 	 * Unified function to isAirBlock. Intended for compat with Fluidlogged API
 	 * <p> NOTE --> VERY PRONE TO MESS WITH THINGS WHEN YOU DON'T USE IT PROPERTLY
@@ -211,7 +206,7 @@ public class RealisticFiniteFluidFunctions {
 				if (world.getBlockState(pos).getMaterial() == Material.AIR) 
 					return world.isAirBlock(pos);
 			}
-			
+
 		}
 
 		return world.isAirBlock(pos);
@@ -243,7 +238,14 @@ public class RealisticFiniteFluidFunctions {
 	/**
 	 * Unified function to setBlockState. Intended for compat with Fluidlogged API
 	 */
-	public static boolean setBlockState(World world, @Nullable BlockPos sourcePos, BlockPos destPos, IBlockState state) {
+	public static boolean setBlockState(World world, BlockPos destPos, IBlockState state) {
+		return setBlockState(world, destPos, destPos, state);
+	}
+
+	/**
+	 * Unified function to setBlockState. Intended for compat with Fluidlogged API
+	 */
+	public static boolean setBlockState(World world, BlockPos sourcePos, BlockPos destPos, IBlockState state) {
 		//world.setBlockState(destPos, state, 3);
 		if (RealisticFiniteFluids.FluidLoggedAPI) {
 			//FluidLogged API Compat
@@ -253,8 +255,7 @@ public class RealisticFiniteFluidFunctions {
 				//System.out.println();
 				return world.setBlockState(destPos, state, 3);
 			}
-			else if (sourcePos != null 
-					&& FluidloggedUtils.canFluidFlow(world, destPos, state, FiniteFluidLogic.GeneralPurposeLogic.getFacingBetween(sourcePos, destPos))
+			else if (FluidloggedUtils.canFluidFlow(world, destPos, state, FiniteFluidLogic.GeneralPurposeLogic.getFacingBetween(sourcePos, destPos))
 					&& !(posToPlaceBlock.getBlock() instanceof IRealisticFiniteFluid )) {
 				FluidState newFluidState = FluidState.of(state); //.withLevel(getVolume(null, null, state));
 				return FluidloggedUtils.setFluidState(world, destPos, posToPlaceBlock, newFluidState, false, Constants.BlockFlags.SEND_TO_CLIENTS | Constants.BlockFlags.NO_RERENDER | Constants.BlockFlags.NO_OBSERVERS);

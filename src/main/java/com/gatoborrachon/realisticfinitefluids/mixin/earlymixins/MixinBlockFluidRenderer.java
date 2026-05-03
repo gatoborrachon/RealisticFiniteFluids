@@ -35,10 +35,10 @@ public class MixinBlockFluidRenderer {
     @Shadow(remap = References.onDev) @Final private TextureAtlasSprite field_187501_d; //atlasSpriteWaterOverlay
 	
     @Inject(
-    		method = "renderFluid",
+    		method = "func_178270_a", //renderFluid
     		at = @At("HEAD"), 
     		cancellable = true,
-            remap = false
+            remap = References.onDev
             )
     private void rff$renderFluid(
     		IBlockAccess world, 
@@ -191,16 +191,16 @@ public class MixinBlockFluidRenderer {
             float epsilon = 0.001F;
             
          // Coordenadas y UVs base            
-            final float baseU0 = isFlowing ? fluidSprites[1].getMinU() : fluidSprites[0].getMinU();
-            final float baseV0 = isFlowing ? fluidSprites[1].getMinV() : fluidSprites[0].getMinV();
-            final float baseU1 = isFlowing ? fluidSprites[1].getMaxU() : fluidSprites[0].getMaxU();
-            final float baseV1 = isFlowing ? fluidSprites[1].getMaxV() : fluidSprites[0].getMaxV();
+            final float baseU0 = (isFlowing && FiniteFluidLogic.dynamicOrStaticTexture) ? fluidSprites[1].getMinU() : fluidSprites[0].getMinU();
+            final float baseV0 = (isFlowing && FiniteFluidLogic.dynamicOrStaticTexture) ? fluidSprites[1].getMinV() : fluidSprites[0].getMinV();
+            final float baseU1 = (isFlowing && FiniteFluidLogic.dynamicOrStaticTexture) ? fluidSprites[1].getMaxU() : fluidSprites[0].getMaxU();
+            final float baseV1 = (isFlowing && FiniteFluidLogic.dynamicOrStaticTexture) ? fluidSprites[1].getMaxV() : fluidSprites[0].getMaxV();
 
             // Calcular UVs tipo vanilla si hay flujo
             float uA, uB, uC, uD;
             float vA, vB, vC, vD;
 
-            if (isFlowing) {
+            if (isFlowing && FiniteFluidLogic.dynamicOrStaticTexture) {
                 // Magnitud > 0 --> flujo efectivo, usamos UVs tipo vanilla
                 float sinAngle = (float) Math.sin(angle) * 0.25f;
                 float cosAngle = (float) Math.cos(angle) * 0.25f;
@@ -323,7 +323,7 @@ public class MixinBlockFluidRenderer {
                 else if (sideIndex == 3) offsetX = 1; // EAST
 
                 BlockPos neighborPos = pos.add(offsetX, 0, offsetZ);
-                TextureAtlasSprite sideSprite = isFlowing ? fluidSprites[1] : fluidSprites[0]; // sprite base
+                TextureAtlasSprite sideSprite = (isFlowing && FiniteFluidLogic.dynamicOrStaticTexture) ? fluidSprites[1] : fluidSprites[0]; // sprite base
 
                 // Verificar overlay (si es agua y el vecino tiene cara sólida)
                 if (!isLava) {
@@ -372,8 +372,8 @@ public class MixinBlockFluidRenderer {
                 // Calcular UVs
                 float uStart = sideSprite.getInterpolatedU(0.0D);
                 float uEnd   = sideSprite.getInterpolatedU(8.0D);
-                float vStart = sideSprite.getInterpolatedV((1.0F - yTopStart) * 16.0F * 0.5F);
-                float vEnd   = sideSprite.getInterpolatedV((1.0F - yTopEnd)   * 16.0F * 0.5F);
+                float vStart = sideSprite.getInterpolatedV((1.0F - yTopStart) * 16.0F * 0.25F);
+                float vEnd   = sideSprite.getInterpolatedV((1.0F - yTopEnd)   * 16.0F * 0.25F);
                 float vBottom = sideSprite.getInterpolatedV(8.0D);
 
                 // Luz del bloque vecino

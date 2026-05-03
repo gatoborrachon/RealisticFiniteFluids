@@ -85,16 +85,23 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 // COMPLETADO 3) Arreglar los remaps de los Mixins
 
 // COMPLETADO 4) Arreglar el bug visual del agua (hasta el final, me vale verga)
-// 5) Arreglar la textura de los items de cada fluid
+// COMPLETADO 5) Arreglar la textura de los items de cada fluid
 
 // COMPLETADO 6) Arreglar compat con FluidLogged API (mixin aa su clase que hace referencia a LEVELs y CORNER_LEVELS paraa usar Reference.LEVEL)
-// 7) Arreglar un bug visual con los bloques de fluidos cuando tienen a otro bloque de fluido al lado
+// COMPLETADO ??? 7) Arreglar un bug visual con los bloques de fluidos cuando tienen a otro bloque de fluido al lado
 // COMPLETADO 8) IMPLEMENTAR net.minecraftforge.event.ForgeEventFactory.fireFluidPlaceBlockEvent(worldIn, blockpos, pos, Blocks.FIRE.getDefaultState()));
 //worldIn.setBlockState(pos.down(), net.minecraftforge.event.ForgeEventFactory.fireFluidPlaceBlockEvent(worldIn, pos.down(), pos, Blocks.STONE.getDefaultState()));
 //JAVA SEARCH --> net.minecraftforge.event.ForgeEventFactory.firePlayerLoadingEvent(net.minecraft.entity.player.EntityPlayer, net.minecraft.world.storage.IPlayerFileData, java.lang.String)
 
 // 9) Config option to change whether 1 level should equal 125mb or 1000mb
 // 10) Decidir si deberia ponerle el interactWithLiquids a los bloques BlockFluidClassic (interacciones vanilla a bloques modded)
+//NOTA --> CREO QUE ESTO SE MANEJA POR PARTE DEL MODDER, EL ES EL QUE AÑADE ESAS INTERACCIONES EN LA FUNCION 'update()', NO YO
+
+// 11) BUG --> Las cubetas, cuando ponen agua en el bloque de arriba, no checan si arriba ya tienen un liquido y solo ponen el fluido, bueno, almenos a mi
+//me parece un bug de perdida de fluidos
+
+
+
 
 
 //FLUIDLOGGED API

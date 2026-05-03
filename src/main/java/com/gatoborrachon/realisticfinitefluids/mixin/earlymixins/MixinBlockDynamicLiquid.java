@@ -165,7 +165,7 @@ public abstract class MixinBlockDynamicLiquid extends BlockLiquid implements IRe
 	@Unique private static final int MINIMUM_CONCEPTUAL_LEVEL = References.MINIMUM_CONCEPTUAL_LEVEL;
     
     /**
-     * Maximum literal level for the finite fluid blocks (15). The maximum conceptual level is 16.
+     * Maximum literal level for the finite fluid blocks (7). The maximum conceptual level is 8.
      */
 	@Unique private static final int MAXIMUM_LEVEL = References.MAXIMUM_LEVEL; //ESTE ES EL MAESTRO ALV
 	@Unique private static final int MAXIMUM_CONCEPTUAL_LEVEL = References.MAXIMUM_CONCEPTUAL_LEVEL;

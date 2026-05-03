@@ -233,7 +233,6 @@ public class FluidCompat {
 
 
 	/*public static void registerMissingFluidBlockForFluids() {
-		//TODO Registrar bien este bloque
 	    ForgeRegistries.BLOCKS.register(References.DEBUG_BLOCK);
 
 	    for (Fluid fluid : FluidRegistry.getRegisteredFluids().values()) {
