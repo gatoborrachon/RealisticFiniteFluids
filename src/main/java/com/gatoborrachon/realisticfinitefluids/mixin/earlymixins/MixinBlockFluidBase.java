@@ -1,8 +1,5 @@
 package com.gatoborrachon.realisticfinitefluids.mixin.earlymixins;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -10,7 +7,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import com.gatoborrachon.realisticfinitefluids.References;
 import com.gatoborrachon.realisticfinitefluids.logic.RealisticFiniteFluidFunctions;
 
 import net.minecraft.block.material.MapColor;
@@ -27,7 +23,7 @@ public abstract class MixinBlockFluidBase {
     //@Shadow @Final public static PropertyInteger LEVEL; // shadow del campo original
 	@Shadow protected int tickRate;
 
-    @Inject(method = "<clinit>", at = @At("RETURN"))
+    /*@Inject(method = "<clinit>", at = @At("RETURN"))
     private static void injectSetLevel(CallbackInfo ci) throws Exception {
         // Quitamos el final y reasignamos
         Field levelField = BlockFluidBase.class.getField("LEVEL");
@@ -40,16 +36,16 @@ public abstract class MixinBlockFluidBase {
         
         
         //For FluidLogged API Compat
-        /*Field levelCornersField = BlockFluidBase.class.getField("LEVEL_CORNERS");
-        Field modifiersFieldLevelCorners = Field.class.getDeclaredField("modifiers");
-        modifiersFieldLevelCorners.setAccessible(true);
-        modifiersFieldLevelCorners.setInt(levelCornersField, levelCornersField.getModifiers() & ~Modifier.FINAL);
+        ////Field levelCornersField = BlockFluidBase.class.getField("LEVEL_CORNERS");
+        ////Field modifiersFieldLevelCorners = Field.class.getDeclaredField("modifiers");
+        ////modifiersFieldLevelCorners.setAccessible(true);
+        ////modifiersFieldLevelCorners.setInt(levelCornersField, levelCornersField.getModifiers() & ~Modifier.FINAL);
 
-        levelCornersField.set(null, References.LEVEL_CORNERS);
-        */
+        ////levelCornersField.set(null, References.LEVEL_CORNERS);
         
         
-    }
+        
+    }*/
     
     
     /*@Shadow @Final @Mutable

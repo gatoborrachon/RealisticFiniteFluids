@@ -52,9 +52,9 @@ public class FluidModelEventHandler {
 
             for (BlockPos pos : BlockPos.getAllInBox(player.getPosition().add(-8, -4, -8),
                                                      player.getPosition().add(8, 4, 8))) {
-                IBlockState state = world.getBlockState(pos);
-                if (RealisticFiniteFluidFunctions.getBlock(world, pos, state) instanceof IRealisticFiniteFluid) {
-                    int level = ((IRealisticFiniteFluid)RealisticFiniteFluidFunctions.getBlock(world, pos, state)).getVolume(world, pos, state); //state.getValue(BlockFiniteFluid.LEVEL);
+                //IBlockState state = world.getBlockState(pos);
+                if (RealisticFiniteFluidFunctions.getBlock(world, pos, null) instanceof IRealisticFiniteFluid) {
+                    int level = ((IRealisticFiniteFluid)RealisticFiniteFluidFunctions.getBlock(world, pos, null)).getVolume(world, pos, null); //state.getValue(BlockFiniteFluid.LEVEL);
                     //String typeOfBlock = FluidState.of(state).toString().split("mine")[0];
                     		//state.getBlock().getLocalizedName().split(" ")[0];
                     

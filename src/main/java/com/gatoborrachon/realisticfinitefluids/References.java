@@ -34,7 +34,7 @@ public class References {
     //public static final PropertyInteger LEVEL = PropertyInteger.create("level", BlockFiniteFluid.MINIMUM_LEVEL, BlockFiniteFluid.MAXIMUM_REAL_LEVEL); //MEJOR NO TOCAMOS ESTO, SE VA ALV EL REGISTRO DE BLOQUES
 	
 	static {
-		DEBUG_BLOCK = new Block(Material.IRON) {}.setRegistryName("debug_block").setTranslationKey("debug_block");
+		DEBUG_BLOCK = new Block(Material.IRON) {}.setRegistryName("fluid_debug_block").setTranslationKey("fluid_debug_block");
 	}
 	
 	
@@ -49,7 +49,7 @@ public class References {
 	
 	
 	
-    public static final double EPS = 1.0 / 1024.0; // pequeña histéresis para evitar parpadeos en calculos de renderizado
+    public static final double EPS = 1.0 / 1024.0; // pequeï¿½a histï¿½resis para evitar parpadeos en calculos de renderizado
     /**
      * Minimum literal level for the finite fluid blocks (0). The minimum conceptual level is 1.
      */

@@ -51,7 +51,7 @@ public abstract class MixinItemFluidCell {
         if (originalIC2FluidCell.isEmpty()) return; // deja que el vanilla maneje
         
 
-     // Decide sobre qué stack trabajará el resto de tu código
+     // Decide sobre quï¿½ stack trabajarï¿½ el resto de tu cï¿½digo
      ItemStack IC2FluidCell = originalIC2FluidCell;
      boolean isCopy = false;
      if (originalIC2FluidCell.getCount() > 1) {
@@ -100,7 +100,7 @@ public abstract class MixinItemFluidCell {
         
         BlockPos targetPos = pos;
         if (!block.isReplaceable(world, pos)) {
-            targetPos = pos.offset(side); // bloque adyacente en la dirección clickeada
+            targetPos = pos.offset(side); // bloque adyacente en la direcciï¿½n clickeada
             pos = targetPos;
             state = world.getBlockState(targetPos);
             block = RealisticFiniteFluidFunctions.getBlock(world, targetPos, state);
@@ -109,12 +109,12 @@ public abstract class MixinItemFluidCell {
         boolean targetIsFinite = (block instanceof IRealisticFiniteFluid);
     	////System.out.println("targetIsFinite: "+targetIsFinite);
 
-        // si ni el item ni el target están relacionados con finite fluids -> NO interceptamos
+        // si ni el item ni el target estï¿½n relacionados con finite fluids -> NO interceptamos
         if (!targetIsFinite && currentLevels == 0 && tankMB == 0) {
             return; // dejamos que el comportamiento original suceda
         }
         
-        IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)FiniteFluidLogic.liquids.get(FiniteFluidLogic.onFiniteFluidIndex).flowingBlock);
+        IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)FiniteFluidLogic.liquids.get(FiniteFluidLogic.currentFiniteFluidIndex).flowingBlock);
 
 
         /* 
@@ -178,7 +178,7 @@ CASOS QUE REQUIEREN CONFIRMAR EL BLOQUE A COLOCAR --> Caso 2, 6, 1.2, 5
 
                 // Recoger suavemente
                 int blockLevelConceptual = realisticFluid.getConceptualVolume(world, pos, state); //state.getValue(BlockFiniteFluid.LEVEL) + 1;
-                // usa la nueva función que devuelve cuantos niveles conceptuales EXTRA se obtuvieron
+                // usa la nueva funciï¿½n que devuelve cuantos niveles conceptuales EXTRA se obtuvieron
                 int delta = FiniteFluidLogic.FluidWorldInteraction.bucketRemoveFluidEvenLowCollect(world, pos, blockLevelConceptual, MAX_LEVELS - currentLevels, ((IFluidBlock)RealisticFiniteFluidFunctions.getBlock(world, pos, state)).getFluid());
             	////System.out.println("DEBUG CASO 1.1:delta "+delta);
             	////System.out.println("DEBUG CASO 1.1:currentLevels "+currentLevels);
@@ -198,7 +198,7 @@ CASOS QUE REQUIEREN CONFIRMAR EL BLOQUE A COLOCAR --> Caso 2, 6, 1.2, 5
                 return;
             }
 
-            // NORMAL y CELDA FULL -> intentar colocar (comportamiento normal de colocación) -- CASO 1) tambien
+            // NORMAL y CELDA FULL -> intentar colocar (comportamiento normal de colocaciï¿½n) -- CASO 1) tambien
             if (!sneak && currentLevels >= MAX_LEVELS) {
             	////System.out.println("DEBUG CASO 1.2");
                 List<BlockPos> targets = Arrays.asList(pos, pos.north(), pos.south(), pos.east(), pos.west());
@@ -215,7 +215,7 @@ CASOS QUE REQUIEREN CONFIRMAR EL BLOQUE A COLOCAR --> Caso 2, 6, 1.2, 5
                 return;
             }
 
-            // si no hemos hecho nada y celda vacía -> intentar recoger (si la celda está VACIA) -- CASO 3)
+            // si no hemos hecho nada y celda vacï¿½a -> intentar recoger (si la celda estï¿½ VACIA) -- CASO 3)
             if (!sneak && !cellHasFluid) {
             	/*if (IC2FluidCell.getCount() > 1) {
             		IC2FluidCell.shrink(1);
@@ -224,7 +224,7 @@ CASOS QUE REQUIEREN CONFIRMAR EL BLOQUE A COLOCAR --> Caso 2, 6, 1.2, 5
             	}*/ 
             		
             	////System.out.println("DEBUG CASO 3");
-                // intentar recoger desde el bloque al que apuntamos (equivalente a llenar una celda vacía)
+                // intentar recoger desde el bloque al que apuntamos (equivalente a llenar una celda vacï¿½a)
                 int blockLevelConceptual = realisticFluid.getConceptualVolume(world, pos, state); //state.getValue(BlockFiniteFluid.LEVEL) + 1;
             	////System.out.println("DEBUG CASO 3:blockLevelConceptual"+blockLevelConceptual);
                 int delta = FiniteFluidLogic.FluidWorldInteraction.bucketRemoveFluidEvenLowCollect(world, pos, blockLevelConceptual, MAX_LEVELS - currentLevels, ((IFluidBlock)RealisticFiniteFluidFunctions.getBlock(world, pos, state)).getFluid());
@@ -256,7 +256,7 @@ CASOS QUE REQUIEREN CONFIRMAR EL BLOQUE A COLOCAR --> Caso 2, 6, 1.2, 5
                 placePos = pos.offset(side);
             }*/
             if (RealisticFiniteFluidFunctions.isAirBlock(world, placePos, true) || world.mayPlace(FiniteFluidLogic.liquids.get(0).flowingBlock, placePos, false, side, null)) {
-                // colocamos usando distributeEqually solo con un objetivo: la posición
+                // colocamos usando distributeEqually solo con un objetivo: la posiciï¿½n
                 List<BlockPos> targets = Arrays.asList(placePos);
                 
             	int fluidType = FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(nbtFluidName); 
@@ -280,7 +280,7 @@ CASOS QUE REQUIEREN CONFIRMAR EL BLOQUE A COLOCAR --> Caso 2, 6, 1.2, 5
         }
 
         // NORMAL + CELDA CON LIQUIDO + APUNTANDO A BLOQUE NO-FINITO:
-        // sólo colocar *si* tiene 16 niveles (completo), como pediste
+        // sï¿½lo colocar *si* tiene 16 niveles (completo), como pediste
     	int fluidType = FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(nbtFluidName); 
     	////System.out.println("DEBUG CASO 2:fluidType: "+fluidType);
         if (!sneak && currentLevels >= MAX_LEVELS && fluidType != -1) {
@@ -308,7 +308,7 @@ CASOS QUE REQUIEREN CONFIRMAR EL BLOQUE A COLOCAR --> Caso 2, 6, 1.2, 5
             }
         }
 
-        // si no hicimos nada, dejamos que la lógica original ocurra (no cancelar)
+        // si no hicimos nada, dejamos que la lï¿½gica original ocurra (no cancelar)
         return;
     }
 

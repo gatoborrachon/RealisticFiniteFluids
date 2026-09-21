@@ -88,7 +88,7 @@ public class RenderNewFluidsClassic {
 			float fz = (float) flow.z;
 			float mag = (float) Math.sqrt(fx * fx + fz * fz);
 			hasFlow = mag > 1e-4f; // umbral para evitar ruido
-			if (hasFlow) angle = (float) Math.atan2(fx, -fz); // misma convención que usabas
+			if (hasFlow) angle = (float) Math.atan2(fx, -fz); // misma convenciï¿½n que usabas
 		}
 
 		//Decidimos si renderizar la cara superior (cuando tenemos bloques del mismo tipo encima: No renderizar, cuando son de distinto tipo: Si renderizar)
@@ -117,7 +117,7 @@ public class RenderNewFluidsClassic {
 				&& RealisticFiniteFluidFunctions.getBlock(null, null, upState) != RealisticFiniteFluidFunctions.getBlock(null, null, state)) {
 			// si NO hay flujo significativo, usa las UVs simples del sprite (still)
 			if (isStill) {
-				// top quad con UVs sin rotación ni offsets
+				// top quad con UVs sin rotaciï¿½n ni offsets
 				UnpackedBakedQuad.Builder topUp = new UnpackedBakedQuad.Builder(DefaultVertexFormats.BLOCK);
 				topUp.setQuadOrientation(EnumFacing.UP);
 				topUp.setTexture(spriteStill);
@@ -139,8 +139,8 @@ public class RenderNewFluidsClassic {
 				quads.add(topDown.build());
 				 */
 			} else {
-				// HAY FLUJO: usa método tipo vanilla para calcular las UVs por vértice
-				// No escalamos `baseU0..baseV1`. En su lugar calculamos UVs por vértice en "pixel coords"
+				// HAY FLUJO: usa mï¿½todo tipo vanilla para calcular las UVs por vï¿½rtice
+				// No escalamos `baseU0..baseV1`. En su lugar calculamos UVs por vï¿½rtice en "pixel coords"
 				// inspirado en BlockFluidRenderer:
 				float stitchFactor = 0.35f;
 				if (RealisticFiniteFluidFunctions.getBlock(null, null, state) instanceof BlockLiquid) stitchFactor = 0.25f;
@@ -166,7 +166,7 @@ public class RenderNewFluidsClassic {
 				topUp.setQuadOrientation(EnumFacing.UP);
 				topUp.setTexture(spriteFlowing);
 
-				// Nota: el orden de vértices debe coincidir con el que espera el renderer (igual que tu código original)
+				// Nota: el orden de vï¿½rtices debe coincidir con el que espera el renderer (igual que tu cï¿½digo original)
 				putVertex(topUp, 0f, h000, 0f, r, g, b, alpha, uA, vA);
 				putVertex(topUp, 0f, h010, 1f, r, g, b, alpha, uB, vB);
 				putVertex(topUp, 1f, h110, 1f, r, g, b, alpha, uC, vC);
@@ -186,7 +186,7 @@ public class RenderNewFluidsClassic {
 				 */
 			}
 
-			return quads; // Si solo querían UP, devuelve aquí
+			return quads; // Si solo querï¿½an UP, devuelve aquï¿½
 
 		}
 
@@ -209,7 +209,7 @@ public class RenderNewFluidsClassic {
 		EnumFacing[] sides = EnumFacing.values();
 		//System.out.println("[RFF] sideRequested: "+sideRequested);
 		for (EnumFacing face : sides) {
-			if (sideRequested != null && face != sideRequested) continue; // si piden una cara específica, las demas las descartamos
+			if (sideRequested != null && face != sideRequested) continue; // si piden una cara especï¿½fica, las demas las descartamos
 			if (face == EnumFacing.UP) continue; // Ya hicimos la cara UP arriba
 
 			//Obtenemos el IBlockState y Block del bloque vecino para la respectiva cara a renderizar
@@ -222,7 +222,7 @@ public class RenderNewFluidsClassic {
 			boolean shouldRender = false;
 
 
-			// Si es aire, sí renderiza
+			// Si es aire, sï¿½ renderiza
 			if (neighborBlock == Blocks.AIR) {
 				shouldRender = true;
 			} else {
@@ -361,7 +361,7 @@ public class RenderNewFluidsClassic {
 			float fz = (float) flow.z;
 			float mag = (float) Math.sqrt(fx * fx + fz * fz);
 			hasFlow = mag > 1e-4f; // umbral para evitar ruido
-			if (hasFlow) angle = (float) Math.atan2(-fx, fz); // misma convención que usabas
+			if (hasFlow) angle = (float) Math.atan2(-fx, fz); // misma convenciï¿½n que usabas
 
 			/*if (sideRequested == EnumFacing.UP) {
 	        		System.out.println("--------------");
@@ -418,7 +418,7 @@ public class RenderNewFluidsClassic {
 			// si NO hay flujo significativo, usa las UVs simples del sprite (still)
 			//if (!(state.getBlock() instanceof BlockFiniteFluid_Flow)) {
 			if (isStill || !FiniteFluidLogic.dynamicOrStaticTexture) {
-				// top quad con UVs sin rotación ni offsets
+				// top quad con UVs sin rotaciï¿½n ni offsets
 				UnpackedBakedQuad.Builder topUp = new UnpackedBakedQuad.Builder(DefaultVertexFormats.BLOCK);
 				topUp.setQuadOrientation(EnumFacing.UP);
 				topUp.setTexture(spriteStill);
@@ -438,8 +438,8 @@ public class RenderNewFluidsClassic {
 				putVertex(topDown, 0f, h010 - 0.001f, 1f, r, g, b, 1.0F, baseU0, baseV1);
 				quads.add(topDown.build());
 			} else {
-				// HAY FLUJO: usa método tipo vanilla para calcular las UVs por vértice
-				// No escalamos `baseU0..baseV1`. En su lugar calculamos UVs por vértice en "pixel coords"
+				// HAY FLUJO: usa mï¿½todo tipo vanilla para calcular las UVs por vï¿½rtice
+				// No escalamos `baseU0..baseV1`. En su lugar calculamos UVs por vï¿½rtice en "pixel coords"
 				// inspirado en BlockFluidRenderer:
 				// f21 = sin(angle) * 0.25F
 				// f22 = cos(angle) * 0.25F
@@ -467,7 +467,7 @@ public class RenderNewFluidsClassic {
 				topUp.setQuadOrientation(EnumFacing.UP);
 				topUp.setTexture(spriteFlowing);
 
-				// Nota: el orden de vértices debe coincidir con el que espera el renderer (igual que tu código original)
+				// Nota: el orden de vï¿½rtices debe coincidir con el que espera el renderer (igual que tu cï¿½digo original)
 				putVertex(topUp, 0f, h000, 0f, r, g, b, alpha, uA, vA);
 				putVertex(topUp, 0f, h010, 1f, r, g, b, alpha, uB, vB);
 				putVertex(topUp, 1f, h110, 1f, r, g, b, alpha, uC, vC);
@@ -485,7 +485,7 @@ public class RenderNewFluidsClassic {
 				quads.add(topDown.build());
 			}
 
-			return quads; // Si solo querían UP, devuelve aquí
+			return quads; // Si solo querï¿½an UP, devuelve aquï¿½
 
 		}
 
@@ -508,7 +508,7 @@ public class RenderNewFluidsClassic {
 		EnumFacing[] sides = EnumFacing.values();
 		//System.out.println("[RFF] sideRequested: "+sideRequested);
 		for (EnumFacing face : sides) {
-			if (sideRequested != null && face != sideRequested) continue; // si piden una cara específica, las demas las descartamos
+			if (sideRequested != null && face != sideRequested) continue; // si piden una cara especï¿½fica, las demas las descartamos
 			if (face == EnumFacing.UP) continue; // Ya hicimos la cara UP arriba
 
 			//Obtenemos el IBlockState y Block del bloque vecino para la respectiva cara a renderizar
@@ -521,7 +521,7 @@ public class RenderNewFluidsClassic {
 			boolean shouldRender = false;
 
 
-			// Si es aire, sí renderiza
+			// Si es aire, sï¿½ renderiza
 			if (neighborBlock == Blocks.AIR) {
 				shouldRender = true;
 			} else {
@@ -604,7 +604,7 @@ public class RenderNewFluidsClassic {
 
 
 
-	//Esta funcion es la que se encarga de añadirle los respectivos parametros de posicion, color, coordenada UV, etc a cada vertice unico (4 por cara) que vamos a renderizar
+	//Esta funcion es la que se encarga de aï¿½adirle los respectivos parametros de posicion, color, coordenada UV, etc a cada vertice unico (4 por cara) que vamos a renderizar
 	private void putVertex(UnpackedBakedQuad.Builder builder, float x, float y, float z,
 			float r, float g, float b, float a,
 			float u, float v) {
@@ -644,7 +644,7 @@ public class RenderNewFluidsClassic {
 		float r = ((color >> 16) & 255) / 255.0f;
 		float g = ((color >> 8) & 255) / 255.0f;
 		float b = (color & 255) / 255.0f;
-		float alpha = 1.0f;
+		//float alpha = 1.0f;
 
 		float u0 = spriteStill.getMinU();
 		float v0 = spriteStill.getMinV();
@@ -659,7 +659,7 @@ public class RenderNewFluidsClassic {
 		builder.setQuadTint(0);
 
 
-		// CUADRO COMPLETO 0–1
+		// CUADRO COMPLETO 0ï¿½1
 		putItemVertex(builder, 0f, 0f, 0f, r, g, b, 1, u1, v0);
 		putItemVertex(builder, 1f, 0f, 0f, r, g, b, 1, u0, v0);
 		putItemVertex(builder, 1f, 1f, 0f, r, g, b, 1, u0, v1);

@@ -29,16 +29,23 @@ public class MixinFluidCollisionHandler {
     @Final
     public static ThreadLocal<IWaterHeight> cacheHeight;
 	
-    @Unique
+    /*@Unique
     private static double applyQolOffset(final double fluidHeight) {
         final double qolOffset = 0.015; // move the level to check down slightly, so things like lava next to soul sand don't light players on fire
         return (int)fluidHeight == fluidHeight ? fluidHeight : fluidHeight - qolOffset;
+   */
+    
+    private static double applyQolOffset(final double fluidHeight, final boolean visualOnly) {
+        if(fluidHeight >= 1-1E-2) return 1; // handle possible floating point errors (fixes #299)
+        else if(visualOnly) return fluidHeight + 0.055; // helps prevent the player camera from clipping into water, without applying correct fog
+        final double maxHeight = 0.875; // move the level to check down slightly, so things like lava next to soul sand don't light players on fire
+        return Math.min(fluidHeight, maxHeight);
     }
     
     @Unique
     private static boolean isYWithinFluid(@Nullable final Fluid fluid, @Nonnull final BlockPos pos, final double minY, final double maxY, final double fluidHeight, final boolean checkCache) {
         final boolean gas = fluid != null && fluid.isLighterThanAir();
-        final boolean isWithin = gas ? maxY > pos.getY() + 1 - fluidHeight && minY < pos.getY() + 1 : minY < pos.getY() + fluidHeight && maxY > pos.getY();
+        final boolean isWithin = gas ? maxY > pos.getY() + 1 - fluidHeight && minY <= pos.getY() + 1 : minY <= pos.getY() + fluidHeight && maxY > pos.getY();
 
         if(!isWithin) return false;
         else if(checkCache && FluidloggedAPIConfig.ignoreLowFluidCollision) {
@@ -56,16 +63,12 @@ public class MixinFluidCollisionHandler {
     }
 	
 	@Overwrite
-    //@SuppressWarnings("UnnecessaryLocalVariable")
-    static boolean isPointWithinFluid(@Nonnull final BlockPos pos, final double xIn, final double minY, final double maxY, final double zIn, @Nonnull final IExtendedBlockState state, final boolean checkCache) {
-		//if (!(RealisticFiniteFluidFunctions.getBlock(state) instanceof IRealisticFiniteFluid)) return false;
-		
-		//IRealisticFiniteFluid block = ((IRealisticFiniteFluid)RealisticFiniteFluidFunctions.getBlock(state));
-		@Nonnull final float[][] corners = new float[2][2];
-        corners[0][0] = state.getValue(References.LEVEL_CORNERS[0]); //state.getValue(References.LEVEL_CORNERS[0]);
-        corners[0][1] = state.getValue(References.LEVEL_CORNERS[1]); //state.getValue(References.LEVEL_CORNERS[1]);
-        corners[1][1] = state.getValue(References.LEVEL_CORNERS[2]); //state.getValue(References.LEVEL_CORNERS[2]);
-        corners[1][0] = state.getValue(References.LEVEL_CORNERS[3]); //state.getValue(References.LEVEL_CORNERS[3]);
+    static boolean isPointWithinFluid(@Nonnull final BlockPos pos, final double xIn, final double minY, final double maxY, final double zIn, @Nonnull final IExtendedBlockState state, final boolean checkCache, final boolean visualOnly) {
+        @Nonnull final float[][] corners = new float[2][2];
+        corners[0][0] = state.getValue(References.LEVEL_CORNERS[0]);
+        corners[0][1] = state.getValue(References.LEVEL_CORNERS[1]);
+        corners[1][1] = state.getValue(References.LEVEL_CORNERS[2]);
+        corners[1][0] = state.getValue(References.LEVEL_CORNERS[3]);
 
         // unit position of the point, relative to the fluid pos
         final double x = MathHelper.clamp(xIn, pos.getX(), pos.getX() + 1) - pos.getX();
@@ -79,7 +82,7 @@ public class MixinFluidCollisionHandler {
                 + corners[0][1] * x_weight_0 * z_weight_1
                 + corners[1][1] * x_weight_1 * z_weight_1
                 + corners[1][0] * x_weight_1 * z_weight_0;
-        return isYWithinFluid(FluidloggedUtils.getFluidFromState(state), pos, minY, maxY, applyQolOffset(fluidHeightAtPoint), checkCache);
+        return isYWithinFluid(FluidloggedUtils.getFluidFromState(state), pos, minY, maxY, applyQolOffset(fluidHeightAtPoint, visualOnly), checkCache);
     }
 
 }

@@ -1,10 +1,17 @@
 v2.1.4
--Fixed: Missing item model texture in JEI/Creative search.
+-Added: Command to kill invasive ocean blocks (when a mod places vanilla fluid blocks or you used my config option to make some modded fluids to be placed as ocean blocks, and one of these blocks have free way to replicate itself over an open area, the command /rffkillswitch will help you to stop this mess).
+-Added: Config option to decide whether fluids can go downwards in the four cardinal directions or only laterally (to let fluids "leak" below edges or not, false by default, i like to not have leaks). Fixes #7.
+-Fixed: Missing item model texture in JEI/Creative search (FluidBlocks Item Render).
+-Fixed: Removed some reflextions from mixins.
+-Fixed: Crash with Nothirium and Thaumic Isorropia.
+-Fixed: Improved liquid spreading (Fluids will disperse more completely over large areas). 
+-Fixed: Improved performance (removed ancient slow code to check pressure nodes for faster alternatives, removed unnecessary get/set IBlockState calls).
+-Fixed: Crash with Fluidlogged API (fields with same names, and crash with the last FluidloggedAPI Mixin). Fixes #10.
 
 v2.1.3
--Added: Glass bottles consume water too.
--Added: Config options to change aesthetic features of fluids (using dynamic or static textures only, and if fluids should render a full blocks or not).
--Fixed: Not using the patched renderer (not using the SRG name in the injected mixin. Why nobody told me about this render issue??).
+-Added: Glass bottles consume water too (almost 1/3 of block).
+-Added: Config options to change aesthetic features of fluids (using both dynamic'n'static textures OR only using static texture, and if fluids should render as full blocks or not [vanilla-like]).
+-Fixed: Not using the patched renderer when FluidLoggedAPI is not installed (not using the SRG name in the injected mixin. Why nobody told me about this render issue??).
 
 v.2.1.2
 -Added: Config option to decide which modded fluids should spawn as infinite fluids (can break easely).

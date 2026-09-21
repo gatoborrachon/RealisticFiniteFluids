@@ -28,3 +28,12 @@ LICENSE-Paulscode SoundSystem CodecIBXM.txt
 /mappings
 NOTAS POR SI ESTAS SACADO DE PEDO.txt
 
+/config
+/crash-reports
+/logs
+/saves
+/screenshots
+usercache.json
+usernamecache.json
+options.txt
+

@@ -1,5 +1,6 @@
 package com.gatoborrachon.realisticfinitefluids.events;
 
+import com.gatoborrachon.realisticfinitefluids.commands.CommandFluidKillswitch;
 import com.gatoborrachon.realisticfinitefluids.compat.FluidCompat;
 import com.gatoborrachon.realisticfinitefluids.interfaces.IRealisticFiniteFluid;
 import com.gatoborrachon.realisticfinitefluids.logic.FiniteFluidLogic;
@@ -12,6 +13,8 @@ import net.minecraft.world.World;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.event.world.ExplosionEvent;
 import net.minecraftforge.event.world.WorldEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
@@ -42,7 +45,7 @@ public class FluidEventHandler {
      * 
      * Si usas borderOceanCheck(world, pos) sin verificar que debes ignorar agua debajo de tu bloque, te cuelgas el servidor
      * 
-     * Si usar borderOceanCheck(world, pos, int check), reduces muchisimo la carga de trabajo debido a que usas un limite muy pequeño (creo que 11),
+     * Si usar borderOceanCheck(world, pos, int check), reduces muchisimo la carga de trabajo debido a que usas un limite muy pequeï¿½o (creo que 11),
      * pero tambien eres propenso a crear agua infinita con el metodo del cual proviene el evento (poner bloques, rompoer bloques, o explosiones)
      * 
      * 
@@ -69,16 +72,16 @@ public class FluidEventHandler {
          */
         for (EnumFacing dir : EnumFacing.VALUES) {
             BlockPos neighbor = pos.offset(dir);
-            IBlockState neighborState = world.getBlockState(neighbor);
+            //IBlockState neighborState = world.getBlockState(neighbor);
 
-            IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)FiniteFluidLogic.liquids.get(FiniteFluidLogic.onFiniteFluidIndex).flowingBlock);
-            if (realisticFluid.isOceanBlock(world, neighbor, neighborState, FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(RealisticFiniteFluidFunctions.getBlock(world, neighbor, neighborState)))) {
+            IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)FiniteFluidLogic.liquids.get(FiniteFluidLogic.currentFiniteFluidIndex).flowingBlock);
+            if (realisticFluid.isOceanBlock(world, neighbor, null, FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(RealisticFiniteFluidFunctions.getBlock(world, neighbor, null)))) {
             	exposedToOceanWater = true;
                 break;
             }
         }
         
-        if (!world.isRemote && exposedToOceanWater && !(RealisticFiniteFluidFunctions.getBlock(world, pos.down(), world.getBlockState(pos.down())) instanceof IRealisticFiniteFluid) && !(RealisticFiniteFluidFunctions.getBlock(world, pos, world.getBlockState(pos)) instanceof IRealisticFiniteFluid)) {
+        if (!world.isRemote && exposedToOceanWater && !(RealisticFiniteFluidFunctions.getBlock(world, pos.down(), null) instanceof IRealisticFiniteFluid) && !(RealisticFiniteFluidFunctions.getBlock(world, pos, null) instanceof IRealisticFiniteFluid)) {
             FiniteFluidLogic.OceanFluidsLogic.borderOceanCheck(world, pos, false);
         }
     }
@@ -94,10 +97,10 @@ public class FluidEventHandler {
 
         for (EnumFacing dir : EnumFacing.VALUES) {
             BlockPos neighbor = pos.offset(dir);
-            IBlockState neighborState = world.getBlockState(neighbor);
+            ////IBlockState neighborState = world.getBlockState(neighbor);
 
-            IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)FiniteFluidLogic.liquids.get(FiniteFluidLogic.onFiniteFluidIndex).flowingBlock);
-            if (realisticFluid.isOceanBlock(world, neighbor, neighborState, FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(RealisticFiniteFluidFunctions.getBlock(world, neighbor, neighborState))) && dir != EnumFacing.DOWN) {
+            IRealisticFiniteFluid realisticFluid = ((IRealisticFiniteFluid)FiniteFluidLogic.liquids.get(FiniteFluidLogic.currentFiniteFluidIndex).flowingBlock);
+            if (realisticFluid.isOceanBlock(world, neighbor, null, FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(RealisticFiniteFluidFunctions.getBlock(world, neighbor, null))) && dir != EnumFacing.DOWN) {
             	exposedToOceanWater = true;
                 break;
             }
@@ -141,7 +144,7 @@ public class FluidEventHandler {
         /*
          * Ya antendi porque esta mamada no sirve,
          * Si obligas a borderOceanCheck a checar puros bloques que SOLO SON AGUA, pues vale madre, porque la funcion se ecnarga de despertar
-         * tanto a este bloque como a bloques proximos, y si yo añado un check para mandar alv bloques que no son agua, pues bueno ya no se jaja
+         * tanto a este bloque como a bloques proximos, y si yo aï¿½ado un check para mandar alv bloques que no son agua, pues bueno ya no se jaja
          * creo que con wakeOcean seria suficienete
          */
         

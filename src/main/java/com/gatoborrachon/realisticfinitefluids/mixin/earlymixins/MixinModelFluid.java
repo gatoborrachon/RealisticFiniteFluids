@@ -1,6 +1,5 @@
 package com.gatoborrachon.realisticfinitefluids.mixin.earlymixins;
 
-import java.util.Optional;
 import java.util.function.Function;
 
 import org.spongepowered.asm.mixin.Final;

@@ -1,6 +1,5 @@
 package com.gatoborrachon.realisticfinitefluids.mixin.earlymixins;
 
-import java.lang.reflect.Method;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Random;
@@ -17,6 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.gatoborrachon.realisticfinitefluids.References;
 import com.gatoborrachon.realisticfinitefluids.blocks.properties.UnlistedPropertyBoolean;
+import com.gatoborrachon.realisticfinitefluids.commands.CommandFluidKillswitch;
 import com.gatoborrachon.realisticfinitefluids.init.EarlyConfig;
 import com.gatoborrachon.realisticfinitefluids.interfaces.IRealisticFiniteFluid;
 import com.gatoborrachon.realisticfinitefluids.logic.FiniteFluidLogic;
@@ -62,7 +62,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 @Mixin(BlockFluidClassic.class)
 public abstract class MixinBlockFluidClassic extends BlockFluidBase implements IRealisticFiniteFluid {
 
-	@Inject(method = "<init>", at = @At("RETURN"))
+	/*@Inject(method = "<init>", at = @At("RETURN"))
 	private void onConstructed(Fluid fluid, Material material, MapColor mapColor, CallbackInfo ci) {
 		if (References.debugBlockFluidClassic) {
 			Class<?> clazz = this.getClass();
@@ -70,20 +70,20 @@ public abstract class MixinBlockFluidClassic extends BlockFluidBase implements I
 			if (clazz != BlockFluidClassic.class) {
 				System.out.println("[RFF] Nueva clase que extiende BlockFluidClassic: " + clazz.getName());
 
-				// Ver métodos overrideados
+				// Ver mï¿½todos overrideados
 				for (Method m : clazz.getDeclaredMethods()) {
 					try {
 						Method parent = BlockFluidClassic.class.getMethod(m.getName(), m.getParameterTypes());
 						if (!m.equals(parent)) {
-							System.out.println("[RFF] Método overrideado: " + m.getName());
+							System.out.println("[RFF] Mï¿½todo overrideado: " + m.getName());
 						}
 					} catch (NoSuchMethodException e) {
-						System.out.println("[RFF] Método NUEVO agregado: " + m.getName());
+						System.out.println("[RFF] Mï¿½todo NUEVO agregado: " + m.getName());
 					}
 				}
 			}
 		}
-	}
+	}*/
 
 
 
@@ -97,7 +97,7 @@ public abstract class MixinBlockFluidClassic extends BlockFluidBase implements I
 							value = "INVOKE",
 							target = "Lnet/minecraftforge/fluids/BlockFluidBase;<init>(Lnet/minecraftforge/fluids/Fluid;Lnet/minecraft/block/material/Material;Lnet/minecraft/block/material/MapColor;)V"
 							),
-					index = 1 // índice del argumento Material
+					index = 1 // ï¿½ndice del argumento Material
 			)
 	private static Material rff$replaceAirMaterial(Material material) {
 		if (material == Material.AIR) {
@@ -150,7 +150,7 @@ public abstract class MixinBlockFluidClassic extends BlockFluidBase implements I
 		this.fluid = fluid;
 		this.fluidMaterial = material;
 
-		this.fluidName = fluid.getName();
+		//this.fluidName = fluid.getName(); 21-08-2026
 		this.density = fluid.getDensity();
 		this.temperature = fluid.getTemperature();
 		//this.maxScaledLight = fluid.luminosity;
@@ -174,14 +174,14 @@ public abstract class MixinBlockFluidClassic extends BlockFluidBase implements I
 
 	@Unique private Fluid fluid;
 	@Unique private Material fluidMaterial;
-	@Unique private String fluidName;
+	//@Unique private String fluidName; 21-08-2026
 	//@Shadow protected int densityDir;
 	//@Unique private Object temperature;
 	//@Unique private Object densityDir;
 	@Unique private boolean isStill;
 
 	/**
-	 * pequeña histéresis para evitar parpadeos en calculos de renderizado
+	 * pequeï¿½a histï¿½resis para evitar parpadeos en calculos de renderizado
 	 */
 	@Unique private static final double EPS = References.EPS;
 
@@ -418,7 +418,20 @@ public abstract class MixinBlockFluidClassic extends BlockFluidBase implements I
 	@Override
 	public Boolean isEntityInsideMaterialForOverlay(IBlockAccess world, BlockPos pos, IBlockState state, 
 			Entity entity, double eyeY, Material material) {
-		return getFluid().isGaseous() ? false : RealisticFiniteFluidFunctions.isEntityInsideMaterialForOverlay(world, pos, state, entity, eyeY, material);
+		//System.out.println("VERGA getFluid(): "+getFluid());
+		//System.out.println("VERGA getFluid(): "+getFluid().isGaseous());
+		
+		//System.out.println("VERGA world: "+world);
+		//System.out.println("VERGA pos: "+pos);
+		//System.out.println("VERGA state: "+state);
+		//System.out.println("VERGA entity: "+entity);
+		//System.out.println("VERGA eyeY: "+eyeY);
+		//System.out.println("VERGA material: "+material);
+		//System.out.println("VERGA isEntityInsideMaterialForOverlay: "+RealisticFiniteFluidFunctions.isEntityInsideMaterialForOverlay(world, pos, state, entity, eyeY, material));
+
+		return getFluid() == null ? false : //ARREGLAR CRASH CON ISORROPIA THAUMCRAFT ADDON
+			getFluid().isGaseous() ? false : 
+				RealisticFiniteFluidFunctions.isEntityInsideMaterialForOverlay(world, pos, state, entity, eyeY, material);
 	}
 
 	@Unique
@@ -685,7 +698,7 @@ public abstract class MixinBlockFluidClassic extends BlockFluidBase implements I
 							false);
 				}
 			} else if (isStill) {
-				// Agua quieta --> partículas de suspensión ocasionales
+				// Agua quieta --> partï¿½culas de suspensiï¿½n ocasionales
 				if (rand.nextInt(10) == 0) {
 					worldIn.spawnParticle(EnumParticleTypes.SUSPENDED,
 							d0 + (double)rand.nextFloat(),
@@ -875,7 +888,7 @@ public abstract class MixinBlockFluidClassic extends BlockFluidBase implements I
 						) { //getVolume(world, pos, state) > MAXIMUM_LEVEL) { //WE ARE OCEAN
 					//BlockFiniteFluid.setVolume(world, pos, state.withProperty(IS_STILL, true), newLevel);
 					//CONTROLA SI LOS BLOQUES OCEANICOS DEBERIAN ACTUAR DE FORMA INFINITA O CONVERTIRSE EN BLOQUES DE AGUA STILL
-					if (!FiniteFluidLogic.shouldFluidsBeInfinite) {
+					if (!FiniteFluidLogic.shouldFluidsBeInfinite || CommandFluidKillswitch.oceanKillswitchTicks > 0) {
 						Block stillBlock = ((NewFluidType) FiniteFluidLogic.liquids.get(FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(RealisticFiniteFluidFunctions.getBlock(world, pos, state)))).stillBlock;
 						this.setBlockState(world, pos, pos, this.setVolume(null, null, stillBlock.getDefaultState(), MAXIMUM_LEVEL));
 						world.scheduleUpdate(pos, ((Block)(Object)this), this.tickRate(world));
@@ -928,8 +941,8 @@ public abstract class MixinBlockFluidClassic extends BlockFluidBase implements I
 					if (FluidWorldInteraction.interactWithNeighborLiquid(world, pos)){
 						return;
 						//Aca yo controlo lo de interaccion de still con ocean xd
-					}  else if (isOceanBlock(world, below, stateBelow, FiniteFluidLogic.onFiniteFluidIndex) /*stateBelow.getBlock() == ModBlocks.INFINITE_WATER_SOURCE*/ && getVolume(world, pos, world.getBlockState(pos)) < Q1_LOW) {
-						// Este bloque es "absorbido" por el océano
+					}  else if (isOceanBlock(world, below, stateBelow, FiniteFluidLogic.currentFiniteFluidIndex) /*stateBelow.getBlock() == ModBlocks.INFINITE_WATER_SOURCE*/ && getVolume(world, pos, world.getBlockState(pos)) < Q1_LOW) {
+						// Este bloque es "absorbido" por el ocï¿½ano
 						RealisticFiniteFluidFunctions.setBlockToAir(world, pos);
 						//world.setBlockToAir(pos);  // O reemplaza por aire
 					}
@@ -965,7 +978,7 @@ public abstract class MixinBlockFluidClassic extends BlockFluidBase implements I
 
 					//Aca yo controlo lo de interaccion de flowing con ocean xd
 					//Avoid too much block updates over oceanic liquid
-					if (isOceanBlock(world, pos.down(), null, FiniteFluidLogic.onFiniteFluidIndex) //downBlock == FiniteFluidLogic.liquids.get(FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(currentBlock)).oceanBlock 
+					if (isOceanBlock(world, pos.down(), null, FiniteFluidLogic.currentFiniteFluidIndex) //downBlock == FiniteFluidLogic.liquids.get(FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(currentBlock)).oceanBlock 
 							&& getVolume(world, pos, currentState) < Q1_HIGH) { //8
 						int newValue = getVolume(world, pos, world.getBlockState(pos))/2; //3
 						//world.setBlockState(pos, currentaState.withProperty(BlockFiniteFluid.LEVEL, newValue));
@@ -1022,7 +1035,7 @@ public abstract class MixinBlockFluidClassic extends BlockFluidBase implements I
 						}
 
 						//SI todo LO ANTERIOR NO SE CUMPLIO --> 
-						//AÑADIMOS UN CALCULO A LA LSITA DE CALCULOS ACTUALES
+						//Aï¿½ADIMOS UN CALCULO A LA LSITA DE CALCULOS ACTUALES
 						FiniteFluidLogic.GeneralPurposeLogic.addCalc();
 
 						//SI EL BLOQUE DE ABAJO (DEPENDIENDO GRAVEDAD) ES UN BLOQUE DEBUG
@@ -1047,7 +1060,7 @@ public abstract class MixinBlockFluidClassic extends BlockFluidBase implements I
 							world.scheduleUpdate(pos, ((Block)(Object)this), this.tickRate(world));
 						}
 
-						//SI NO EXISTEN BLOQUES DE FLUIDO FINITO ALEDAÑOS
+						//SI NO EXISTEN BLOQUES DE FLUIDO FINITO ALEDAï¿½OS
 						else if (!FluidWorldInteraction.interactWithNeighborLiquid(world, pos))
 						{
 							//CALCULAMOS EL NIVEL DEL BLOQUE ACTUAL
@@ -1066,8 +1079,31 @@ public abstract class MixinBlockFluidClassic extends BlockFluidBase implements I
 								//GUARDAMOS EL TIPO DE FLUIDO ACTUAL
 								//FiniteFluidLogic.GeneralPurposeLogic.setCurrentFluidIndex(((Block)(Object)this));
 								int currentFluidIndex = FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(this);
+								if (currentFluidIndex == -1) {
+									System.out.println(
+											"RFF: Could not determine fluid index for block: " +this.getRegistryName() +
+									        ". This block may be a custom fluid block not associated with " +
+									        "the registered RFF fluid. Falling back to water (index 0)."
+									        );
+									currentFluidIndex = 0;
+								}
+								
+								//System.out.println("this block: "+this);
+								//System.out.println("this currentFluidIndex: "+FiniteFluidLogic.GeneralPurposeLogic.getFluidIndex(world.getBlockState(pos).getBlock()));
+								//System.out.println("currentFluidIndex: "+currentFluidIndex);
 
-								//CALCULAMOS UN BLOCKSTATE DEL FLUDO ACTUAL STILL
+								//System.out.println("liquids.get: "+FiniteFluidLogic.liquids.get(currentFluidIndex));
+								//if (FiniteFluidLogic.liquids.get(currentFluidIndex) == null) {
+								//	for (Map.Entry<Integer, NewFluidType> entry : FiniteFluidLogic.liquids.entrySet()) {
+								//	    System.out.println(
+								//	        "ID: " + entry.getKey() +
+								//	        " | Fluid: " + entry.getValue().name
+								//	    );
+								//	}
+								//}
+								//System.out.println("stillBlock: "+((NewFluidType) FiniteFluidLogic.liquids.get(currentFluidIndex)).stillBlock);
+
+								//CALCULAMOS UN BLOCKSTATE DEL FLUIDO ACTUAL STILL
 								Block stillBlock = ((NewFluidType) FiniteFluidLogic.liquids.get(currentFluidIndex)).stillBlock;
 								//IBlockState newState = stillBlock.getDefaultState().withProperty(BlockFiniteFluid.LEVEL, newLevel);
 								//world.setBlockState(pos, newState, 3);
@@ -1140,7 +1176,7 @@ public abstract class MixinBlockFluidClassic extends BlockFluidBase implements I
 						return;
 						//Aca yo controlo lo de interaccion de still con ocean xd
 					}  else if (isOceanBlock(world, below, stateBelow, FiniteFluidLogic.onFiniteFluidIndex) && getVolume(world, pos, world.getBlockState(pos)) < Q1_LOW) {
-						// Este bloque es "absorbido" por el océano
+						// Este bloque es "absorbido" por el ocï¿½ano
 						world.setBlockToAir(pos);  // O reemplaza por aire
 					}*/
 					//System.out.println("STILL");
@@ -1232,7 +1268,7 @@ public abstract class MixinBlockFluidClassic extends BlockFluidBase implements I
 						}
 
 						//SI todo LO ANTERIOR NO SE CUMPLIO --> 
-						//AÑADIMOS UN CALCULO A LA LSITA DE CALCULOS ACTUALES
+						//Aï¿½ADIMOS UN CALCULO A LA LSITA DE CALCULOS ACTUALES
 						FiniteFluidLogic.GeneralPurposeLogic.addCalc();
 
 						//SI EL BLOQUE DE ABAJO (DEPENDIENDO GRAVEDAD) ES UN BLOQUE DEBUG
@@ -1256,7 +1292,7 @@ public abstract class MixinBlockFluidClassic extends BlockFluidBase implements I
 							world.scheduleUpdate(pos, ((Block)(Object)this), this.tickRate(world));
 						}
 
-						//SI NO EXISTEN BLOQUES DE FLUIDO FINITO ALEDAÑOS
+						//SI NO EXISTEN BLOQUES DE FLUIDO FINITO ALEDAï¿½OS
 						else if (!FluidWorldInteraction.interactWithNeighborLiquid(world, pos))
 						{
 							//CALCULAMOS EL NIVEL DEL BLOQUE ACTUAL
@@ -1454,7 +1490,7 @@ public abstract class MixinBlockFluidClassic extends BlockFluidBase implements I
 
 		//IBlockState currentState = world.getBlockState(pos);
 		int currentConceptual = getConceptualVolume(world, pos, null); // 0..16
-		// Si hay otro tipo de bloque fluyente distinto, preferimos colocarlo solo si está vacío/puede reemplazar: dejamos esa decisión al llamador.
+		// Si hay otro tipo de bloque fluyente distinto, preferimos colocarlo solo si estï¿½ vacï¿½o/puede reemplazar: dejamos esa decisiï¿½n al llamador.
 		// Sumamos niveles (cap 16)
 		int newTotalConceptual = Math.min(MAXIMUM_CONCEPTUAL_LEVEL, currentConceptual + addConceptual);
 		int usedConceptual = newTotalConceptual - currentConceptual;
@@ -1480,8 +1516,8 @@ public abstract class MixinBlockFluidClassic extends BlockFluidBase implements I
 
 	/**
 	 * drain:
-	 * - Intentamos dar un bucket completo si es posible (colectando vecinos) — igual que bucketCollect.
-	 * - Si no hay para bucket completo, devolvemos la cantidad extraíble del bloque (en mB).
+	 * - Intentamos dar un bucket completo si es posible (colectando vecinos) ï¿½ igual que bucketCollect.
+	 * - Si no hay para bucket completo, devolvemos la cantidad extraï¿½ble del bloque (en mB).
 	 * - Si doDrain==true aplicamos los cambios al mundo (usamos tus helpers que modifican el mundo).
 	 */
 	@Overwrite(remap = false)
@@ -1496,7 +1532,7 @@ public abstract class MixinBlockFluidClassic extends BlockFluidBase implements I
 		int centerConcept = getConceptualVolume(world, pos, null); // 0..16
 		if (centerConcept < MINIMUM_CONCEPTUAL_LEVEL) return null;
 
-		// 1) Si el bloque central ya está full (16) -> bucket completo
+		// 1) Si el bloque central ya estï¿½ full (16) -> bucket completo
 		if (centerConcept >= MAXIMUM_CONCEPTUAL_LEVEL) {
 			if (doDrain) {
 				RealisticFiniteFluidFunctions.setBlockToAir(world, pos);
@@ -1507,7 +1543,7 @@ public abstract class MixinBlockFluidClassic extends BlockFluidBase implements I
 			return new FluidStack(blockFluid, 1000);
 		}
 
-		// 2) Calculamos total disponible alrededor (simulación, sin modificar)
+		// 2) Calculamos total disponible alrededor (simulaciï¿½n, sin modificar)
 		int total = centerConcept;
 		BlockPos[] laterals = {pos.north(), pos.south(), pos.east(), pos.west()};
 		BlockPos[] diagonals = {
@@ -1542,14 +1578,14 @@ public abstract class MixinBlockFluidClassic extends BlockFluidBase implements I
 		if (total >= MAXIMUM_CONCEPTUAL_LEVEL) {
 			if (doDrain) {
 				// Usamos tu helper que consume vecinos y central para formar cubeta completa.
-				// bucketRemoveFluidOnlyFullCollect hace la extracción real.
+				// bucketRemoveFluidOnlyFullCollect hace la extracciï¿½n real.
 				FiniteFluidLogic.FluidWorldInteraction.bucketRemoveFluidOnlyFullCollect(world, pos, centerConcept, blockFluid);
-				// observe: tu helper ya hace world.setBlockToAir/setBlockState según convenga
+				// observe: tu helper ya hace world.setBlockToAir/setBlockState segï¿½n convenga
 			}
 			return new FluidStack(blockFluid, 1000);
 		}
 
-		// 4) No alcanza para cubeta entera: devolver lo que hay en el bloque (o extraer lo máximo disponible)
+		// 4) No alcanza para cubeta entera: devolver lo que hay en el bloque (o extraer lo mï¿½ximo disponible)
 		if (doDrain) {
 			// Usamos el helper que extrae suavemente hasta 16 niveles (pero si no hay tanto, extrae lo disponible).
 			int collectedLevels = FiniteFluidLogic.FluidWorldInteraction.bucketRemoveFluidEvenLowCollect(world, pos, centerConcept, MAXIMUM_CONCEPTUAL_LEVEL, blockFluid);
@@ -1557,7 +1593,7 @@ public abstract class MixinBlockFluidClassic extends BlockFluidBase implements I
 			int mb = conceptualToMB(collectedLevels);
 			return new FluidStack(blockFluid, mb);
 		} else {
-			// Simulación: sólo devolvemos lo que hay en el bloque central (sin tocar vecinos)
+			// Simulaciï¿½n: sï¿½lo devolvemos lo que hay en el bloque central (sin tocar vecinos)
 			int mbCenter = conceptualToMB(centerConcept);
 			return new FluidStack(blockFluid, mbCenter);
 		}
@@ -1565,7 +1601,7 @@ public abstract class MixinBlockFluidClassic extends BlockFluidBase implements I
 
 	/**
 	 * canDrain:
-	 * - true si hay algo para drenar en la posición o en vecinos inmediatos (compatibilidad con bombas que intentan formar cubeta).
+	 * - true si hay algo para drenar en la posiciï¿½n o en vecinos inmediatos (compatibilidad con bombas que intentan formar cubeta).
 	 */
 	@Overwrite(remap = false)
 	public boolean canDrain(World world, BlockPos pos) {
@@ -1597,7 +1633,7 @@ public abstract class MixinBlockFluidClassic extends BlockFluidBase implements I
 
 	/**
 	 * getFilledPercentage:
-	 * - devuelve entre 0.0 (vacío / no es BlockFiniteFluid) y 1.0 (bloque conceptualmente lleno, 16/16).
+	 * - devuelve entre 0.0 (vacï¿½o / no es BlockFiniteFluid) y 1.0 (bloque conceptualmente lleno, 16/16).
 	 * - usamos getLevelForBlock (conceptual 1..16) y lo normalizamos a 16.
 	 */
 	@Unique

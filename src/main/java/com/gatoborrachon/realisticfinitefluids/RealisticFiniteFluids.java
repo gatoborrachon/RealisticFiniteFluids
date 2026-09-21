@@ -1,5 +1,7 @@
 package com.gatoborrachon.realisticfinitefluids;
 
+import com.gatoborrachon.realisticfinitefluids.commands.CommandFluidKillswitch;
+import com.gatoborrachon.realisticfinitefluids.compat.FluidCompat;
 import com.gatoborrachon.realisticfinitefluids.events.FluidEventHandler;
 import com.gatoborrachon.realisticfinitefluids.events.FluidModelEventHandler;
 import com.gatoborrachon.realisticfinitefluids.init.ModConfig;
@@ -8,6 +10,7 @@ import com.gatoborrachon.realisticfinitefluids.proxy.CommonProxy;
 import com.gatoborrachon.realisticfinitefluids.util.RFFFluidFixer;
 
 import net.minecraft.util.datafix.FixTypes;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.ModFixs;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -18,6 +21,7 @@ import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.Mod.Instance;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 
 /**
  * TODO
@@ -44,7 +48,7 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
  * o poder poern una lilipad encima sin necesidad de apoyar tu campo de vision en un bloque, 
  * 	(algo esta pasando que el agua como que no tiene algun tipo de bounding box, que si tiene el agua vanilla, y yo supongo cualquier ClassicFluid)
  * 
- * COMPLETADO 6.- LAST --> AÒadir lava
+ * COMPLETADO 6.- LAST --> AÔøΩadir lava
  * COMPETADO LA PUTA MADRE 6.1.- Arreglar bugs de interaccion entre agua-lava (la lava sobre agua --> obsidiana, agua sobre lava --> Nada (bug visual))
  * COMPLETADO 6.2.- Ver porque, al colocar un cubetazo de lava por ejemplo, en un agua de nivel 0-1, esta se recarga de agua (algun if lo ha de resolver)
  * 
@@ -95,7 +99,7 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
 // 9) Config option to change whether 1 level should equal 125mb or 1000mb
 // 10) Decidir si deberia ponerle el interactWithLiquids a los bloques BlockFluidClassic (interacciones vanilla a bloques modded)
-//NOTA --> CREO QUE ESTO SE MANEJA POR PARTE DEL MODDER, EL ES EL QUE A—ADE ESAS INTERACCIONES EN LA FUNCION 'update()', NO YO
+//NOTA --> CREO QUE ESTO SE MANEJA POR PARTE DEL MODDER, EL ES EL QUE AÔøΩADE ESAS INTERACCIONES EN LA FUNCION 'update()', NO YO
 
 // 11) BUG --> Las cubetas, cuando ponen agua en el bloque de arriba, no checan si arriba ya tienen un liquido y solo ponen el fluido, bueno, almenos a mi
 //me parece un bug de perdida de fluidos
@@ -145,6 +149,17 @@ public class RealisticFiniteFluids
     }
     
 	public static boolean FluidLoggedAPI = Loader.isModLoaded("fluidlogged_api");
+	
+	
+	
+	@EventHandler
+	public void serverStarting(FMLServerStartingEvent event) {
+	    //WorldServer overworld = event.getServer().getWorld(0);
+	    //FiniteFluidLogic.clearLiquidLists();
+	    //FluidCompat.loadFiniteFluids(overworld);
+	    
+	    event.registerServerCommand(new CommandFluidKillswitch()); // ya que est√°s aqu√≠, este es el mismo lugar donde registras el comando killswitch
+	}
 
     
 }

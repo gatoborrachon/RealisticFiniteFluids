@@ -12,19 +12,18 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.nio.charset.StandardCharsets;
 
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+//import org.apache.logging.log4j.LogManager;
+//import org.apache.logging.log4j.Logger;
 
 public class EarlyConfig {
 
-    private static final Logger LOGGER = LogManager.getLogger("RealisticFiniteFluids");
+    //private static final Logger LOGGER = LogManager.getLogger("RealisticFiniteFluids");
     public static final String CONFIG_PATH = "config/realisticfinitefluids.cfg";
 
     public static boolean readTickRandomly() {
         try {
             File file = new File(CONFIG_PATH);
-            //LOGGER.info("¿EL ARCHIVO EXISTE? {}", file.exists());
+            //LOGGER.info("ï¿½EL ARCHIVO EXISTE? {}", file.exists());
             if (!file.exists()) return true;
 
             for (String line : Files.readAllLines(file.toPath())) {
@@ -51,7 +50,7 @@ public class EarlyConfig {
     	
         //File file = new File(CONFIG_PATH);
         Path path = Paths.get(CONFIG_PATH);
-        //LOGGER.info("¿EL ARCHIVO EXISTE? {}", !Files.exists(path));
+        //LOGGER.info("ï¿½EL ARCHIVO EXISTE? {}", !Files.exists(path));
         if (!Files.exists(path)) {
             return infiniteModdedFluids;
         }
@@ -70,8 +69,8 @@ public class EarlyConfig {
                     // Caso A: multilinea
                     if (s.contains("<")) {
                         List<String> collected = new ArrayList<>();
-                        // Si hay algo después del '<' en la misma línea, ignoramos (no es común)
-                        // Leemos siguientes líneas hasta encontrar '>' de cierre
+                        // Si hay algo despuï¿½s del '<' en la misma lï¿½nea, ignoramos (no es comï¿½n)
+                        // Leemos siguientes lï¿½neas hasta encontrar '>' de cierre
                         while ((line = br.readLine()) != null) {
                             String item = line.trim();
                             if (item.equals(">")) break;
@@ -80,13 +79,13 @@ public class EarlyConfig {
                             //LOGGER.info("Infinite modded fluid added: "+item);
                         }
                         if (!collected.isEmpty()) return collected;
-                        // si estaba vacía, seguir buscando (fallback)
+                        // si estaba vacï¿½a, seguir buscando (fallback)
                     } else {
                         // Caso B: inline: S:infiniteModdedFluids=[a, b, c] o S:infiniteModdedFluids = [a,b]
                         int eq = s.indexOf('=');
                         if (eq >= 0) {
                             String raw = s.substring(eq + 1).trim();
-                            // quitar corchetes/chevrons si están
+                            // quitar corchetes/chevrons si estï¿½n
                             raw = raw.replaceAll("[\\[\\]<>]", "");
                             String[] parts = raw.split(",");
                             List<String> out = Arrays.stream(parts)

@@ -36,7 +36,9 @@ public class ModConfig {
     public static boolean maxOrNormalFluidHeight;
     public static boolean dynamicOrStaticTexture;
     
-
+    public static boolean shouldBlocksMoveSidewayDownwards;
+    
+    
     private static final String CATEGORY_GENERAL = "general";
     static Configuration config;
     
@@ -45,12 +47,14 @@ public class ModConfig {
         config = new Configuration(configFile);
         config.load();
 
+        
         //Tickrates
         waterTickRate = config.getInt("waterTickRate", CATEGORY_GENERAL, 8, 0, Integer.MAX_VALUE,
                 "Water tick rate. 4 = Original, 8 = Default.");
 
         lavaTickRate = config.getInt("lavaTickRate", CATEGORY_GENERAL, 30, 0, Integer.MAX_VALUE,
                 "Lava tick rate. 24 = Original, 30 = Default.");
+        
         
         
         //Fluid Logic
@@ -62,6 +66,22 @@ public class ModConfig {
         
         playerMaxDistanceToCalc = config.getInt("playerMaxDistanceToCalc", CATEGORY_GENERAL, 1024, 1, Integer.MAX_VALUE, 
         		"Maximum distance between a flowing liquid and a player to decide whether postpone or update now the block at the current tick when currentCalc is starting to get closer to maxCalc.");
+        
+        
+        
+        //Fluid Behavior
+        waterCanFreeze = config.getBoolean("waterCanFreeze", CATEGORY_GENERAL, true, 
+        		"whether water can become ice.");
+        
+        shouldTickRandomly = config.getBoolean("shouldTickRandomly", CATEGORY_GENERAL, true, 
+        		"Whether fluids should have random ticks.");
+        
+        shouldFluidsBeInfinite = config.getBoolean("shouldFluidsBeInfinite", CATEGORY_GENERAL, true, 
+        		"Whether big fluid masses (lakes, oceans) should act as infinite fluid sources. It also works as a security switch to deactivate Ocean Blocks (set to false just in case you find a finite fluid eating your world [HOPE YOU NEVER HAVE TO DO THIS]).");
+        
+        shouldBlocksMoveSidewayDownwards = config.getBoolean("shouldBlocksMoveSidewayDownwards", CATEGORY_GENERAL, false, 
+        		"Whether fluids could go down in the 4 cardinal positions in 1 movement or not (it makes them appear to leak below cardinal edges).");
+        
         
         
         //Rain Logic
@@ -80,12 +100,16 @@ public class ModConfig {
         rainAmount = config.getFloat("rainAmount", CATEGORY_GENERAL, 1f, 0.1f, 24f, 
         		"A proportional modifier to the probability of a water drop to fall per tick when raining. values bigger than 24 won't increase the rain amount. It can't be zero, but 0.1 is valid.");
         
+        
+        
         //Pressure Logic
         doPressure = config.getBoolean("doPressure", CATEGORY_GENERAL, true, 
         		"Whether to activate the pressure system.");
         
         pressureLimit = config.getInt("pressureLimit", CATEGORY_GENERAL, 256, 0, Integer.MAX_VALUE, 
         		"The maximum tries we will check for blocks to apply pressure.");
+        
+        
         
         //Evaporation Logic
         enableEvaporation = config.getBoolean("enableEvaporation", CATEGORY_GENERAL, true,
@@ -95,37 +119,31 @@ public class ModConfig {
                 "Probability of water evaporation per tick. 1 = 100%, 2 = 50%, 100 = 1%. 100 = Default.");
         
         
-        //Misc Logic
-        waterCanFreeze = config.getBoolean("waterCanFreeze", CATEGORY_GENERAL, true, 
-        		"whether water can become ice.");
         
+        //Misc Logic
         bucketRemoveLowFluid = config.getBoolean("bucketRemoveLowFluid", CATEGORY_GENERAL, false, 
         		"Whether buckets should remove finite fluids on the world when there's not enough fluid to make a full bucket.");
         
-        waterLightOpacity = config.getInt("waterLightOpacity", CATEGORY_GENERAL, 1, 0, Integer.MAX_VALUE, 
-        		"The amount of light the water will remove when it passes through it. 3 = Vanilla, 1 = Default.");
-
         flowingWaterShouldMoveCreativePlayer = config.getBoolean("flowingWaterShouldMoveCreativePlayer", CATEGORY_GENERAL, true, 
         		"Whether flowing liquids should move players on creative mode.");
-        
-        shouldTickRandomly = config.getBoolean("shouldTickRandomly", CATEGORY_GENERAL, true, 
-        		"Whether fluids should have random ticks.");
-        
-        shouldFluidsBeInfinite = config.getBoolean("shouldFluidsBeInfinite", CATEGORY_GENERAL, true, 
-        		"Whether big fluid masses (lakes, oceans) should act as infinite fluid sources. It also works as a security switch to deactivate Ocean Blocks (set to false just in case you find a finite fluid eating your world [HOPE YOU NEVER HAVE TO DO THIS]).");
         
         createBlocksForBlocklessFluids = config.getBoolean("createBlocksForBlocklessFluids", CATEGORY_GENERAL, true, 
         		"Create finite fluid Blocks for Fluids that have no default Block assigned.");
         
         infiniteModdedFluids = config.getStringList("infiniteModdedFluids", CATEGORY_GENERAL, new String[] {}, 
-        		"List of modded fluids' names that should spawn as infinite fluids. You can find the list of fluids inside your world inside: ´/.minecraft/saves/YOUR_WORLD_NAME/data´ ");
+        		"List of modded fluids' names that should spawn as infinite fluids. You can find the list of fluids inside your world inside: ï¿½/.minecraft/saves/YOUR_WORLD_NAME/dataï¿½ ");
+        
+        
+        
+        //Render
+        waterLightOpacity = config.getInt("waterLightOpacity", CATEGORY_GENERAL, 1, 0, Integer.MAX_VALUE, 
+        		"The amount of light the water will remove when it passes through it. 3 = Vanilla, 1 = Default.");
         
         maxOrNormalFluidHeight = config.getBoolean("maxOrNormalFluidHeight", CATEGORY_GENERAL, true, 
         		"If fluids should have the full block height or not. Only has aesthetic effect.");
         
         dynamicOrStaticTexture = config.getBoolean("dynamicOrStaticTexture", CATEGORY_GENERAL, true, 
         		"If fluids should use the dynamic fluid texture or not. Only has aesthetic effect.");
-        
         
         
         
